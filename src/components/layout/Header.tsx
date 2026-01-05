@@ -6,7 +6,7 @@ export const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="bg-blue-600 dark:bg-gray-800 text-white shadow-lg transition-colors duration-200">
+    <header className="bg-blue-700 dark:bg-gray-900 text-white shadow-lg transition-colors duration-200">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link
@@ -23,22 +23,6 @@ export const Header: React.FC = () => {
                   className="hover:text-blue-100 dark:hover:text-gray-300 transition font-medium"
                 >
                   Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/employees"
-                  className="hover:text-blue-100 dark:hover:text-gray-300 transition font-medium"
-                >
-                  Employees
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/customers"
-                  className="hover:text-blue-100 dark:hover:text-gray-300 transition font-medium"
-                >
-                  Customers
                 </Link>
               </li>
             </ul>
