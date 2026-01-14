@@ -1,11 +1,19 @@
 import { configureStore } from "@reduxjs/toolkit";
-import employeesReducer from "../features/employees/employeesSlice";
-import customersReducer from "../features/customers/customersSlice";
+import contactPersonsReducer from "../features/contactPersons/contactPersonsSlice";
+import dealsReducer from "../features/deals/dealsSlice";
+import dealTagsReducer from "../features/dealTags/dealTagsSlice";
+import eventsReducer from "../features/events/eventsSlice";
+import eventNotesReducer from "../features/eventNotes/eventNotesSlice";
+import enumsReducer from "../features/enums/enumsSlice";
 
 export const store = configureStore({
   reducer: {
-    employees: employeesReducer,
-    customers: customersReducer,
+    contactPersons: contactPersonsReducer,
+    deals: dealsReducer,
+    dealTags: dealTagsReducer,
+    events: eventsReducer,
+    eventNotes: eventNotesReducer,
+    enums: enumsReducer,
   },
 });
 

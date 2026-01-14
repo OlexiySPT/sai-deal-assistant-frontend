@@ -6,50 +6,34 @@ export const Header: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="bg-blue-600 dark:bg-gray-800 text-white shadow-lg transition-colors duration-200">
-      <nav className="container mx-auto px-4 py-4">
+    <header className="bg-blue-700 dark:bg-gray-900 text-white shadow-lg transition-colors duration-200">
+      <nav className="container mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           <Link
             to="/"
-            className="text-2xl font-bold hover:text-blue-100 dark:hover:text-gray-300 transition"
+            className="text-xl font-bold hover:text-blue-100 dark:hover:text-gray-300 transition"
           >
             Deal Assistant
           </Link>
-          <div className="flex items-center space-x-6">
-            <ul className="flex space-x-6">
+          <div className="flex items-center space-x-4">
+            <ul className="flex space-x-4">
               <li>
                 <Link
                   to="/"
-                  className="hover:text-blue-100 dark:hover:text-gray-300 transition font-medium"
+                  className="hover:text-blue-100 dark:hover:text-gray-300 transition text-sm"
                 >
                   Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/employees"
-                  className="hover:text-blue-100 dark:hover:text-gray-300 transition font-medium"
-                >
-                  Employees
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/customers"
-                  className="hover:text-blue-100 dark:hover:text-gray-300 transition font-medium"
-                >
-                  Customers
                 </Link>
               </li>
             </ul>
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-blue-700 dark:hover:bg-gray-700 transition"
+              className="p-1.5 rounded-lg hover:bg-blue-700 dark:hover:bg-gray-700 transition"
               aria-label="Toggle theme"
             >
               {theme === "light" ? (
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -57,7 +41,7 @@ export const Header: React.FC = () => {
                 </svg>
               ) : (
                 <svg
-                  className="w-5 h-5"
+                  className="w-4 h-4"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
