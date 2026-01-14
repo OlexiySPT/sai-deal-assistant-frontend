@@ -1,0 +1,57 @@
+name: Deploy to Dev Server
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Build Docker image
+        run: |
+          docker build -t sai-deal-assistant-frontend:dev .
+
+      - name: Save Docker image
+        run: |
+          docker save sai-deal-assistant-frontend:dev -o sai-deal-assistant-frontend-dev.tar
+
+      - name: Copy files to dev server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 192.168.1.245
+          username: sai
+          password: ${{ secrets.DEV_SERVER_PASSWORD }}
+          port: 2222
+          source: "sai-deal-assistant-frontend-dev.tar,deploy-dev.sh"
+          target: /tmp/
+
+      - name: Deploy on dev server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 192.168.1.245
+          username: sai
+          password: ${{ secrets.DEV_SERVER_PASSWORD }}
+          port: 2222
+          script: |
+            chmod +x /tmp/deploy-dev.sh
+            /tmp/deploy-dev.sh
