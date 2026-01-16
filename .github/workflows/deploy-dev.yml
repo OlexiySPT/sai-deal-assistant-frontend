@@ -36,7 +36,7 @@ jobs:
           docker save sai-deal-assistant-frontend:dev -o sai-deal-assistant-frontend-dev.tar
 
       - name: Copy files to dev server
-        uses: appleboy/scp-action@917f8b4beeab43f6e1bf18425e0b96d3bdf8f042 # v0.1.7
+        uses: appleboy/scp-action@23ca25820b432b2c23fa9e4e767965fbd5507953 # v0.1.7
         with:
           host: 192.168.1.245
           username: sai
@@ -46,7 +46,7 @@ jobs:
           target: /tmp/
 
       - name: Deploy on dev server
-        uses: appleboy/ssh-action@25ce8cdbdbef8c3bd6b87052584e2de255c05e64 # v1.0.3
+        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
         with:
           host: 192.168.1.245
           username: sai
