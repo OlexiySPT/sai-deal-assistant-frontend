@@ -35,23 +35,21 @@ jobs:
         run: |
           docker save sai-deal-assistant-frontend:dev -o sai-deal-assistant-frontend-dev.tar
 
+      - name: Install SSH client
+        run: sudo apt-get install -y sshpass
+
       - name: Copy files to dev server
-        uses: appleboy/scp-action@23ca25820b432b2c23fa9e4e767965fbd5507953 # v0.1.7
-        with:
-          host: 192.168.1.245
-          username: sai
-          password: ${{ secrets.DEV_SERVER_PASSWORD }}
-          port: 2222
-          source: "sai-deal-assistant-frontend-dev.tar,deploy-dev.sh"
-          target: /tmp/
+        env:
+          DEV_PASSWORD: ${{ secrets.DEV_SERVER_PASSWORD }}
+        run: |
+          sshpass -p "$DEV_PASSWORD" scp -P 2222 -o StrictHostKeyChecking=no \
+            sai-deal-assistant-frontend-dev.tar deploy-dev.sh \
+            sai@192.168.1.245:/tmp/
 
       - name: Deploy on dev server
-        uses: appleboy/ssh-action@029f5b4aeeeb58fdfe1410a5d17f967dacf36262 # v1.0.3
-        with:
-          host: 192.168.1.245
-          username: sai
-          password: ${{ secrets.DEV_SERVER_PASSWORD }}
-          port: 2222
-          script: |
-            chmod +x /tmp/deploy-dev.sh
-            /tmp/deploy-dev.sh
+        env:
+          DEV_PASSWORD: ${{ secrets.DEV_SERVER_PASSWORD }}
+        run: |
+          sshpass -p "$DEV_PASSWORD" ssh -p 2222 -o StrictHostKeyChecking=no \
+            sai@192.168.1.245 \
+            'chmod +x /tmp/deploy-dev.sh && /tmp/deploy-dev.sh'
