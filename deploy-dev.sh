@@ -22,12 +22,22 @@ docker rmi $IMAGE_NAME 2>/dev/null || true
 echo "Loading new Docker image..."
 docker load -i /tmp/sai-deal-assistant-frontend-dev.tar
 
+# Create dev config
+echo "Creating dev configuration..."
+mkdir -p /tmp/frontend-config
+cat > /tmp/frontend-config/config.json <<EOF
+{
+  "apiBaseUrl": "https://192.168.1.245:5001"
+}
+EOF
+
 # Run the new container
 echo "Starting new container..."
 docker run -d \
   --name $CONTAINER_NAME \
   --restart unless-stopped \
   -p $HOST_PORT:$CONTAINER_PORT \
+  -v /tmp/frontend-config/config.json:/usr/share/nginx/html/config.json:ro \
   $IMAGE_NAME
 
 # Clean up
