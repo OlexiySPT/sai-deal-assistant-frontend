@@ -35,12 +35,6 @@ jobs:
         run: |
           docker save sai-deal-assistant-frontend:dev -o sai-deal-assistant-frontend-dev.tar
 
-      - name: Ensure sshpass is installed
-        run: |
-          if ! command -v sshpass &> /dev/null; then
-            sudo apt-get update && sudo apt-get install -y sshpass
-          fi
-
       - name: Copy files to dev server
         env:
           DEV_PASSWORD: ${{ secrets.DEV_SERVER_PASSWORD }}
