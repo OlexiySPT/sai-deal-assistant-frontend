@@ -6,8 +6,10 @@ echo "Starting deployment to dev server..."
 # Configuration
 CONTAINER_NAME="sai-deal-assistant-frontend-dev"
 IMAGE_NAME="sai-deal-assistant-frontend:dev"
-HOST_PORT=3000
-CONTAINER_PORT=80
+HOST_PORT_HTTP=3000
+HOST_PORT_HTTPS=3443
+CONTAINER_PORT_HTTP=80
+CONTAINER_PORT_HTTPS=443
 
 # Stop and remove existing container if it exists
 echo "Stopping existing container..."
@@ -31,13 +33,25 @@ cat > /tmp/frontend-config/config.json <<EOF
 }
 EOF
 
+# Generate self-signed certificate if not exists
+echo "Setting up SSL certificates..."
+mkdir -p /tmp/frontend-ssl
+if [ ! -f /tmp/frontend-ssl/cert.pem ]; then
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /tmp/frontend-ssl/key.pem \
+    -out /tmp/frontend-ssl/cert.pem \
+    -subj "/CN=192.168.1.245"
+fi
+
 # Run the new container
 echo "Starting new container..."
 docker run -d \
   --name $CONTAINER_NAME \
   --restart unless-stopped \
-  -p $HOST_PORT:$CONTAINER_PORT \
+  -p $HOST_PORT_HTTP:$CONTAINER_PORT_HTTP \
+  -p $HOST_PORT_HTTPS:$CONTAINER_PORT_HTTPS \
   -v /tmp/frontend-config/config.json:/usr/share/nginx/html/config.json:ro \
+  -v /tmp/frontend-ssl:/etc/nginx/ssl:ro \
   $IMAGE_NAME
 
 # Clean up
@@ -48,4 +62,6 @@ rm -f /tmp/sai-deal-assistant-frontend-dev.tar
 echo "Deployment completed successfully!"
 docker ps | grep $CONTAINER_NAME
 
-echo "Application should be available at http://192.168.1.245:$HOST_PORT"
+echo "Application available at:"
+echo "  HTTP:  http://192.168.1.245:$HOST_PORT_HTTP"
+echo "  HTTPS: https://192.168.1.245:$HOST_PORT_HTTPS"
