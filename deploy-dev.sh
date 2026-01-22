@@ -16,11 +16,6 @@ echo "Stopping existing container..."
 docker stop $CONTAINER_NAME 2>/dev/null || true
 docker rm $CONTAINER_NAME 2>/dev/null || true
 
-# Clean up old config directory (may be owned by docker)
-echo "Cleaning up old configuration..."
-docker run --rm -v /tmp/frontend-config:/data alpine rm -rf /data/* 2>/dev/null || true
-rm -rf /tmp/frontend-config 2>/dev/null || true
-
 # Remove old image if exists
 echo "Removing old image..."
 docker rmi $IMAGE_NAME 2>/dev/null || true
@@ -32,6 +27,9 @@ docker load -i /tmp/sai-deal-assistant-frontend-dev.tar
 # Copy dev config (should be transferred from local config.dev.json)
 echo "Setting up dev configuration..."
 mkdir -p /tmp/frontend-config
+if [ -f /tmp/frontend-config/config.json ]; then
+  rm -f /tmp/frontend-config/config.json
+fi
 if [ -f /tmp/config.dev.json ]; then
   cp /tmp/config.dev.json /tmp/frontend-config/config.json
 else
