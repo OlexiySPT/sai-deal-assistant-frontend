@@ -26,12 +26,14 @@ docker load -i /tmp/sai-deal-assistant-frontend-dev.tar
 
 # Copy dev config (should be transferred from local config.dev.json)
 echo "Setting up dev configuration..."
-mkdir -p /tmp/frontend-config
+if [ ! -d /tmp/frontend-config ]; then
+  mkdir -p /tmp/frontend-config
+fi
 if [ -f /tmp/frontend-config/config.json ]; then
   rm -f /tmp/frontend-config/config.json
 fi
 if [ -f /tmp/config.dev.json ]; then
-  cp /tmp/config.dev.json /tmp/frontend-config/config.json
+  cp -T /tmp/config.dev.json /tmp/frontend-config/config.json
 else
   echo "Warning: config.dev.json not found, using default"
   echo '{"apiBaseUrl": "https://your-server:5001"}' > /tmp/frontend-config/config.json
