@@ -16,6 +16,9 @@ echo "Stopping existing container..."
 docker stop $CONTAINER_NAME 2>/dev/null || true
 docker rm $CONTAINER_NAME 2>/dev/null || true
 
+# Clean up old config directory created by Docker volume mount
+rm -rf /tmp/frontend-config/config.json 2>/dev/null || true
+
 # Remove old image if exists
 echo "Removing old image..."
 docker rmi $IMAGE_NAME 2>/dev/null || true
