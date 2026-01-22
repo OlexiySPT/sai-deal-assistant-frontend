@@ -26,12 +26,9 @@ docker load -i /tmp/sai-deal-assistant-frontend-dev.tar
 
 # Copy dev config (should be transferred from local config.dev.json)
 echo "Setting up dev configuration..."
+# Remove and recreate the config directory to avoid permission issues
+sudo rm -rf /tmp/frontend-config
 mkdir -p /tmp/frontend-config
-# Ensure we can remove the old config (change permissions if it exists)
-if [ -e /tmp/frontend-config/config.json ]; then
-  chmod -R u+w /tmp/frontend-config/config.json
-  rm -rf /tmp/frontend-config/config.json
-fi
 if [ -f /tmp/config.dev.json ]; then
   cp /tmp/config.dev.json /tmp/frontend-config/config.json
 else
