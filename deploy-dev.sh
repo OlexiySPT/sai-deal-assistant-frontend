@@ -27,7 +27,7 @@ docker load -i /tmp/sai-deal-assistant-frontend-dev.tar
 # Copy dev config (should be transferred from local config.dev.json)
 echo "Setting up dev configuration..."
 mkdir -p /tmp/frontend-config
-rm -f /tmp/frontend-config/config.json
+rm -rf /tmp/frontend-config/config.json
 if [ -f /tmp/config.dev.json ]; then
   cp /tmp/config.dev.json /tmp/frontend-config/config.json
 else
