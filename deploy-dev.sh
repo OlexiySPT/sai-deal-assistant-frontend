@@ -24,14 +24,15 @@ docker rmi $IMAGE_NAME 2>/dev/null || true
 echo "Loading new Docker image..."
 docker load -i /tmp/sai-deal-assistant-frontend-dev.tar
 
-# Create dev config
-echo "Creating dev configuration..."
+# Copy dev config (should be transferred from local config.dev.json)
+echo "Setting up dev configuration..."
 mkdir -p /tmp/frontend-config
-cat > /tmp/frontend-config/config.json <<EOF
-{
-  "apiBaseUrl": "https://192.168.1.245:5001"
-}
-EOF
+if [ -f /tmp/config.dev.json ]; then
+  cp /tmp/config.dev.json /tmp/frontend-config/config.json
+else
+  echo "Warning: config.dev.json not found, using default"
+  echo '{"apiBaseUrl": "https://your-server:5001"}' > /tmp/frontend-config/config.json
+fi
 
 # Generate self-signed certificate if not exists
 echo "Setting up SSL certificates..."

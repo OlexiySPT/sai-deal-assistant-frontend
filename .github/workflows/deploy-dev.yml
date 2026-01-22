@@ -38,14 +38,14 @@ jobs:
         env:
           DEV_PASSWORD: ${{ secrets.DEV_SERVER_PASSWORD }}
         run: |
-          sshpass -p "$DEV_PASSWORD" scp -P 2222 -o StrictHostKeyChecking=no \
-            sai-deal-assistant-frontend-dev.tar deploy-dev.sh \
-            sai@192.168.1.245:/tmp/
+          sshpass -p "$DEV_PASSWORD" scp -P ${{ vars.DEV_SERVER_SSH_PORT }} -o StrictHostKeyChecking=no \
+            sai-deal-assistant-frontend-dev.tar deploy-dev.sh public/config.dev.json \
+            ${{ vars.DEV_SERVER_SSH_USER }}@${{ vars.DEV_SERVER_HOST }}:/tmp/
 
       - name: Deploy on dev server
         env:
           DEV_PASSWORD: ${{ secrets.DEV_SERVER_PASSWORD }}
         run: |
-          sshpass -p "$DEV_PASSWORD" ssh -p 2222 -o StrictHostKeyChecking=no \
-            sai@192.168.1.245 \
+          sshpass -p "$DEV_PASSWORD" ssh -p ${{ vars.DEV_SERVER_SSH_PORT }} -o StrictHostKeyChecking=no \
+            ${{ vars.DEV_SERVER_SSH_USER }}@${{ vars.DEV_SERVER_HOST }} \
             'chmod +x /tmp/deploy-dev.sh && /tmp/deploy-dev.sh'
