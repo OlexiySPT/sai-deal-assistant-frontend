@@ -2,7 +2,7 @@ import axios from "axios";
 import { getConfig } from "../config/config";
 
 const api = axios.create({
-  baseURL: "https://localhost:719-6", // Default, will be overridden after config loads
+  baseURL: "https://YourBackendBaseUrl", // Default, will be overridden after config loads
   headers: {
     "Content-Type": "application/json",
   },
@@ -19,7 +19,7 @@ api.interceptors.response.use(
   (error) => {
     console.error("API Error:", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;
