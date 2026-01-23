@@ -38,7 +38,7 @@ jobs:
               --base dev \
               --head "$BRANCH" \
               --title "[$BRANCH] Merge to dev" \
-              --body "Auto-generated PR from $BRANCH to dev branch" || echo "Failed to create PR to dev or PR already exists"
+              --body "Auto-generated PR from $BRANCH to dev branch"
           else
             echo "PR to dev already exists: #$EXISTING_PR"
           fi
@@ -58,7 +58,7 @@ jobs:
               --base main \
               --head "$BRANCH" \
               --title "[$BRANCH] Merge to main" \
-              --body "Auto-generated PR from $BRANCH to main branch" || echo "Failed to create PR to main or PR already exists"
+              --body "Auto-generated PR from $BRANCH to main branch"
           else
             echo "PR to main already exists: #$EXISTING_PR"
           fi
