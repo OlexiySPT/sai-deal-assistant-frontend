@@ -1,5 +1,4 @@
 name: Deploy to Dev Server
-
 on:
   pull_request:
     types: [closed]
@@ -45,6 +44,7 @@ jobs:
       - name: Deploy on dev server
         env:
           DEV_PASSWORD: ${{ secrets.DEV_SERVER_PASSWORD }}
+          DEV_SERVER_HOST: ${{ vars.DEV_SERVER_HOST }}
         run: |
           sshpass -p "$DEV_PASSWORD" ssh -p ${{ vars.DEV_SERVER_SSH_PORT }} -o StrictHostKeyChecking=no \
             ${{ vars.DEV_SERVER_SSH_USER }}@${{ vars.DEV_SERVER_HOST }} \

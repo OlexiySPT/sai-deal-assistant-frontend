@@ -4,6 +4,8 @@ set -e
 echo "Starting deployment to dev server..."
 
 # Configuration
+# Set DEV_SERVER_HOST environment variable or it will use the placeholder below
+DEV_SERVER_HOST="${DEV_SERVER_HOST:-your-server-host-here}"
 CONTAINER_NAME="sai-deal-assistant-frontend-dev"
 IMAGE_NAME="sai-deal-assistant-frontend:dev"
 HOST_PORT_HTTP=3000
@@ -44,7 +46,7 @@ if [ ! -f /tmp/frontend-ssl/cert.pem ]; then
   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout /tmp/frontend-ssl/key.pem \
     -out /tmp/frontend-ssl/cert.pem \
-    -subj "/CN=192.168.1.245"
+    -subj "/CN=$DEV_SERVER_HOST"
 fi
 
 # Run the new container
@@ -67,5 +69,5 @@ echo "Deployment completed successfully!"
 docker ps | grep $CONTAINER_NAME
 
 echo "Application available at:"
-echo "  HTTP:  http://192.168.1.245:$HOST_PORT_HTTP"
-echo "  HTTPS: https://192.168.1.245:$HOST_PORT_HTTPS"
+echo "  HTTP:  http://$DEV_SERVER_HOST:$HOST_PORT_HTTP"
+echo "  HTTPS: https://$DEV_SERVER_HOST:$HOST_PORT_HTTPS"
