@@ -1,0 +1,64 @@
+name: Auto Create Pull Requests
+
+on:
+  push:
+    branches-ignore:
+      - dev
+      - main
+
+jobs:
+  create-pull-requests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Get current branch name
+        id: branch
+        run: echo "name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+
+      - name: Check and create PR to dev
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+        run: |
+          BRANCH="${{ steps.branch.outputs.name }}"
+
+          # Check if PR to dev already exists
+          EXISTING_PR=$(gh pr list --base dev --head "$BRANCH" --json number --jq '.[0].number')
+
+          if [ -z "$EXISTING_PR" ]; then
+            echo "Creating PR to dev branch..."
+            gh pr create \
+              --base dev \
+              --head "$BRANCH" \
+              --title "[$BRANCH] Merge to dev" \
+              --body "Auto-generated PR from $BRANCH to dev branch" || echo "Failed to create PR to dev or PR already exists"
+          else
+            echo "PR to dev already exists: #$EXISTING_PR"
+          fi
+
+      - name: Check and create PR to main
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+        run: |
+          BRANCH="${{ steps.branch.outputs.name }}"
+
+          # Check if PR to main already exists
+          EXISTING_PR=$(gh pr list --base main --head "$BRANCH" --json number --jq '.[0].number')
+
+          if [ -z "$EXISTING_PR" ]; then
+            echo "Creating PR to main branch..."
+            gh pr create \
+              --base main \
+              --head "$BRANCH" \
+              --title "[$BRANCH] Merge to main" \
+              --body "Auto-generated PR from $BRANCH to main branch" || echo "Failed to create PR to main or PR already exists"
+          else
+            echo "PR to main already exists: #$EXISTING_PR"
+          fi
