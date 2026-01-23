@@ -38,7 +38,7 @@ jobs:
           DEV_PASSWORD: ${{ secrets.DEV_SERVER_PASSWORD }}
         run: |
           sshpass -p "$DEV_PASSWORD" scp -P ${{ vars.DEV_SERVER_SSH_PORT }} -o StrictHostKeyChecking=no \
-            sai-deal-assistant-frontend-dev.tar deploy-dev.sh public/config.dev.json \
+            sai-deal-assistant-frontend-dev.tar deploy-dev.sh \
             ${{ vars.DEV_SERVER_SSH_USER }}@${{ vars.DEV_SERVER_HOST }}:/tmp/
 
       - name: Deploy on dev server
