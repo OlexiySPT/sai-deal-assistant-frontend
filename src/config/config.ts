@@ -17,7 +17,7 @@ export const loadConfig = async (): Promise<AppConfig> => {
     console.error("Failed to load config.json, using defaults:", error);
     // Fallback to default configuration
     config = {
-      apiBaseUrl: "https://localhost:719-6",
+      apiBaseUrl: "https://YOUR_DEFAULT_API_URL.com",
     };
     return config;
   }

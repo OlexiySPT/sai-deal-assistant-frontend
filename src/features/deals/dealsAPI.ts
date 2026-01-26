@@ -75,8 +75,8 @@ export interface DealsQueryParams {
   Name?: string;
   Description?: string;
   Industry?: string;
-  StateId?: number;
-  TypeId?: number;
+  StateIds?: number | number[];
+  TypeIds?: number | number[];
   SortBy?: string;
   SortDirection?: 0 | 1;
   Page?: number;
@@ -86,7 +86,7 @@ export interface DealsQueryParams {
 
 // API Functions
 export const getDeals = async (
-  params?: DealsQueryParams
+  params?: DealsQueryParams,
 ): Promise<DealListItemDtoQueryResult> => {
   const response = await api.get<DealListItemDtoQueryResult>("/api/Deals", {
     params,
@@ -100,10 +100,10 @@ export const getDealById = async (id: number): Promise<DealDto> => {
 };
 
 export const getDealWithDependents = async (
-  id: number
+  id: number,
 ): Promise<DealWithDependentsDto> => {
   const response = await api.get<DealWithDependentsDto>(
-    `/api/Deals/${id}/with-dependents`
+    `/api/Deals/${id}/with-dependents`,
   );
   return response.data;
 };
@@ -115,7 +115,7 @@ export const createDeal = async (data: CreateDealCommand): Promise<DealDto> => {
 
 export const updateDeal = async (
   id: number,
-  data: UpdateDealCommand
+  data: UpdateDealCommand,
 ): Promise<DealDto> => {
   const response = await api.put<DealDto>(`/api/Deals/${id}`, data);
   return response.data;

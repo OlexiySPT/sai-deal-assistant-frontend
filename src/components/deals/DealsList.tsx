@@ -11,6 +11,7 @@ import {
   loadAllEnums,
 } from "../../features/enums/enumsSlice";
 import type { DealsQueryParams } from "../../features/deals/dealsAPI";
+import { MultiSelect } from "../common/MultiSelect";
 
 // Deal state icon component
 const DealStateIcon: React.FC<{ state: string | null }> = ({ state }) => {
@@ -157,6 +158,8 @@ export const DealsList: React.FC<DealsListProps> = ({
   const dealStates = useAppSelector(selectEnumValues("dealstate"));
   const dealTypes = useAppSelector(selectEnumValues("dealtype"));
   const [showDealsOnMobile, setShowDealsOnMobile] = useState(false);
+  const [selectedStates, setSelectedStates] = useState<number[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
 
   const [filters, setFilters] = useState<DealsQueryParams>({
     Page: 1,
@@ -170,6 +173,22 @@ export const DealsList: React.FC<DealsListProps> = ({
   useEffect(() => {
     dispatch(fetchDeals(filters));
   }, [dispatch, filters]);
+
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      StateIds: selectedStates.length > 0 ? selectedStates : undefined,
+      Page: 1,
+    }));
+  }, [selectedStates]);
+
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      TypeIds: selectedTypes.length > 0 ? selectedTypes : undefined,
+      Page: 1,
+    }));
+  }, [selectedTypes]);
 
   const handleFilterChange = (key: keyof DealsQueryParams, value: any) => {
     setFilters((prev) => ({ ...prev, [key]: value, Page: 1 }));
@@ -197,40 +216,24 @@ export const DealsList: React.FC<DealsListProps> = ({
             value={filters.Name || ""}
             onChange={(e) => handleFilterChange("Name", e.target.value)}
           />
-          <select
-            className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            value={filters.StateId || ""}
-            onChange={(e) =>
-              handleFilterChange(
-                "StateId",
-                e.target.value ? Number(e.target.value) : undefined
-              )
-            }
-          >
-            <option value="">All States</option>
-            {dealStates.map((state: any) => (
-              <option key={state.Id} value={state.Id}>
-                {state.State}
-              </option>
-            ))}
-          </select>
-          <select
-            className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            value={filters.TypeId || ""}
-            onChange={(e) =>
-              handleFilterChange(
-                "TypeId",
-                e.target.value ? Number(e.target.value) : undefined
-              )
-            }
-          >
-            <option value="">All Types</option>
-            {dealTypes.map((type: any) => (
-              <option key={type.Id} value={type.Id}>
-                {type.Type}
-              </option>
-            ))}
-          </select>
+          <MultiSelect
+            options={dealStates.map((state: any) => ({
+              id: state.Id,
+              label: state.State,
+            }))}
+            selectedValues={selectedStates}
+            onChange={(values) => setSelectedStates(values as number[])}
+            placeholder="All States"
+          />
+          <MultiSelect
+            options={dealTypes.map((type: any) => ({
+              id: type.Id,
+              label: type.Type,
+            }))}
+            selectedValues={selectedTypes}
+            onChange={(values) => setSelectedTypes(values as number[])}
+            placeholder="All Types"
+          />
           <input
             type="text"
             placeholder="Industry..."
