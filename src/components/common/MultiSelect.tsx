@@ -21,7 +21,14 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
   className = "",
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [pendingValues, setPendingValues] =
+    useState<(number | string)[]>(selectedValues);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Sync pendingValues with selectedValues when closed
+  useEffect(() => {
+    if (!isOpen) setPendingValues(selectedValues);
+  }, [isOpen, selectedValues]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -39,15 +46,20 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
   }, []);
 
   const toggleOption = (id: number | string) => {
-    if (selectedValues.includes(id)) {
-      onChange(selectedValues.filter((val) => val !== id));
+    if (pendingValues.includes(id)) {
+      setPendingValues(pendingValues.filter((val) => val !== id));
     } else {
-      onChange([...selectedValues, id]);
+      setPendingValues([...pendingValues, id]);
     }
   };
 
   const clearAll = () => {
-    onChange([]);
+    setPendingValues([]);
+  };
+
+  const applyFilter = () => {
+    onChange(pendingValues);
+    setIsOpen(false);
   };
 
   const getDisplayText = () => {
@@ -86,8 +98,8 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
 
       {isOpen && (
         <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-60 overflow-y-auto">
-          {selectedValues.length > 0 && (
-            <div className="px-2 py-1.5 border-b border-gray-200 dark:border-gray-600">
+          {pendingValues.length > 0 && (
+            <div className="px-2 py-1.5 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
               <button
                 type="button"
                 onClick={clearAll}
@@ -102,22 +114,33 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
               No options available
             </div>
           ) : (
-            options.map((option) => (
-              <label
-                key={option.id}
-                className="flex items-center px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedValues.includes(option.id)}
-                  onChange={() => toggleOption(option.id)}
-                  className="mr-2 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-2"
-                />
-                <span className="text-xs text-gray-900 dark:text-gray-100">
-                  {option.label}
-                </span>
-              </label>
-            ))
+            <>
+              {options.map((option) => (
+                <label
+                  key={option.id}
+                  className="flex items-center px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={pendingValues.includes(option.id)}
+                    onChange={() => toggleOption(option.id)}
+                    className="mr-2 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-2"
+                  />
+                  <span className="text-xs text-gray-900 dark:text-gray-100">
+                    {option.label}
+                  </span>
+                </label>
+              ))}
+              <div className="px-2 py-2 border-t border-gray-200 dark:border-gray-600 flex justify-end">
+                <button
+                  type="button"
+                  className="bg-blue-600 text-white text-xs px-3 py-1 rounded hover:bg-blue-700"
+                  onClick={applyFilter}
+                >
+                  Apply
+                </button>
+              </div>
+            </>
           )}
         </div>
       )}

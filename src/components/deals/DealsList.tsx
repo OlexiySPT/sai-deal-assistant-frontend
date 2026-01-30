@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchDeals,
@@ -12,6 +12,8 @@ import {
 } from "../../features/enums/enumsSlice";
 import type { DealsQueryParams } from "../../features/deals/dealsAPI";
 import { MultiSelect } from "../common/MultiSelect";
+import { CreateOrUpdateDealDialog } from "./CreateOrUpdateDealDialog";
+import AddButton from "../common/AddButton";
 
 // Deal state icon component
 const DealStateIcon: React.FC<{ state: string | null }> = ({ state }) => {
@@ -158,17 +160,47 @@ export const DealsList: React.FC<DealsListProps> = ({
   const dealStates = useAppSelector(selectEnumValues("dealstate"));
   const dealTypes = useAppSelector(selectEnumValues("dealtype"));
   const [showDealsOnMobile, setShowDealsOnMobile] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedStates, setSelectedStates] = useState<number[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
-
   const [filters, setFilters] = useState<DealsQueryParams>({
     Page: 1,
     PageSize: 20,
   });
+  const industryInputTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [industryDraft, setIndustryDraft] = useState("");
+  const nameInputTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [nameDraft, setNameDraft] = useState("");
 
   useEffect(() => {
     dispatch(loadAllEnums());
   }, [dispatch]);
+
+  // Throttle industry filter
+  useEffect(() => {
+    if (industryDraft === (filters.Industry || "")) return;
+    if (industryInputTimeout.current)
+      clearTimeout(industryInputTimeout.current);
+    industryInputTimeout.current = setTimeout(() => {
+      setFilters((prev) => ({ ...prev, Industry: industryDraft, Page: 1 }));
+    }, 300);
+    return () => {
+      if (industryInputTimeout.current)
+        clearTimeout(industryInputTimeout.current);
+    };
+  }, [industryDraft]);
+
+  // Throttle name filter
+  useEffect(() => {
+    if (nameDraft === (filters.Name || "")) return;
+    if (nameInputTimeout.current) clearTimeout(nameInputTimeout.current);
+    nameInputTimeout.current = setTimeout(() => {
+      setFilters((prev) => ({ ...prev, Name: nameDraft, Page: 1 }));
+    }, 300);
+    return () => {
+      if (nameInputTimeout.current) clearTimeout(nameInputTimeout.current);
+    };
+  }, [nameDraft]);
 
   useEffect(() => {
     dispatch(fetchDeals(filters));
@@ -201,20 +233,29 @@ export const DealsList: React.FC<DealsListProps> = ({
   const totalPages = Math.ceil(totalItems / (filters.PageSize || 20));
   const currentPage = filters.Page || 1;
 
+  const handleDealCreated = () => {
+    setShowCreateDialog(false);
+    // Optionally, you could refresh the deals list here if needed
+    dispatch(fetchDeals(filters));
+  };
+
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
       {/* Filters Panel */}
       <div className="p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-sm font-semibold mb-1.5 text-gray-800 dark:text-gray-100">
-          Deals
-        </h2>
+        <div className="flex items-center justify-between mb-1.5">
+          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+            Deals
+          </h2>
+          <AddButton onClick={() => setShowCreateDialog(true)} />
+        </div>
         <div className="space-y-1.5">
           <input
             type="text"
             placeholder="Search by name..."
             className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            value={filters.Name || ""}
-            onChange={(e) => handleFilterChange("Name", e.target.value)}
+            value={nameDraft}
+            onChange={(e) => setNameDraft(e.target.value)}
           />
           <MultiSelect
             options={dealStates.map((state: any) => ({
@@ -238,8 +279,8 @@ export const DealsList: React.FC<DealsListProps> = ({
             type="text"
             placeholder="Industry..."
             className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            value={filters.Industry || ""}
-            onChange={(e) => handleFilterChange("Industry", e.target.value)}
+            value={industryDraft}
+            onChange={(e) => setIndustryDraft(e.target.value)}
           />
         </div>
       </div>
@@ -320,6 +361,11 @@ export const DealsList: React.FC<DealsListProps> = ({
           </div>
         </div>
       </div>
+      <CreateOrUpdateDealDialog
+        open={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        onCreated={handleDealCreated}
+      />
     </div>
   );
 };
