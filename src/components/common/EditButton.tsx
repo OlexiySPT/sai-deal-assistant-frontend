@@ -6,7 +6,7 @@ const EditButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = (
   <button
     type="button"
     className="ml-2 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-    title="Edit Deal"
+    title={props.title || "Edit"}
     {...props}
   >
     <svg

@@ -166,6 +166,8 @@ export const DealsList: React.FC<DealsListProps> = ({
   const [filters, setFilters] = useState<DealsQueryParams>({
     Page: 1,
     PageSize: 20,
+    SortBy: "createdAt",
+    SortDirection: 1,
   });
   const industryInputTimeout = useRef<NodeJS.Timeout | null>(null);
   const [industryDraft, setIndustryDraft] = useState("");

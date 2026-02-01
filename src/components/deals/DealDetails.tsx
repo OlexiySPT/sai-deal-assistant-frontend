@@ -8,6 +8,7 @@ import {
 import EditButton from "../common/EditButton";
 import { CreateOrUpdateDealDialog } from "./CreateOrUpdateDealDialog";
 import AddButton from "../common/AddButton";
+import { DealTagsEditor } from "./DealTagsEditor";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -22,6 +23,14 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [showTagsEditor, setShowTagsEditor] = useState(false);
+  const handleTagsEditClick = () => setShowTagsEditor(true);
+  const handleTagsEditorClose = () => {
+    setShowTagsEditor(false);
+    if (dealId) {
+      dispatch(fetchDealWithDependents(dealId)); // refresh tags
+    }
+  };
 
   useEffect(() => {
     const checkMobile = () => {
@@ -122,7 +131,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {deal.name || "Untitled Deal"}
-            <EditButton onClick={handleEditClick} />
+            <EditButton title="Edit Deal" onClick={handleEditClick} />
           </h1>
 
           {/* Tags */}
@@ -137,7 +146,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                   {tag.tag}
                 </span>
               ))}
-              <EditButton />
+              <EditButton title="Edit Tags" onClick={handleTagsEditClick} />
             </div>
           </div>
 
@@ -369,6 +378,11 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
         onCreated={handleDealUpdated}
         dealId={dealId}
       />
+      {showTagsEditor && dealId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <DealTagsEditor dealId={dealId} onClose={handleTagsEditorClose}  />
+        </div>
+      )}
     </div>
   );
 };

@@ -76,7 +76,7 @@ export const CreateOrUpdateDealDialog: React.FC<CreateDealDialogProps> = ({
         aiBriefDescription: "",
         industry: "",
         status: "",
-        typeId: 0,
+        typeId: 2,
         stateId: 0,
       });
     }

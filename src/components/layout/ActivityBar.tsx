@@ -15,7 +15,7 @@ export const ActivityBar: React.FC<ActivityBarProps> = ({
   };
 
   return (
-    <div className="w-12 bg-gray-800 dark:bg-gray-950 flex flex-col items-center py-2 border-r border-gray-700 dark:border-gray-800">
+    <div className="h-full w-12 bg-gray-800 dark:bg-gray-950 flex flex-col items-center py-2 border-r border-gray-700 dark:border-gray-800">
       {/* Deals Icon */}
       <button
         onClick={() => handleIconClick("deals")}
@@ -31,7 +31,7 @@ export const ActivityBar: React.FC<ActivityBarProps> = ({
       </button>
 
       {/* Placeholder for future icons */}
-      {/* 
+
       <button
         onClick={() => handleIconClick("search")}
         className={`w-12 h-12 flex items-center justify-center transition-colors mt-1 ${
@@ -41,11 +41,20 @@ export const ActivityBar: React.FC<ActivityBarProps> = ({
         }`}
         title="Search"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <svg
+          className="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
         </svg>
       </button>
-      */}
 
       {/* Settings at the bottom */}
       <div className="flex-1" />
