@@ -1,18 +1,13 @@
 import axios from "axios";
-import { getConfig } from "../config/config";
+import { API_BASE_URL } from "../app/config";
 
+console.log("API_BASE_URL:", API_BASE_URL);
 const api = axios.create({
-  baseURL: "https://YourBackendBaseUrl", // Default, will be overridden after config loads
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
 });
-
-// Update baseURL after config is loaded
-export const initializeApi = () => {
-  const config = getConfig();
-  api.defaults.baseURL = config.apiBaseUrl;
-};
 
 api.interceptors.response.use(
   (response) => response,
