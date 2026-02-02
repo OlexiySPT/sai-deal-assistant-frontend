@@ -9,7 +9,7 @@ jobs:
   deploy:
     if: github.event.pull_request.merged == true
     runs-on: self-hosted
-
+    environment: Dev
     steps:
       - name: Checkout code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -17,28 +17,31 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
-          node-version: "18"
+          node-version: "20"
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build
-
-      - name: Build Docker image
+      - name: Create .env file
         run: |
-          docker build -t sai-deal-assistant-frontend:dev .
+          echo "VITE_API_BASE_URL=${{ vars.VITE_API_BASE_URL }}" > .env
+          echo "BACKEND_URL=${{ vars.BACKEND_URL }}" >> .env
+          echo "BFF_PORT=${{ vars.BFF_PORT }}" >> .env
+          echo "ALLOWED_ORIGINS=${{ vars.ALLOWED_ORIGINS }}" >> .env
+          echo "NODE_TLS_REJECT_UNAUTHORIZED=${{ vars.NODE_TLS_REJECT_UNAUTHORIZED }}" >> .env
 
-      - name: Save Docker image
+      - name: Build Docker images using docker compose
         run: |
-          docker save sai-deal-assistant-frontend:dev -o sai-deal-assistant-frontend-dev.tar
+          docker compose build
+
+      - name: Save Docker images
+        run: |
+          docker save sai-deal-assistant-frontend-frontend:latest -o frontend.tar
+          docker save sai-deal-assistant-frontend-bff:latest -o bff.tar
 
       - name: Copy files to dev server
         env:
           DEV_PASSWORD: ${{ secrets.DEV_SERVER_PASSWORD }}
         run: |
           sshpass -p "$DEV_PASSWORD" scp -P ${{ vars.DEV_SERVER_SSH_PORT }} -o StrictHostKeyChecking=no \
-            sai-deal-assistant-frontend-dev.tar deploy-dev.sh \
+            frontend.tar bff.tar docker-compose.yml .env deploy-dev.sh \
             ${{ vars.DEV_SERVER_SSH_USER }}@${{ vars.DEV_SERVER_HOST }}:/tmp/
 
       - name: Deploy on dev server

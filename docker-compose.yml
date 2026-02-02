@@ -1,0 +1,26 @@
+services:
+  frontend:
+    build:
+      context: .
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+    depends_on:
+      - bff
+
+  bff:
+    build:
+      context: ./bff
+      args:
+        BACKEND_URL: ${BACKEND_URL}
+        BFF_PORT: ${BFF_PORT}
+    ports:
+      - "3001:3001"
+    environment:
+      - BACKEND_URL=${BACKEND_URL}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - NODE_ENV=production
+      - NODE_TLS_REJECT_UNAUTHORIZED=${NODE_TLS_REJECT_UNAUTHORIZED}
