@@ -14,13 +14,6 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Verify gh CLI is available
-        run: |
-          if ! command -v gh >/dev/null 2>&1; then
-            echo "gh CLI not found on runner. Install it (https://cli.github.com/) or add it to the runner image."
-            exit 1
-          fi
-
       - name: Checkout code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
@@ -30,42 +23,37 @@ jobs:
         id: branch
         run: echo "name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
-      - name: Check and create PR to dev
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
-        run: |
-          BRANCH="${{ steps.branch.outputs.name }}"
+      - name: Check and create PR to dev (via API)
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_PAT || github.token }}
+          script: |
+            const branch = `${{ steps.branch.outputs.name }}`;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            // Search for an existing PR with base=dev and head=owner:branch
+            const existing = await github.rest.pulls.list({ owner, repo, base: 'dev', head: `${owner}:${branch}` });
+            if (existing.data && existing.data.length > 0) {
+              console.log(`PR to dev already exists: #${existing.data[0].number}`);
+            } else {
+              console.log('Creating PR to dev branch...');
+              const created = await github.rest.pulls.create({ owner, repo, title: `[${branch}] Merge to dev`, head: branch, base: 'dev', body: `Auto-generated PR from ${branch} to dev branch` });
+              console.log(`Created PR #${created.data.number}`);
+            }
 
-          # Check if PR to dev already exists
-          EXISTING_PR=$(gh pr list --base dev --head "$BRANCH" --json number --jq '.[0].number')
-
-          if [ -z "$EXISTING_PR" ]; then
-            echo "Creating PR to dev branch..."
-            gh pr create \
-              --base dev \
-              --head "$BRANCH" \
-              --title "[$BRANCH] Merge to dev" \
-              --body "Auto-generated PR from $BRANCH to dev branch"
-          else
-            echo "PR to dev already exists: #$EXISTING_PR"
-          fi
-
-      - name: Check and create PR to main
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
-        run: |
-          BRANCH="${{ steps.branch.outputs.name }}"
-
-          # Check if PR to main already exists
-          EXISTING_PR=$(gh pr list --base main --head "$BRANCH" --json number --jq '.[0].number')
-
-          if [ -z "$EXISTING_PR" ]; then
-            echo "Creating PR to main branch..."
-            gh pr create \
-              --base main \
-              --head "$BRANCH" \
-              --title "[$BRANCH] Merge to main" \
-              --body "Auto-generated PR from $BRANCH to main branch"
-          else
-            echo "PR to main already exists: #$EXISTING_PR"
-          fi
+      - name: Check and create PR to main (via API)
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_PAT || github.token }}
+          script: |
+            const branch = `${{ steps.branch.outputs.name }}`;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const existing = await github.rest.pulls.list({ owner, repo, base: 'main', head: `${owner}:${branch}` });
+            if (existing.data && existing.data.length > 0) {
+              console.log(`PR to main already exists: #${existing.data[0].number}`);
+            } else {
+              console.log('Creating PR to main branch...');
+              const created = await github.rest.pulls.create({ owner, repo, title: `[${branch}] Merge to main`, head: branch, base: 'main', body: `Auto-generated PR from ${branch} to main branch` });
+              console.log(`Created PR #${created.data.number}`);
+            }
