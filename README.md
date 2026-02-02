@@ -248,28 +248,58 @@ sai-deal-assistant-frontend/
 
 ---
 
-## 🐳 Docker Support
+## 🐳 Docker Support & TLS Reverse Proxy 🔐
 
-The application includes Docker support for containerized deployment:
+The application supports running as Docker containers and includes an optional TLS-terminating reverse proxy (nginx) that front-ends the frontend and BFF services. This is the recommended setup for local dev and simple deployments where you want HTTPS on `https://localhost`.
 
-**Build Docker image:**
+Key points
+
+- The frontend, BFF and proxy are defined in `docker-compose.yml`.
+- The **proxy** service is built from `docker/proxy/Dockerfile` and uses `docker/proxy/proxy.conf` for nginx configuration.
+- TLS certs (for dev) are mounted from `bff/certs` into the proxy at `/etc/nginx/certs`.
+- The BFF is a Next.js app in `bff/` which listens on port `3001` internally and acts as an API gateway for frontend `/api/*` calls.
+
+Local development using the proxy (HTTPS)
+
+1. Generate local self-signed certs (example):
 
 ```bash
-docker build -t sai-deal-assistant-frontend:latest .
+# from bff/certs
+openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 365 -subj "/CN=localhost"
 ```
 
-**Run container:**
+2. Build and start services (from repo root):
 
 ```bash
-docker run -d \
-  --name deal-assistant-frontend \
-  -p 3000:80 \
-  -p 3443:443 \
-  -v $(pwd)/public/config.json:/usr/share/nginx/html/config.json:ro \
-  sai-deal-assistant-frontend:latest
+# Build everything and start services including proxy
+docker compose build
+docker compose up --build
 ```
 
-The container uses **Nginx** to serve the static files and includes SSL support.
+3. Access the app at `https://localhost` (the proxy listens on 443 and terminates TLS). The proxy forwards `/api/*` to the BFF at `http://bff:3001`.
+
+Configuration notes
+
+- When using the proxy, set `VITE_API_BASE_URL=https://localhost` (frontend config) so API calls go to the proxied origin.
+- Ensure `ALLOWED_ORIGINS` in BFF includes `https://localhost` (see `bff/src/lib/config.ts` used by `bff/src/lib/proxy.ts`).
+- In development the BFF sets `NODE_TLS_REJECT_UNAUTHORIZED=0` to allow backend calls to self-signed certs — do not copy this to production.
+
+CI / Deploy behavior
+
+- The deployed workflow (`.github/workflows/deploy-dev.yml`) now builds and saves the proxy image as `proxy.tar` and copies `docker/proxy/proxy.conf` and `bff/certs/` to the deploy host.
+- The deploy script (`deploy-dev.sh`) loads `proxy.tar` and places the proxy config and certs into the deployment directory so `docker compose up -d` binds them at runtime.
+
+Security reminder ⚠️
+
+- Do not commit production private keys into the repository. Use a secrets manager or Let's Encrypt/ACME in production to obtain and rotate certificates.
+
+References
+
+- `docker-compose.yml` (services: `proxy`, `frontend`, `bff`)
+- `docker/proxy/Dockerfile` + `docker/proxy/proxy.conf`
+- `bff/certs/` (dev certs)
+- `bff/src/lib/proxy.ts` (BFF proxying and CORS handling)
+- `.github/workflows/deploy-dev.yml` and `deploy-dev.sh` (CI/deploy flow)
 
 ---
 
