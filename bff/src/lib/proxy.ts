@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { BACKEND_URL } from "./config";
+import { BACKEND_URL, ALLOWED_ORIGINS } from "./config";
 
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(",") || [
+const AllowedOriginsArray = ALLOWED_ORIGINS?.split(",") || [
   "http://localhost:3000",
-  "http://localhost:5173",
+  "https://localhost:3000",
 ];
 
 export async function proxyRequest(request: NextRequest, path: string) {
@@ -41,9 +41,9 @@ export async function proxyRequest(request: NextRequest, path: string) {
     const responseData = await response.text();
 
     // Only allow specific origins
-    const allowedOrigin = ALLOWED_ORIGINS.includes(origin)
+    const allowedOrigin = AllowedOriginsArray.includes(origin)
       ? origin
-      : ALLOWED_ORIGINS[0];
+      : AllowedOriginsArray[0];
 
     return new NextResponse(responseData, {
       status: response.status,

@@ -1,4 +1,18 @@
 services:
+  proxy:
+    build:
+      context: ./docker/proxy
+      dockerfile: Dockerfile
+    volumes:
+      - ./docker/proxy/proxy.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./bff/certs:/etc/nginx/certs:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - bff
+
   frontend:
     build:
       context: .

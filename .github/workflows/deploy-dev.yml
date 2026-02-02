@@ -35,13 +35,14 @@ jobs:
         run: |
           docker save sai-deal-assistant-frontend-frontend:latest -o frontend.tar
           docker save sai-deal-assistant-frontend-bff:latest -o bff.tar
+          docker save sai-deal-assistant-frontend-proxy:latest -o proxy.tar
 
       - name: Copy files to dev server
         env:
           DEV_PASSWORD: ${{ secrets.DEV_SERVER_PASSWORD }}
         run: |
           sshpass -p "$DEV_PASSWORD" scp -P ${{ vars.DEV_SERVER_SSH_PORT }} -o StrictHostKeyChecking=no \
-            frontend.tar bff.tar docker-compose.yml .env deploy-dev.sh \
+            frontend.tar bff.tar proxy.tar docker-compose.yml .env deploy-dev.sh docker/proxy/proxy.conf bff/certs/ \
             ${{ vars.DEV_SERVER_SSH_USER }}@${{ vars.DEV_SERVER_HOST }}:/tmp/
 
       - name: Deploy on dev server
