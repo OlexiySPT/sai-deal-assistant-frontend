@@ -30,12 +30,52 @@ mkdir -p "${DEPLOY_DIR}"
 mv /tmp/docker-compose.yml "${DEPLOY_DIR}/"
 mv /tmp/.env "${DEPLOY_DIR}/"
 # move proxy config and certs (if provided)
-if [ -f /tmp/proxy.tar ] || [ -f /tmp/proxy/proxy.conf ] || [ -f /tmp/docker/proxy/proxy.conf ]; then
+if [ -f /tmp/proxy.tar ] || [ -f /tmp/proxy/proxy.conf ] || [ -f /tmp/docker/proxy/proxy.conf ] || [ -d /tmp/proxy ] || [ -d /tmp/docker/proxy ]; then
   mkdir -p "${DEPLOY_DIR}/docker"
+
+  # Handle direct file uploads
   if [ -f /tmp/proxy/proxy.conf ]; then
     mv /tmp/proxy/proxy.conf "${DEPLOY_DIR}/docker/proxy.conf" || true
-  elif [ -f /tmp/docker/proxy/proxy.conf ]; then
+  fi
+  if [ -f /tmp/docker/proxy/proxy.conf ]; then
     mv /tmp/docker/proxy/proxy.conf "${DEPLOY_DIR}/docker/proxy.conf" || true
+  fi
+
+  # Handle directory uploads (common when scp -r is used)
+  if [ -d /tmp/proxy ] && [ -f /tmp/proxy/proxy.conf ]; then
+    mv /tmp/proxy/proxy.conf "${DEPLOY_DIR}/docker/proxy.conf" || true
+    rm -rf /tmp/proxy || true
+  fi
+  if [ -d /tmp/docker/proxy ] && [ -f /tmp/docker/proxy/proxy.conf ]; then
+    mv /tmp/docker/proxy/proxy.conf "${DEPLOY_DIR}/docker/proxy.conf" || true
+    rm -rf /tmp/docker/proxy || true
+  fi
+
+  # Normalize existing deploy directory if it contains nested /docker/proxy
+  if [ -d "${DEPLOY_DIR}/docker/proxy" ] && [ -f "${DEPLOY_DIR}/docker/proxy/proxy.conf" ]; then
+    mv "${DEPLOY_DIR}/docker/proxy/proxy.conf" "${DEPLOY_DIR}/docker/proxy.conf" || true
+    rm -rf "${DEPLOY_DIR}/docker/proxy" || true
+  fi
+
+  # Handle accidental directory at proxy.conf (repair or remove)
+  if [ -d "${DEPLOY_DIR}/docker/proxy.conf" ]; then
+    echo "Repairing unexpected directory at ${DEPLOY_DIR}/docker/proxy.conf"
+    # If a nested proxy.conf exists, move it into place
+    if [ -f "${DEPLOY_DIR}/docker/proxy.conf/proxy.conf" ]; then
+      mv "${DEPLOY_DIR}/docker/proxy.conf/proxy.conf" "${DEPLOY_DIR}/docker/proxy.conf.tmp" || true
+      rm -rf "${DEPLOY_DIR}/docker/proxy.conf" || true
+      mv "${DEPLOY_DIR}/docker/proxy.conf.tmp" "${DEPLOY_DIR}/docker/proxy.conf" || true
+      echo "Replaced directory with nested proxy.conf file."
+    elif [ -f "${DEPLOY_DIR}/docker/proxy.conf/default.conf" ]; then
+      mv "${DEPLOY_DIR}/docker/proxy.conf/default.conf" "${DEPLOY_DIR}/docker/proxy.conf.tmp" || true
+      rm -rf "${DEPLOY_DIR}/docker/proxy.conf" || true
+      mv "${DEPLOY_DIR}/docker/proxy.conf.tmp" "${DEPLOY_DIR}/docker/proxy.conf" || true
+      echo "Replaced directory with nested default.conf file."
+    else
+      # empty or unexpected contents — remove the directory so we can place a file
+      echo "Removing empty or unexpected directory ${DEPLOY_DIR}/docker/proxy.conf"
+      rm -rf "${DEPLOY_DIR}/docker/proxy.conf" || true
+    fi
   fi
 fi
 if [ -d /tmp/bff/certs ]; then
