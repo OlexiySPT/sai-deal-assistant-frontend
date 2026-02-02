@@ -11,6 +11,7 @@ services:
     depends_on:
       - frontend
       - bff
+    restart: unless-stopped
 
   frontend:
     build:
@@ -23,6 +24,7 @@ services:
       - VITE_API_BASE_URL=${VITE_API_BASE_URL}
     depends_on:
       - bff
+    restart: unless-stopped
 
   bff:
     build:
@@ -37,3 +39,4 @@ services:
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - NODE_ENV=production
       - NODE_TLS_REJECT_UNAUTHORIZED=${NODE_TLS_REJECT_UNAUTHORIZED}
+    restart: unless-stopped
