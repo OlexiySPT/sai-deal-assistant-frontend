@@ -23,37 +23,88 @@ jobs:
         id: branch
         run: echo "name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
-      - name: Check and create PR to dev (via API)
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GH_PAT || github.token }}
-          script: |
-            const branch = `${{ steps.branch.outputs.name }}`;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            // Search for an existing PR with base=dev and head=owner:branch
-            const existing = await github.rest.pulls.list({ owner, repo, base: 'dev', head: `${owner}:${branch}` });
-            if (existing.data && existing.data.length > 0) {
-              console.log(`PR to dev already exists: #${existing.data[0].number}`);
-            } else {
-              console.log('Creating PR to dev branch...');
-              const created = await github.rest.pulls.create({ owner, repo, title: `[${branch}] Merge to dev`, head: branch, base: 'dev', body: `Auto-generated PR from ${branch} to dev branch` });
-              console.log(`Created PR #${created.data.number}`);
-            }
+      - name: Check and create PR to dev (via REST API)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT || github.token }}
+        run: |
+          set -e
+          BRANCH="${{ steps.branch.outputs.name }}"
+          OWNER="$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)"
+          REPO="$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)"
+          LIST_URL="https://api.github.com/repos/$OWNER/$REPO/pulls?head=${OWNER}:$BRANCH&base=dev"
 
-      - name: Check and create PR to main (via API)
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GH_PAT || github.token }}
-          script: |
-            const branch = `${{ steps.branch.outputs.name }}`;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const existing = await github.rest.pulls.list({ owner, repo, base: 'main', head: `${owner}:${branch}` });
-            if (existing.data && existing.data.length > 0) {
-              console.log(`PR to main already exists: #${existing.data[0].number}`);
-            } else {
-              console.log('Creating PR to main branch...');
-              const created = await github.rest.pulls.create({ owner, repo, title: `[${branch}] Merge to main`, head: branch, base: 'main', body: `Auto-generated PR from ${branch} to main branch` });
-              console.log(`Created PR #${created.data.number}`);
-            }
+          echo "Checking existing PRs for $BRANCH -> dev..."
+          curl -s -H "Authorization: token $GITHUB_TOKEN" "$LIST_URL" -o /tmp/prs.json
+          NUM=$(python - <<'PY'
+import sys, json
+data=json.load(open('/tmp/prs.json'))
+print(len(data))
+PY
+)
+          if [ "$NUM" -gt 0 ]; then
+            NUM0=$(python - <<'PY'
+import json
+data=json.load(open('/tmp/prs.json'))
+print(data[0]['number'])
+PY
+)
+            echo "PR to dev already exists: #$NUM0"
+          else
+            echo "Creating PR to dev branch..."
+            python - <<'PY' > /tmp/payload.json
+import os, json
+branch = os.environ['BRANCH']
+obj = {"title": f"[{branch}] Merge to dev", "head": branch, "base": "dev", "body": f"Auto-generated PR from {branch} to dev branch"}
+print(json.dumps(obj))
+PY
+            curl -s -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/json" -d @/tmp/payload.json "https://api.github.com/repos/$OWNER/$REPO/pulls" -o /tmp/create_pr.json
+            CREATED=$(python - <<'PY'
+import json
+print(json.load(open('/tmp/create_pr.json'))['number'])
+PY
+)
+            echo "Created PR #$CREATED"
+          fi
+
+      - name: Check and create PR to main (via REST API)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT || github.token }}
+        run: |
+          set -e
+          BRANCH="${{ steps.branch.outputs.name }}"
+          OWNER="$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)"
+          REPO="$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)"
+          LIST_URL="https://api.github.com/repos/$OWNER/$REPO/pulls?head=${OWNER}:$BRANCH&base=main"
+
+          echo "Checking existing PRs for $BRANCH -> main..."
+          curl -s -H "Authorization: token $GITHUB_TOKEN" "$LIST_URL" -o /tmp/prs.json
+          NUM=$(python - <<'PY'
+import sys, json
+data=json.load(open('/tmp/prs.json'))
+print(len(data))
+PY
+)
+          if [ "$NUM" -gt 0 ]; then
+            NUM0=$(python - <<'PY'
+import json
+data=json.load(open('/tmp/prs.json'))
+print(data[0]['number'])
+PY
+)
+            echo "PR to main already exists: #$NUM0"
+          else
+            echo "Creating PR to main branch..."
+            python - <<'PY' > /tmp/payload.json
+import os, json
+branch = os.environ['BRANCH']
+obj = {"title": f"[{branch}] Merge to main", "head": branch, "base": "main", "body": f"Auto-generated PR from {branch} to main branch"}
+print(json.dumps(obj))
+PY
+            curl -s -H "Authorization: token $GITHUB_TOKEN" -H "Content-Type: application/json" -d @/tmp/payload.json "https://api.github.com/repos/$OWNER/$REPO/pulls" -o /tmp/create_pr.json
+            CREATED=$(python - <<'PY'
+import json
+print(json.load(open('/tmp/create_pr.json'))['number'])
+PY
+)
+            echo "Created PR #$CREATED"
+          fi
