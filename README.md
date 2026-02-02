@@ -286,7 +286,7 @@ Configuration notes
 
 CI / Deploy behavior
 
-- The deployed workflow (`.github/workflows/deploy-dev.yml`) now builds and saves the proxy image as `proxy.tar`. The CI uploads `bff/certs/` to the deploy host so TLS certs can be mounted at runtime; proxy configuration is baked into the image and does not need to be copied at deploy time.
+- The deployed workflow (`.github/workflows/deploy-dev.yml`) now builds and saves the proxy image as `proxy.tar` and then creates a single `deploy.tar` archive containing the images, `docker-compose.yml`, `.env`, `deploy-dev.sh`, and `bff/certs/`. The deploy job uploads `deploy.tar` to the server where the deploy script extracts the archive, loads the images, and places certs in place so `docker compose up -d` can bind them at runtime.
 - The deploy script (`deploy-dev.sh`) loads `proxy.tar` and places TLS certs (`bff/certs/`) into the deployment directory so `docker compose up -d` can bind them at runtime.
 
 Security reminder ⚠️
