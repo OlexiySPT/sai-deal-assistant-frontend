@@ -255,7 +255,7 @@ The application supports running as Docker containers and includes an optional T
 Key points
 
 - The frontend, BFF and proxy are defined in `docker-compose.yml`.
-- The **proxy** service is built from `docker/proxy/Dockerfile` and uses `docker/proxy/proxy.conf` for nginx configuration.
+- The **proxy** service is built from `docker/proxy/Dockerfile`. The nginx configuration (`proxy.conf`) is baked into the proxy image at build time (for reproducible deployments). To override config in development, edit `docker/proxy/proxy.conf` and rebuild the `proxy` image.
 - TLS certs (for dev) are mounted from `bff/certs` into the proxy at `/etc/nginx/certs`.
 - The BFF is a Next.js app in `bff/` which listens on port `3001` internally and acts as an API gateway for frontend `/api/*` calls.
 
@@ -286,8 +286,8 @@ Configuration notes
 
 CI / Deploy behavior
 
-- The deployed workflow (`.github/workflows/deploy-dev.yml`) now builds and saves the proxy image as `proxy.tar` and copies `docker/proxy/proxy.conf` and `bff/certs/` to the deploy host.
-- The deploy script (`deploy-dev.sh`) loads `proxy.tar` and places the proxy config and certs into the deployment directory so `docker compose up -d` binds them at runtime.
+- The deployed workflow (`.github/workflows/deploy-dev.yml`) now builds and saves the proxy image as `proxy.tar`. The CI uploads `bff/certs/` to the deploy host so TLS certs can be mounted at runtime; proxy configuration is baked into the image and does not need to be copied at deploy time.
+- The deploy script (`deploy-dev.sh`) loads `proxy.tar` and places TLS certs (`bff/certs/`) into the deployment directory so `docker compose up -d` can bind them at runtime.
 
 Security reminder ⚠️
 
@@ -296,7 +296,7 @@ Security reminder ⚠️
 References
 
 - `docker-compose.yml` (services: `proxy`, `frontend`, `bff`)
-- `docker/proxy/Dockerfile` + `docker/proxy/proxy.conf`
+- `docker/proxy/Dockerfile` (proxy config baked into image)
 - `bff/certs/` (dev certs)
 - `bff/src/lib/proxy.ts` (BFF proxying and CORS handling)
 - `.github/workflows/deploy-dev.yml` and `deploy-dev.sh` (CI/deploy flow)
