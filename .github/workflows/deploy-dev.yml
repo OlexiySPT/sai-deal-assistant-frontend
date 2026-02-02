@@ -37,14 +37,17 @@ jobs:
           docker save sai-deal-assistant-frontend-bff:latest -o bff.tar
           docker save sai-deal-assistant-frontend-proxy:latest -o proxy.tar
 
-      - name: Copy files to dev server
+      - name: Create deploy archive
+        run: |
+          # Create a single tarball with images + deploy files to avoid nested paths and scp pitfalls
+          tar -czf deploy.tar frontend.tar bff.tar proxy.tar docker-compose.yml .env deploy-dev.sh bff/certs || true
+
+      - name: Copy deploy archive to dev server
         env:
           DEV_PASSWORD: ${{ secrets.DEV_SERVER_PASSWORD }}
         run: |
-          # Use recursive scp to copy directories (bff/certs)
-          sshpass -p "$DEV_PASSWORD" scp -r -P ${{ vars.DEV_SERVER_SSH_PORT }} -o StrictHostKeyChecking=no \
-            frontend.tar bff.tar proxy.tar docker-compose.yml .env deploy-dev.sh bff/certs/ \
-            ${{ vars.DEV_SERVER_SSH_USER }}@${{ vars.DEV_SERVER_HOST }}:/tmp/
+          sshpass -p "$DEV_PASSWORD" scp -P ${{ vars.DEV_SERVER_SSH_PORT }} -o StrictHostKeyChecking=no \
+            deploy.tar ${{ vars.DEV_SERVER_SSH_USER }}@${{ vars.DEV_SERVER_HOST }}:/tmp/
 
       - name: Deploy on dev server
         env:
@@ -53,4 +56,4 @@ jobs:
         run: |
           sshpass -p "$DEV_PASSWORD" ssh -p ${{ vars.DEV_SERVER_SSH_PORT }} -o StrictHostKeyChecking=no \
             ${{ vars.DEV_SERVER_SSH_USER }}@${{ vars.DEV_SERVER_HOST }} \
-            'chmod +x /tmp/deploy-dev.sh && /tmp/deploy-dev.sh'
+            'tar -xzf /tmp/deploy.tar -C /tmp || true; chmod +x /tmp/deploy-dev.sh && /tmp/deploy-dev.sh'
