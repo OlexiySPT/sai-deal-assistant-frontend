@@ -43,6 +43,20 @@ if [ -d /tmp/bff/certs ]; then
   mv /tmp/bff/certs/* "${DEPLOY_DIR}/bff/certs/" || true
 fi
 
+# Validate proxy config before starting
+echo "Validating deployment files..."
+if [ -e "${DEPLOY_DIR}/docker/proxy.conf" ]; then
+  if [ -f "${DEPLOY_DIR}/docker/proxy.conf" ]; then
+    echo "Found proxy config: ${DEPLOY_DIR}/docker/proxy.conf"
+  else
+    echo "ERROR: ${DEPLOY_DIR}/docker/proxy.conf exists but is not a regular file. Aborting."
+    echo "Run 'ls -la ${DEPLOY_DIR}/docker' on the host to inspect."
+    exit 1
+  fi
+else
+  echo "Warning: proxy config not found at ${DEPLOY_DIR}/docker/proxy.conf. Proxy may fail to start or will use built-in config."
+fi
+
 # Start the services using docker compose
 echo "Starting services with docker compose..."
 cd "${DEPLOY_DIR}"
