@@ -8,7 +8,7 @@ on:
 
 jobs:
   create-pull-requests:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
