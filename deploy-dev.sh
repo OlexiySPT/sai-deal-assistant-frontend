@@ -30,9 +30,13 @@ mkdir -p "${DEPLOY_DIR}"
 mv /tmp/docker-compose.yml "${DEPLOY_DIR}/"
 mv /tmp/.env "${DEPLOY_DIR}/"
 # move proxy config and certs (if provided)
-if [ -f /tmp/proxy.tar ] || [ -f /tmp/proxy/proxy.conf ]; then
+if [ -f /tmp/proxy.tar ] || [ -f /tmp/proxy/proxy.conf ] || [ -f /tmp/docker/proxy/proxy.conf ]; then
   mkdir -p "${DEPLOY_DIR}/docker"
-  mv /tmp/proxy/proxy.conf "${DEPLOY_DIR}/docker/proxy.conf" || true
+  if [ -f /tmp/proxy/proxy.conf ]; then
+    mv /tmp/proxy/proxy.conf "${DEPLOY_DIR}/docker/proxy.conf" || true
+  elif [ -f /tmp/docker/proxy/proxy.conf ]; then
+    mv /tmp/docker/proxy/proxy.conf "${DEPLOY_DIR}/docker/proxy.conf" || true
+  fi
 fi
 if [ -d /tmp/bff/certs ]; then
   mkdir -p "${DEPLOY_DIR}/bff/certs"
