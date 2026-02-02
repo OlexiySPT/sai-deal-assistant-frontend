@@ -9,7 +9,7 @@ PROJECT_NAME="sai-deal-assistant-frontend"
 
 # Stop and remove existing containers
 echo "Stopping existing containers..."
-docker-compose down 2>/dev/null || true
+cd /opt/${PROJECT_NAME} && docker compose down 2>/dev/null || true
 
 # Remove old images
 echo "Removing old images..."
@@ -27,10 +27,10 @@ mkdir -p /opt/${PROJECT_NAME}
 mv /tmp/docker-compose.yml /opt/${PROJECT_NAME}/
 mv /tmp/.env /opt/${PROJECT_NAME}/
 
-# Start the services using docker-compose
-echo "Starting services with docker-compose..."
+# Start the services using docker compose
+echo "Starting services with docker compose..."
 cd /opt/${PROJECT_NAME}
-docker-compose up -d
+docker compose up -d
 
 # Clean up
 echo "Cleaning up..."
@@ -38,7 +38,7 @@ rm -f /tmp/frontend.tar /tmp/bff.tar
 
 # Show container status
 echo "Deployment completed successfully!"
-docker-compose ps
+docker compose ps
 
 echo "Application available at:"
 echo "  Frontend: http://$DEV_SERVER_HOST:3000"

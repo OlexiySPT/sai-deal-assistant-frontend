@@ -27,9 +27,9 @@ jobs:
           echo "ALLOWED_ORIGINS=${{ vars.ALLOWED_ORIGINS }}" >> .env
           echo "NODE_TLS_REJECT_UNAUTHORIZED=${{ vars.NODE_TLS_REJECT_UNAUTHORIZED }}" >> .env
 
-      - name: Build Docker images using docker-compose
+      - name: Build Docker images using docker compose
         run: |
-          docker-compose build
+          docker compose build
 
       - name: Save Docker images
         run: |
