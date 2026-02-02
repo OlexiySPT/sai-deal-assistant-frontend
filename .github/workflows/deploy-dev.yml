@@ -37,10 +37,42 @@ jobs:
           docker save sai-deal-assistant-frontend-bff:latest -o bff.tar
           docker save sai-deal-assistant-frontend-proxy:latest -o proxy.tar
 
-      - name: Create deploy archive
+      - name: Create TLS files from secrets and deploy archive
+        env:
+          CERT_PFX_B64: ${{ secrets.CERT_PFX_B64 }}
+          CERT_PEM_B64: ${{ secrets.CERT_PEM_B64 }}
+          KEY_PEM_B64: ${{ secrets.KEY_PEM_B64 }}
         run: |
-          # Create a single tarball with images + deploy files to avoid nested paths and scp pitfalls
+          set -euo pipefail
+          echo "Preparing bff/certs from secrets (if present)"
+          mkdir -p bff/certs
+
+          # Decode and write files safely if secrets are provided
+          if [ -n "${CERT_PFX_B64:-}" ]; then
+            printf '%s' "${CERT_PFX_B64}" | base64 -d > bff/certs/aspnetapp.pfx
+            chmod 600 bff/certs/aspnetapp.pfx
+            echo "Wrote bff/certs/aspnetapp.pfx"
+          fi
+
+          if [ -n "${CERT_PEM_B64:-}" ]; then
+            printf '%s' "${CERT_PEM_B64}" | base64 -d > bff/certs/cert.pem
+            chmod 644 bff/certs/cert.pem
+            echo "Wrote bff/certs/cert.pem"
+          fi
+
+          if [ -n "${KEY_PEM_B64:-}" ]; then
+            printf '%s' "${KEY_PEM_B64}" | base64 -d > bff/certs/key.pem
+            chmod 600 bff/certs/key.pem
+            echo "Wrote bff/certs/key.pem"
+          fi
+
+          echo "Creating deploy.tar (images + deploy files)"
           tar -czf deploy.tar frontend.tar bff.tar proxy.tar docker-compose.yml .env deploy-dev.sh bff/certs || true
+
+          echo "Wiping temporary bff/certs from runner (secrets kept only in deploy.tar)"
+          rm -rf bff/certs/* || true
+          rmdir bff/certs || true
+          echo "deploy.tar ready"
 
       - name: Copy deploy archive to dev server
         env:
