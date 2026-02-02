@@ -8,12 +8,19 @@ on:
 
 jobs:
   create-pull-requests:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux]
     permissions:
       contents: read
       pull-requests: write
 
     steps:
+      - name: Verify gh CLI is available
+        run: |
+          if ! command -v gh >/dev/null 2>&1; then
+            echo "gh CLI not found on runner. Install it (https://cli.github.com/) or add it to the runner image."
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
