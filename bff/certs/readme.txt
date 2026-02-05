@@ -1,3 +1,7 @@
+#generate proper keys and put them to the action's secrets :
+CERT_PFX_B64 and CERT_PEM_B64 (see deploy-dev.yml ln 42)
+
+
 # this will copy cert.pem content to clipboard
 $b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes('bff\certs\cert.pem'))
 Set-Clipboard $b64
