@@ -1,4 +1,18 @@
 services:
+  proxy:
+    build:
+      context: ./docker/proxy
+      dockerfile: Dockerfile
+    volumes:
+      - ./bff/certs:/etc/nginx/certs:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - bff
+    restart: unless-stopped
+
   frontend:
     build:
       context: .
@@ -10,6 +24,7 @@ services:
       - VITE_API_BASE_URL=${VITE_API_BASE_URL}
     depends_on:
       - bff
+    restart: unless-stopped
 
   bff:
     build:
@@ -24,3 +39,4 @@ services:
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - NODE_ENV=production
       - NODE_TLS_REJECT_UNAUTHORIZED=${NODE_TLS_REJECT_UNAUTHORIZED}
+    restart: unless-stopped
