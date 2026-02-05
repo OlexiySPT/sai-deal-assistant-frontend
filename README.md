@@ -248,28 +248,86 @@ sai-deal-assistant-frontend/
 
 ---
 
-## 🐳 Docker Support
+## 🐳 Docker Support & TLS Reverse Proxy 🔐
 
-The application includes Docker support for containerized deployment:
+The application supports running as Docker containers and includes an optional TLS-terminating reverse proxy (nginx) that front-ends the frontend and BFF services. This is the recommended setup for local dev and simple deployments where you want HTTPS on `https://localhost`.
 
-**Build Docker image:**
+Key points
+
+- The frontend, BFF and proxy are defined in `docker-compose.yml`.
+- The **proxy** service is built from `docker/proxy/Dockerfile`. The nginx configuration (`proxy.conf`) is baked into the proxy image at build time (for reproducible deployments). To override config in development, edit `docker/proxy/proxy.conf` and rebuild the `proxy` image.
+- TLS certs (for dev) are mounted from `bff/certs` into the proxy at `/etc/nginx/certs`.
+- The BFF is a Next.js app in `bff/` which listens on port `3001` internally and acts as an API gateway for frontend `/api/*` calls.
+
+Local development using the proxy (HTTPS)
+
+1. Generate local self-signed certs (example):
 
 ```bash
-docker build -t sai-deal-assistant-frontend:latest .
+# from bff/certs
+openssl req -x509 -newkey rsa:2048 -nodes -keyout key.pem -out cert.pem -days 365 -subj "/CN=localhost"
 ```
 
-**Run container:**
+2. Build and start services (from repo root):
 
 ```bash
-docker run -d \
-  --name deal-assistant-frontend \
-  -p 3000:80 \
-  -p 3443:443 \
-  -v $(pwd)/public/config.json:/usr/share/nginx/html/config.json:ro \
-  sai-deal-assistant-frontend:latest
+# Build everything and start services including proxy
+docker compose build
+docker compose up --build
 ```
 
-The container uses **Nginx** to serve the static files and includes SSL support.
+3. Access the app at `https://localhost` (the proxy listens on 443 and terminates TLS). The proxy forwards `/api/*` to the BFF at `http://bff:3001`.
+
+Configuration notes
+
+- When using the proxy, set `VITE_API_BASE_URL=https://localhost` (frontend config) so API calls go to the proxied origin.
+- Ensure `ALLOWED_ORIGINS` in BFF includes `https://localhost` (see `bff/src/lib/config.ts` used by `bff/src/lib/proxy.ts`).
+- In development the BFF sets `NODE_TLS_REJECT_UNAUTHORIZED=0` to allow backend calls to self-signed certs — do not copy this to production.
+
+CI / Deploy behavior
+
+- The deployed workflow (`.github/workflows/deploy-dev.yml`) now builds and saves the proxy image as `proxy.tar` and then creates a single `deploy.tar` archive containing the images, `docker-compose.yml`, `.env`, `deploy-dev.sh`, and `bff/certs/`. The deploy job uploads `deploy.tar` to the server where the deploy script extracts the archive, loads the images, and places certs in place so `docker compose up -d` can bind them at runtime.
+- The deploy script (`deploy-dev.sh`) loads `proxy.tar` and places TLS certs (`bff/certs/`) into the deployment directory so `docker compose up -d` can bind them at runtime.
+
+CI secrets for TLS (recommended) 🔐
+
+- Instead of storing raw cert files in the repository, store Base64-encoded file contents in repository secrets and let CI decode them at deploy time. The deploy workflow supports the following secrets:
+  - `CERT_PFX_B64` — Base64 of a PFX/PKCS#12 file (optional)
+  - `CERT_PEM_B64` — Base64 of PEM certificate (`cert.pem`)
+  - `KEY_PEM_B64` — Base64 of PEM private key (`key.pem`)
+
+- The `deploy-dev.yml` workflow decodes these secrets into `bff/certs/`, includes them in `deploy.tar`, and wipes the temporary files from the runner to avoid leaving secrets on CI hosts.
+
+How to convert your local files to Base64 (Linux / macOS):
+
+```bash
+# PFX -> base64 single line
+base64 -w 0 aspnetapp.pfx > aspnetapp.pfx.b64
+# PEM cert -> base64 single line
+base64 -w 0 cert.pem > cert.pem.b64
+# PEM key -> base64 single line
+base64 -w 0 key.pem > key.pem.b64
+```
+
+If your `base64` lacks `-w` (macOS/BSD), use:
+
+```bash
+base64 aspnetapp.pfx | tr -d '\n' > aspnetapp.pfx.b64
+```
+
+- Copy the contents of each `.b64` file into the corresponding GitHub secret (`Settings → Secrets`), then the CI will decode and deploy them securely.
+
+Security reminder ⚠️
+
+- Keep private keys out of git and use a secrets manager for production workflows. The CI step only stores secrets transiently on the runner while creating the `deploy.tar` archive and removes them immediately afterwards.
+
+References
+
+- `docker-compose.yml` (services: `proxy`, `frontend`, `bff`)
+- `docker/proxy/Dockerfile` (proxy config baked into image)
+- `bff/certs/` (dev certs)
+- `bff/src/lib/proxy.ts` (BFF proxying and CORS handling)
+- `.github/workflows/deploy-dev.yml` and `deploy-dev.sh` (CI/deploy flow)
 
 ---
 

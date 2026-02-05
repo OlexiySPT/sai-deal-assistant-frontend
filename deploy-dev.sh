@@ -4,70 +4,90 @@ set -e
 echo "Starting deployment to dev server..."
 
 # Configuration
-# Set DEV_SERVER_HOST environment variable or it will use the placeholder below
 DEV_SERVER_HOST="${DEV_SERVER_HOST:-your-server-host-here}"
-CONTAINER_NAME="sai-deal-assistant-frontend-dev"
-IMAGE_NAME="sai-deal-assistant-frontend:dev"
-HOST_PORT_HTTP=3000
-HOST_PORT_HTTPS=3443
-CONTAINER_PORT_HTTP=80
-CONTAINER_PORT_HTTPS=443
+PROJECT_NAME="sai-deal-assistant-frontend"
+DEPLOY_DIR="${DEPLOY_DIR:-$HOME/${PROJECT_NAME}}"
 
-# Stop and remove existing container if it exists
-echo "Stopping existing container..."
-docker stop $CONTAINER_NAME 2>/dev/null || true
-docker rm $CONTAINER_NAME 2>/dev/null || true
+# Stop and remove existing containers
+echo "Stopping existing containers..."
+cd "${DEPLOY_DIR}" && docker compose down 2>/dev/null || true
 
-# Clean up old config directory created by Docker volume mount
-rm -rf /tmp/frontend-config/config.json 2>/dev/null || true
+# Remove old images
+echo "Removing old images..."
+docker rmi ${PROJECT_NAME}-frontend:latest 2>/dev/null || true
+docker rmi ${PROJECT_NAME}-bff:latest 2>/dev/null || true
+docker rmi ${PROJECT_NAME}-proxy:latest 2>/dev/null || true
 
-# Remove old image if exists
-echo "Removing old image..."
-docker rmi $IMAGE_NAME 2>/dev/null || true
+# Load the new images (extract from deploy.tar if present)
+echo "Loading new Docker images..."
+if [ -f /tmp/deploy.tar ]; then
+  echo "Found /tmp/deploy.tar — extracting to /tmp/deploy"
+  mkdir -p /tmp/deploy
+  tar -xzf /tmp/deploy.tar -C /tmp/deploy || true
 
-# Load the new image
-echo "Loading new Docker image..."
-docker load -i /tmp/sai-deal-assistant-frontend-dev.tar
+  # Load images from extracted tarball
+  [ -f /tmp/deploy/frontend.tar ] && docker load -i /tmp/deploy/frontend.tar || true
+  [ -f /tmp/deploy/bff.tar ] && docker load -i /tmp/deploy/bff.tar || true
+  [ -f /tmp/deploy/proxy.tar ] && docker load -i /tmp/deploy/proxy.tar || true
 
-# Create dev config
-echo "Creating dev configuration..."
-mkdir -p /tmp/frontend-config
-if [ -f /tmp/config.dev.json ]; then
-  cat /tmp/config.dev.json > /tmp/frontend-config/config.json
+  # Move docker-compose.yml and .env from archive
+  echo "Setting up configuration from deploy archive..."
+  mkdir -p "${DEPLOY_DIR}"
+  [ -f /tmp/deploy/docker-compose.yml ] && mv /tmp/deploy/docker-compose.yml "${DEPLOY_DIR}/" || true
+  [ -f /tmp/deploy/.env ] && mv /tmp/deploy/.env "${DEPLOY_DIR}/" || true
+
+  # Move certs from extracted archive if present
+  if [ -d /tmp/deploy/bff/certs ]; then
+    mkdir -p "${DEPLOY_DIR}/bff/certs"
+    mv /tmp/deploy/bff/certs/* "${DEPLOY_DIR}/bff/certs/" || true
+    # Ensure safe ownership/permissions
+    chown root:root "${DEPLOY_DIR}/bff/certs/"* 2>/dev/null || true
+    chmod 600 "${DEPLOY_DIR}/bff/certs/key.pem" 2>/dev/null || true
+    chmod 644 "${DEPLOY_DIR}/bff/certs/cert.pem" 2>/dev/null || true
+  fi
 else
-  echo "Warning: config.dev.json not found, using default"
-  echo '{"apiBaseUrl": "https://your-server:5001"}' > /tmp/frontend-config/config.json
+  # Fallback: accept older upload formats
+  docker load -i /tmp/frontend.tar || true
+  docker load -i /tmp/bff.tar || true
+  docker load -i /tmp/proxy.tar || true
+
+  mkdir -p "${DEPLOY_DIR}"
+  mv /tmp/docker-compose.yml "${DEPLOY_DIR}/" || true
+  mv /tmp/.env "${DEPLOY_DIR}/" || true
+  if [ -d /tmp/bff/certs ]; then
+    mkdir -p "${DEPLOY_DIR}/bff/certs"
+    mv /tmp/bff/certs/* "${DEPLOY_DIR}/bff/certs/" || true
+    chown root:root "${DEPLOY_DIR}/bff/certs/"* 2>/dev/null || true
+    chmod 600 "${DEPLOY_DIR}/bff/certs/key.pem" 2>/dev/null || true
+    chmod 644 "${DEPLOY_DIR}/bff/certs/cert.pem" 2>/dev/null || true
+  fi
 fi
 
-# Generate self-signed certificate if not exists
-echo "Setting up SSL certificates..."
-mkdir -p /tmp/frontend-ssl
-if [ ! -f /tmp/frontend-ssl/cert.pem ]; then
-  openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /tmp/frontend-ssl/key.pem \
-    -out /tmp/frontend-ssl/cert.pem \
-    -subj "/CN=$DEV_SERVER_HOST"
+# Check TLS certs and basic deployment files
+echo "Validating deployment files..."
+if [ -d "${DEPLOY_DIR}/bff/certs" ]; then
+  echo "Found TLS certs at ${DEPLOY_DIR}/bff/certs"
+else
+  echo "Warning: TLS certs not found at ${DEPLOY_DIR}/bff/certs. Proxy will start without TLS unless certs are provided or mounted at runtime."
 fi
 
-# Run the new container
-echo "Starting new container..."
-docker run -d \
-  --name $CONTAINER_NAME \
-  --restart unless-stopped \
-  -p $HOST_PORT_HTTP:$CONTAINER_PORT_HTTP \
-  -p $HOST_PORT_HTTPS:$CONTAINER_PORT_HTTPS \
-  -v /tmp/frontend-config/config.json:/usr/share/nginx/html/config.json:ro \
-  -v /tmp/frontend-ssl:/etc/nginx/ssl:ro \
-  $IMAGE_NAME
+# Start the services using docker compose
+echo "Starting services with docker compose..."
+cd "${DEPLOY_DIR}"
+docker compose up -d
 
 # Clean up
 echo "Cleaning up..."
-rm -f /tmp/sai-deal-assistant-frontend-dev.tar
+rm -f /tmp/frontend.tar /tmp/bff.tar /tmp/proxy.tar /tmp/deploy.tar
+rm -rf /tmp/deploy || true
 
 # Show container status
 echo "Deployment completed successfully!"
-docker ps | grep $CONTAINER_NAME
+docker compose ps
 
 echo "Application available at:"
-echo "  HTTP:  http://$DEV_SERVER_HOST:$HOST_PORT_HTTP"
-echo "  HTTPS: https://$DEV_SERVER_HOST:$HOST_PORT_HTTPS"
+echo "  Frontend: http://$DEV_SERVER_HOST:3000"
+echo "  BFF:      http://$DEV_SERVER_HOST:3001"
+echo "Application available at:"
+echo "  Frontend: http://$DEV_SERVER_HOST:3000"
+echo "  BFF:      http://$DEV_SERVER_HOST:3001"
