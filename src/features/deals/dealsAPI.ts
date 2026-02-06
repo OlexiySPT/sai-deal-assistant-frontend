@@ -85,13 +85,24 @@ export interface DealsQueryParams {
 }
 
 // API Functions
+const dealsPending: { [key: string]: Promise<DealListItemDtoQueryResult> } = {};
 export const getDeals = async (
   params?: DealsQueryParams,
 ): Promise<DealListItemDtoQueryResult> => {
-  const response = await api.get<DealListItemDtoQueryResult>("/api/Deals", {
-    params,
-  });
-  return response.data;
+  const key = JSON.stringify(params || {});
+  if (dealsPending[key]) return dealsPending[key];
+  const promise = api
+    .get<DealListItemDtoQueryResult>("/api/Deals", { params })
+    .then((response) => {
+      delete dealsPending[key];
+      return response.data;
+    })
+    .catch((err) => {
+      delete dealsPending[key];
+      throw err;
+    });
+  dealsPending[key] = promise;
+  return promise;
 };
 
 export const getDealById = async (id: number): Promise<DealDto> => {

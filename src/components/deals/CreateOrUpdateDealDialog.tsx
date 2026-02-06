@@ -131,6 +131,7 @@ export const CreateOrUpdateDealDialog: React.FC<CreateDealDialogProps> = ({
       <form
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
         onSubmit={handleSubmit}
+        autoComplete="off"
       >
         {/* Left column - 60% width */}
         <div className="space-y-4 md:col-span-1">

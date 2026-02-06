@@ -13,6 +13,24 @@ export async function proxyRequest(request: NextRequest, path: string) {
 
   const origin = request.headers.get("origin") || "";
 
+  // Handle preflight (CORS) locally at the proxy
+  if (request.method === "OPTIONS") {
+    const allowedOrigin = AllowedOriginsArray.includes(origin)
+      ? origin
+      : AllowedOriginsArray[0];
+
+    return new NextResponse(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": allowedOrigin,
+        "Access-Control-Allow-Methods":
+          "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Credentials": "true",
+      },
+    });
+  }
+
   const requestHeaders = new Headers();
   requestHeaders.set("Content-Type", "application/json");
 
