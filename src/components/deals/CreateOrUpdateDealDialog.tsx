@@ -8,8 +8,10 @@ import {
   createDeal,
   updateDeal,
   getDealById,
+  getCachedDealStatuses,
 } from "../../features/deals/dealsAPI";
 import { Dialog } from "../common/Dialog";
+import AutocompleteInput from "../common/AutocompleteInput";
 
 interface CreateDealDialogProps {
   open: boolean;
@@ -45,6 +47,18 @@ export const CreateOrUpdateDealDialog: React.FC<CreateDealDialogProps> = ({
   });
   const [isEdit, setIsEdit] = useState(false);
 
+  const [statuses, setStatuses] = useState<string[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    getCachedDealStatuses().then((data) => {
+      if (mounted) setStatuses(data || []);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   // Load deal data if editing
   useEffect(() => {
     if (dealId && open) {
@@ -76,8 +90,8 @@ export const CreateOrUpdateDealDialog: React.FC<CreateDealDialogProps> = ({
         aiBriefDescription: "",
         industry: "",
         status: "",
-        typeId: 2,
-        stateId: 0,
+        typeId: 3,
+        stateId: 1,
       });
     }
     // eslint-disable-next-line
@@ -203,12 +217,17 @@ export const CreateOrUpdateDealDialog: React.FC<CreateDealDialogProps> = ({
           </div>
           <div className="flex items-center gap-2">
             <label className="w-32 text-sm font-medium">Status</label>
-            <input
-              name="status"
-              value={form.status}
-              onChange={handleChange}
-              className="flex-1 border rounded px-2 py-1 bg-green-200 dark:bg-green-900 text-green-700 dark:text-green-300 border-gray-300 dark:border-gray-600"
-            />
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <AutocompleteInput
+                value={form.status || ""}
+                onChange={(v) => setForm((prev) => ({ ...prev, status: v }))}
+                suggestions={statuses}
+                placeholder="Type or select status..."
+                onSelect={(s) => setForm((prev) => ({ ...prev, status: s }))}
+                onEnter={(v) => setForm((prev) => ({ ...prev, status: v }))}
+                className="w-full border rounded px-2 py-1 bg-green-200 dark:bg-green-900 text-green-700 dark:text-green-300 border-gray-300 dark:border-gray-600"
+              />
+            </div>
           </div>
         </div>
         {/* Right column - 40% width */}

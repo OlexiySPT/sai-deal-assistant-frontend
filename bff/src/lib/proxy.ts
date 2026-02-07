@@ -10,11 +10,21 @@ export async function proxyRequest(request: NextRequest, path: string) {
   const url = new URL(request.url);
   const backendUrl = `${BACKEND_URL}/api/${path}${url.search}`;
   console.log(`Backend URL: ${backendUrl}`);
+  console.log(AllowedOriginsArray);
 
   const origin = request.headers.get("origin") || "";
 
   // Handle preflight (CORS) locally at the proxy
   if (request.method === "OPTIONS") {
+    // Log preflight info to help debug missing CORS headers
+    console.log("Proxy handling preflight OPTIONS", {
+      url: request.url,
+      origin,
+      allowedOrigins: AllowedOriginsArray,
+      acrm: request.headers.get("access-control-request-method"),
+      acrh: request.headers.get("access-control-request-headers"),
+    });
+
     const allowedOrigin = AllowedOriginsArray.includes(origin)
       ? origin
       : AllowedOriginsArray[0];

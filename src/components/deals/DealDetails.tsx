@@ -9,6 +9,7 @@ import EditButton from "../common/EditButton";
 import { CreateOrUpdateDealDialog } from "./CreateOrUpdateDealDialog";
 import AddButton from "../common/AddButton";
 import { DealTagsEditor } from "./DealTagsEditor";
+import { selectDealLoading } from "../../features/deals/dealsSlice";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -17,7 +18,7 @@ interface DealDetailsProps {
 export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const dispatch = useAppDispatch();
   const deal = useAppSelector(selectCurrentDealWithDependents);
-  const loading = useAppSelector(selectDealsLoading);
+  const loading = useAppSelector(selectDealLoading);
   const [showContactPersons, setShowContactPersons] = useState(false);
   const [rightPanelWidth, setRightPanelWidth] = useState(40);
   const [isDragging, setIsDragging] = useState(false);
@@ -71,12 +72,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
       };
     }
   }, [isDragging]);
-
-  useEffect(() => {
-    if (dealId) {
-      dispatch(fetchDealWithDependents(dealId));
-    }
-  }, [dispatch, dealId]);
 
   const handleEditClick = () => {
     setEditDialogOpen(true);
@@ -380,7 +375,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
       />
       {showTagsEditor && dealId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <DealTagsEditor dealId={dealId} onClose={handleTagsEditorClose}  />
+          <DealTagsEditor dealId={dealId} onClose={handleTagsEditorClose} />
         </div>
       )}
     </div>

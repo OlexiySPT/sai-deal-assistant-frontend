@@ -4,7 +4,9 @@ import {
   getExistingTags,
   addDealTag,
   deleteDealTag,
+  clearExistingTagsCache,
 } from "../../features/dealTags/dealTagsAPI";
+import AutocompleteInput from "../common/AutocompleteInput";
 
 interface DealTagsEditorProps {
   dealId: number;
@@ -18,10 +20,8 @@ export const DealTagsEditor: React.FC<DealTagsEditorProps> = ({
   const [tags, setTags] = useState<{ id: number; tag: string }[]>([]);
   const [existingTags, setExistingTags] = useState<string[]>([]);
   const [input, setInput] = useState("");
-  const [dropdown, setDropdown] = useState<string[]>([]);
-  const [dropdownIndex, setDropdownIndex] = useState<number>(-1);
   const [loading, setLoading] = useState(false);
-  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -34,24 +34,7 @@ export const DealTagsEditor: React.FC<DealTagsEditorProps> = ({
     });
     getExistingTags().then(setExistingTags);
   }, [dealId]);
-  useEffect(() => {
-    if (input) {
-      const filtered = existingTags.filter(
-        (t) =>
-          t.toLowerCase().includes(input.toLowerCase()) &&
-          !tags.some((tag) => tag.tag === t),
-      );
-      setDropdownVisible(true);
-      setDropdown(filtered);
-      setDropdownIndex(filtered.length > 0 ? 0 : -1);
-    } else {
-      const filtered = existingTags.filter(
-        (t) => !tags.some((tag) => tag.tag === t),
-      );
-      setDropdown(filtered);
-      setDropdownIndex(filtered.length > 0 ? 0 : -1);
-    }
-  }, [input, existingTags, tags]);
+
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
@@ -59,13 +42,26 @@ export const DealTagsEditor: React.FC<DealTagsEditorProps> = ({
   const handleAddTag = async (tag: string, closeDropdown = false) => {
     if (!tag.trim() || tags.some((t) => t.tag === tag)) return;
     setLoading(true);
-    const newTag = await addDealTag({ id: 0, tag, dealId });
-    setTags([...tags, { id: newTag.id, tag: newTag.tag! }]);
-    setInput("");
-    setLoading(false);
-    //if (closeDropdown) setDropdown([]);
-    if (closeDropdown) setDropdownVisible(false);
-    inputRef.current?.focus();
+    setError(null);
+    try {
+      const newTag = await addDealTag({ id: 0, tag, dealId });
+      setTags((prev) => [...prev, { id: newTag.id, tag: newTag.tag! }]);
+      // Update existing tags list so the suggestion set reflects the new tag immediately
+      setExistingTags((prev) => (newTag.tag ? [newTag.tag, ...prev] : prev));
+      // clear the cache so future calls will re-fetch if needed
+      try {
+        clearExistingTagsCache();
+      } catch (e) {
+        /* ignore */
+      }
+      setInput("");
+    } catch (err: any) {
+      console.error("Failed to add tag", err);
+      setError(err?.message || "Failed to add tag");
+    } finally {
+      setLoading(false);
+      inputRef.current?.focus();
+    }
   };
 
   const handleDeleteTag = async (id: number) => {
@@ -73,37 +69,6 @@ export const DealTagsEditor: React.FC<DealTagsEditorProps> = ({
     await deleteDealTag(id);
     setTags(tags.filter((t) => t.id !== id));
     setLoading(false);
-  };
-
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "ArrowDown" || e.key === "Down") {
-      e.preventDefault();
-      if (dropdown.length > 0) {
-        setDropdownVisible(true);
-        setDropdownIndex((prev) => (prev < dropdown.length - 1 ? prev + 1 : 0));
-      }
-      return;
-    }
-    if (e.key === "ArrowUp" || e.key === "Up") {
-      e.preventDefault();
-      if (dropdown.length > 0) {
-        setDropdownIndex((prev) => (prev > 0 ? prev - 1 : dropdown.length - 1));
-      }
-      return;
-    }
-    if (dropdown.length > 0 && e.key === "Enter" && dropdownIndex >= 0) {
-      e.preventDefault();
-      handleAddTag(dropdown[dropdownIndex], true);
-      return;
-    }
-    if (e.key === "Enter" && input.trim()) {
-      handleAddTag(input.trim(), true);
-      return;
-    }
-    if (e.key === "Escape") {
-      onClose();
-      return;
-    }
   };
 
   return (
@@ -125,29 +90,20 @@ export const DealTagsEditor: React.FC<DealTagsEditorProps> = ({
         ))}
       </div>
       <div className="flex items-center gap-2 mt-2">
-        <div className="relative" style={{ minWidth: 0, flex: 1 }}>
-          <input
-            ref={inputRef}
-            className="w-full border rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-            placeholder="Add or search tag..."
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <AutocompleteInput
+            inputRef={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleInputKeyDown}
-            disabled={loading}
+            onChange={(v) => setInput(v)}
+            suggestions={existingTags.filter(
+              (t) => !tags.some((tag) => tag.tag === t),
+            )}
+            placeholder="Add or search tag..."
+            onSelect={(s) => handleAddTag(s, true)}
+            onEnter={(v) => handleAddTag(v.trim(), true)}
+            className="w-full border rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
           />
-          {dropdown.length > 0 && dropdownVisible && (
-            <div className="absolute left-0 mt-1 w-48 z-10 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-lg max-h-40 overflow-y-auto">
-              {dropdown.map((tag, idx) => (
-                <div
-                  key={tag}
-                  className={`px-3 py-1 cursor-pointer text-sm ${dropdownIndex === idx ? "bg-purple-100 dark:bg-purple-800" : "hover:bg-purple-100 dark:hover:bg-purple-800"}`}
-                  onClick={() => handleAddTag(tag, true)}
-                >
-                  {tag}
-                </div>
-              ))}
-            </div>
-          )}
+          {error && <div className="text-red-600 text-sm mt-1">{error}</div>}
         </div>
         <button
           onClick={onClose}

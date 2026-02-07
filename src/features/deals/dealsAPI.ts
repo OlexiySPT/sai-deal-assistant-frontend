@@ -75,6 +75,7 @@ export interface DealsQueryParams {
   Name?: string;
   Description?: string;
   Industry?: string;
+  Status?: string;
   StateIds?: number | number[];
   TypeIds?: number | number[];
   SortBy?: string;
@@ -134,4 +135,21 @@ export const updateDeal = async (
 
 export const deleteDeal = async (id: number): Promise<void> => {
   await api.delete(`/api/Deals/${id}`);
+};
+
+// Simple in-memory cache for existing statuses
+let existingStatusesCache: { data: string[]; timestamp: number } | null = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+export const getCachedDealStatuses = async (): Promise<string[]> => {
+  const now = Date.now();
+  if (
+    existingStatusesCache &&
+    now - existingStatusesCache.timestamp < CACHE_DURATION
+  ) {
+    return existingStatusesCache.data;
+  }
+  const response = await api.get<string[]>("/api/Deals/statuses/cached");
+  existingStatusesCache = { data: response.data, timestamp: now };
+  return response.data;
 };
