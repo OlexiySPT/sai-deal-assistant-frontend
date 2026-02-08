@@ -6,6 +6,8 @@ import {
   selectDealsLoading,
 } from "../../features/deals/dealsSlice";
 import EditButton from "../common/EditButton";
+import EditableStringField from "../common/EditableStringField";
+import EditableMultilineStringField from "../common/EditableMultilineStringField";
 import { CreateOrUpdateDealDialog } from "./CreateOrUpdateDealDialog";
 import AddButton from "../common/AddButton";
 import { DealTagsEditor } from "./DealTagsEditor";
@@ -175,26 +177,33 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
         </div>
 
         {/* Description */}
-        {deal.description && (
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              Description
-            </h2>
-            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-              {deal.description}
-            </p>
-          </div>
-        )}
+        <div className="mb-6">
+          <EditableMultilineStringField
+            value={deal.description}
+            entity="Deal"
+            field="description"
+            id={deal.id}
+            validation="None"
+            label="Description"
+            Header="Description"
+            onUpdated={handleDealUpdated}
+            minRows={2}
+            maxRows={10}
+          />
+        </div>
 
         {/* Details Grid */}
-        {deal.industry && (
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-              Industry
-            </h3>
-            <p className="text-gray-900 dark:text-gray-100">{deal.industry}</p>
-          </div>
-        )}
+        <div className="mb-6">
+          <EditableStringField
+            value={deal.industry}
+            entity="Deal"
+            field="industry"
+            id={deal.id}
+            validation="None"
+            label="Industry"
+            onUpdated={handleDealUpdated}
+          />
+        </div>
 
         {/* AI Information */}
         {(deal.aiSearchInfo || deal.aiBriefDescription) && (

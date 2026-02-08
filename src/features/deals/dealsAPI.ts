@@ -12,6 +12,13 @@ export interface DealDto {
   status: string | null;
   typeId: number;
   stateId: number;
+  proposalAmount: number | null;
+  minClientAmount: number | null;
+  maxClientAmount: number | null;
+  currencyCode: string | null;
+  exchangeRate: number | null;
+  amountTypeId: number | null;
+  amountType: string | null;
 }
 
 export interface DealListItemDto {
@@ -22,6 +29,9 @@ export interface DealListItemDto {
   description: string | null;
   industry: string | null;
   createdAt: string;
+  proposalAmount: number | null;
+  currencyCode: string | null;
+  amountType: string | null;
 }
 
 export interface DealListItemDtoQueryResult {
@@ -43,6 +53,13 @@ export interface DealWithDependentsDto {
   contactPersons: any[] | null;
   events: any[] | null;
   tags: any[] | null;
+  proposalAmount: number | null;
+  minClientAmount: number | null;
+  maxClientAmount: number | null;
+  currencyCode: string | null;
+  exchangeRate: number | null;
+  amountTypeId: number | null;
+  amountType: string | null;
 }
 
 export interface CreateDealCommand {
@@ -56,6 +73,13 @@ export interface CreateDealCommand {
   status: string | null;
   typeId: number;
   stateId: number;
+  proposalAmount: number | null;
+  minClientAmount: number | null;
+  maxClientAmount: number | null;
+  currencyCode: string | null;
+  exchangeRate: number | null;
+  amountTypeId: number | null;
+  amountType: string | null;
 }
 
 export interface UpdateDealCommand {
@@ -69,6 +93,13 @@ export interface UpdateDealCommand {
   status: string | null;
   typeId: number;
   stateId: number;
+  proposalAmount: number | null;
+  minClientAmount: number | null;
+  maxClientAmount: number | null;
+  currencyCode: string | null;
+  exchangeRate: number | null;
+  amountTypeId: number | null;
+  amountType: string | null;
 }
 
 export interface DealsQueryParams {
@@ -86,12 +117,15 @@ export interface DealsQueryParams {
 }
 
 // API Functions
-const dealsPending: { [key: string]: Promise<DealListItemDtoQueryResult> } = {};
+const dealsPending: {
+  [key: string]: Promise<DealListItemDtoQueryResult> | undefined;
+} = {};
 export const getDeals = async (
   params?: DealsQueryParams,
 ): Promise<DealListItemDtoQueryResult> => {
   const key = JSON.stringify(params || {});
-  if (dealsPending[key]) return dealsPending[key];
+  const existing = dealsPending[key];
+  if (existing) return existing;
   const promise = api
     .get<DealListItemDtoQueryResult>("/api/Deals", { params })
     .then((response) => {
