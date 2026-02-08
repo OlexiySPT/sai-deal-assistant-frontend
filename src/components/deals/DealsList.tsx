@@ -11,11 +11,11 @@ import {
   loadAllEnums,
 } from "../../features/enums/enumsSlice";
 import type { DealsQueryParams } from "../../features/deals/dealsAPI";
-import { MultiSelect } from "../common/MultiSelect";
-import AutocompleteInput from "../common/AutocompleteInput";
+import { MultiSelect } from "../common/inputs/MultiSelect";
+import AutocompleteInput from "../common/inputs/AutocompleteInput";
 import { getCachedDealStatuses } from "../../features/deals/dealsAPI";
 import { CreateOrUpdateDealDialog } from "./CreateOrUpdateDealDialog";
-import AddButton from "../common/AddButton";
+import AddButton from "../common/buttons/AddButton";
 
 // Deal state icon component
 const DealStateIcon: React.FC<{ state: string | null }> = ({ state }) => {

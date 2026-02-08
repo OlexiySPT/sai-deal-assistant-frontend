@@ -11,7 +11,7 @@ import {
   getCachedDealStatuses,
 } from "../../features/deals/dealsAPI";
 import { Dialog } from "../common/Dialog";
-import AutocompleteInput from "../common/AutocompleteInput";
+import AutocompleteInput from "../common/inputs/AutocompleteInput";
 
 interface CreateDealDialogProps {
   open: boolean;

@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { UpdateStringFieldCommand } from "../../features/fieldUpdate/fieldUpdateAPI";
-import fieldUpdateAPI from "../../features/fieldUpdate/fieldUpdateAPI";
-import OkButton from "./OkButton";
-import CancelButton from "./CancelButton";
-import EditButton from "./EditButton";
+import { UpdateStringFieldCommand } from "../../../features/fieldUpdate/fieldUpdateAPI";
+import fieldUpdateAPI from "../../../features/fieldUpdate/fieldUpdateAPI";
+import OkButton from "../buttons/OkButton";
+import CancelButton from "../buttons/CancelButton";
+import EditButton from "../buttons/EditButton";
 
 interface EditableStringFieldProps {
   value: string | null | undefined;

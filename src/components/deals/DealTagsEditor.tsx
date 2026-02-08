@@ -6,7 +6,7 @@ import {
   deleteDealTag,
   clearExistingTagsCache,
 } from "../../features/dealTags/dealTagsAPI";
-import AutocompleteInput from "../common/AutocompleteInput";
+import AutocompleteInput from "../common/inputs/AutocompleteInput";
 
 interface DealTagsEditorProps {
   dealId: number;

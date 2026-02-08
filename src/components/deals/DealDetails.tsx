@@ -5,11 +5,11 @@ import {
   selectCurrentDealWithDependents,
   selectDealsLoading,
 } from "../../features/deals/dealsSlice";
-import EditButton from "../common/EditButton";
-import EditableStringField from "../common/EditableStringField";
-import EditableMultilineStringField from "../common/EditableMultilineStringField";
+import EditButton from "../common/buttons/EditButton";
+import EditableStringField from "../common/inputs/EditableStringField";
+import EditableMultilineStringField from "../common/inputs/EditableMultilineStringField";
 import { CreateOrUpdateDealDialog } from "./CreateOrUpdateDealDialog";
-import AddButton from "../common/AddButton";
+import AddButton from "../common/buttons/AddButton";
 import { DealTagsEditor } from "./DealTagsEditor";
 import { selectDealLoading } from "../../features/deals/dealsSlice";
 
@@ -184,11 +184,9 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             field="description"
             id={deal.id}
             validation="None"
-            label="Description"
-            Header="Description"
+            header="Description"
             onUpdated={handleDealUpdated}
-            minRows={2}
-            maxRows={10}
+            rows={5}
           />
         </div>
 
