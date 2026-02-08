@@ -5,6 +5,13 @@ import {
   selectCurrentDealWithDependents,
   selectDealsLoading,
 } from "../../features/deals/dealsSlice";
+import EditButton from "../common/EditButton";
+import EditableStringField from "../common/EditableStringField";
+import EditableMultilineStringField from "../common/EditableMultilineStringField";
+import { CreateOrUpdateDealDialog } from "./CreateOrUpdateDealDialog";
+import AddButton from "../common/AddButton";
+import { DealTagsEditor } from "./DealTagsEditor";
+import { selectDealLoading } from "../../features/deals/dealsSlice";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -13,11 +20,20 @@ interface DealDetailsProps {
 export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const dispatch = useAppDispatch();
   const deal = useAppSelector(selectCurrentDealWithDependents);
-  const loading = useAppSelector(selectDealsLoading);
+  const loading = useAppSelector(selectDealLoading);
   const [showContactPersons, setShowContactPersons] = useState(false);
   const [rightPanelWidth, setRightPanelWidth] = useState(40);
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [showTagsEditor, setShowTagsEditor] = useState(false);
+  const handleTagsEditClick = () => setShowTagsEditor(true);
+  const handleTagsEditorClose = () => {
+    setShowTagsEditor(false);
+    if (dealId) {
+      dispatch(fetchDealWithDependents(dealId)); // refresh tags
+    }
+  };
 
   useEffect(() => {
     const checkMobile = () => {
@@ -59,11 +75,18 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
     }
   }, [isDragging]);
 
-  useEffect(() => {
+  const handleEditClick = () => {
+    setEditDialogOpen(true);
+  };
+  const handleEditDialogClose = () => {
+    setEditDialogOpen(false);
+  };
+  const handleDealUpdated = () => {
+    setEditDialogOpen(false);
     if (dealId) {
       dispatch(fetchDealWithDependents(dealId));
     }
-  }, [dispatch, dealId]);
+  };
 
   if (!dealId) {
     return (
@@ -105,7 +128,25 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             {deal.name || "Untitled Deal"}
+            <EditButton title="Edit Deal" onClick={handleEditClick} />
           </h1>
+
+          {/* Tags */}
+          <div className="mb-1">
+            <div className="flex flex-wrap gap-1">
+              <span>Tags:</span>
+              {deal.tags?.map((tag: any) => (
+                <span
+                  key={tag.id}
+                  className="px-3 py-0 rounded-full bg-purple-200 dark:bg-purple-900 text-purple-700 dark:text-purple-300 text-sm"
+                >
+                  {tag.tag}
+                </span>
+              ))}
+              <EditButton title="Edit Tags" onClick={handleTagsEditClick} />
+            </div>
+          </div>
+
           {deal.url && (
             <a
               href={deal.url}
@@ -118,17 +159,17 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           )}
           <div className="flex gap-2">
             {deal.type && (
-              <span className="px-3 py-1 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm">
+              <span className="px-3 py-0 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm">
                 {deal.type}
               </span>
             )}
             {deal.state && (
-              <span className="px-3 py-1 rounded-full bg-blue-200 dark:bg-blue-800 text-blue-700 dark:text-blue-300 text-sm">
+              <span className="px-3 py-0 rounded-full bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-sm">
                 {deal.state}
               </span>
             )}
             {deal.status && (
-              <span className="px-3 py-1 rounded-full bg-green-200 dark:bg-green-800 text-green-700 dark:text-green-300 text-sm">
+              <span className="px-3 py-0 rounded-full bg-green-200 dark:bg-green-900 text-green-700 dark:text-green-300 text-sm">
                 {deal.status}
               </span>
             )}
@@ -136,26 +177,33 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
         </div>
 
         {/* Description */}
-        {deal.description && (
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              Description
-            </h2>
-            <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-              {deal.description}
-            </p>
-          </div>
-        )}
+        <div className="mb-6">
+          <EditableMultilineStringField
+            value={deal.description}
+            entity="Deal"
+            field="description"
+            id={deal.id}
+            validation="None"
+            label="Description"
+            Header="Description"
+            onUpdated={handleDealUpdated}
+            minRows={2}
+            maxRows={10}
+          />
+        </div>
 
         {/* Details Grid */}
-        {deal.industry && (
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-              Industry
-            </h3>
-            <p className="text-gray-900 dark:text-gray-100">{deal.industry}</p>
-          </div>
-        )}
+        <div className="mb-6">
+          <EditableStringField
+            value={deal.industry}
+            entity="Deal"
+            field="industry"
+            id={deal.id}
+            validation="None"
+            label="Industry"
+            onUpdated={handleDealUpdated}
+          />
+        </div>
 
         {/* AI Information */}
         {(deal.aiSearchInfo || deal.aiBriefDescription) && (
@@ -183,25 +231,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                 </p>
               </div>
             )}
-          </div>
-        )}
-
-        {/* Tags */}
-        {deal.tags && deal.tags.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              Tags
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {deal.tags.map((tag: any) => (
-                <span
-                  key={tag.id}
-                  className="px-3 py-1 rounded-full bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-300 text-sm"
-                >
-                  {tag.tag}
-                </span>
-              ))}
-            </div>
           </div>
         )}
 
@@ -257,57 +286,58 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
         className={`${isMobile ? "" : "overflow-y-auto"} md:pl-2 mt-6 md:mt-0`}
       >
         {/* Events */}
-        {deal.events && deal.events.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Events
             </h2>
-            <div className="space-y-3">
-              {deal.events.map((event: any) => (
-                <div
-                  key={event.id}
-                  className="p-4 bg-gray-50 dark:bg-gray-700 rounded"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="font-medium text-gray-900 dark:text-gray-100">
-                      {event.type || "Event"}
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(event.date).toLocaleDateString()}
-                    </div>
-                  </div>
-                  {event.agenda && (
-                    <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">
-                      <strong>Agenda:</strong> {event.agenda}
-                    </div>
-                  )}
-                  {event.result && (
-                    <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">
-                      <strong>Result:</strong> {event.result}
-                    </div>
-                  )}
-                  {event.contactPerson && (
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Contact: {event.contactPerson}
-                    </div>
-                  )}
-                  {event.notes && event.notes.length > 0 && (
-                    <div className="mt-2 pl-4 border-l-2 border-gray-300 dark:border-gray-600">
-                      {event.notes.map((note: any) => (
-                        <div
-                          key={note.id}
-                          className="text-sm text-gray-700 dark:text-gray-300 mb-1"
-                        >
-                          • {note.text}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
+            <AddButton />
           </div>
-        )}
+          <div className="space-y-3">
+            {deal.events?.map((event: any) => (
+              <div
+                key={event.id}
+                className="p-4 bg-gray-50 dark:bg-gray-700 rounded"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="font-medium text-gray-900 dark:text-gray-100">
+                    {event.type || "Event"}
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    {new Date(event.date).toLocaleDateString()}
+                  </div>
+                </div>
+                {event.agenda && (
+                  <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">
+                    <strong>Agenda:</strong> {event.agenda}
+                  </div>
+                )}
+                {event.result && (
+                  <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">
+                    <strong>Result:</strong> {event.result}
+                  </div>
+                )}
+                {event.contactPerson && (
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Contact: {event.contactPerson}
+                  </div>
+                )}
+                {event.notes && event.notes.length > 0 && (
+                  <div className="mt-2 pl-4 border-l-2 border-gray-300 dark:border-gray-600">
+                    {event.notes.map((note: any) => (
+                      <div
+                        key={note.id}
+                        className="text-sm text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        • {note.text}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Contact Persons - Mobile only (below events) */}
         {isMobile && deal.contactPersons && deal.contactPersons.length > 0 && (
@@ -346,6 +376,17 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           </div>
         )}
       </div>
+      <CreateOrUpdateDealDialog
+        open={editDialogOpen}
+        onClose={handleEditDialogClose}
+        onCreated={handleDealUpdated}
+        dealId={dealId}
+      />
+      {showTagsEditor && dealId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <DealTagsEditor dealId={dealId} onClose={handleTagsEditorClose} />
+        </div>
+      )}
     </div>
   );
 };
