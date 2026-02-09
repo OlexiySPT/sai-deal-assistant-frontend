@@ -126,10 +126,17 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
       >
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            {deal.name || "Untitled Deal"}
-            <EditButton title="Edit Deal" onClick={handleEditClick} />
-          </h1>
+          <div className="mb-2">
+            <EditableStringField
+              value={deal.name}
+              entity="Deal"
+              field="name"
+              id={deal.id}
+              validation="NotEmpty"
+              onUpdated={handleDealUpdated}
+              className="text-3xl font-bold text-gray-900 dark:text-gray-100"
+            />
+          </div>
 
           {/* Tags */}
           <div className="mb-1">
@@ -147,16 +154,16 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             </div>
           </div>
 
-          {deal.url && (
-            <a
-              href={deal.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 dark:text-blue-400 hover:underline text-sm mb-2 block"
-            >
-              {deal.url}
-            </a>
-          )}
+          <EditableStringField
+            value={deal.url}
+            entity="Deal"
+            field="url"
+            id={deal.id}
+            validation="Url"
+            label="Website"
+            onUpdated={handleDealUpdated}
+            className="mb-2"
+          />
           <div className="flex gap-2">
             {deal.type && (
               <span className="px-3 py-0 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm">
@@ -184,7 +191,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             field="description"
             id={deal.id}
             validation="None"
-            header="Description"
+            label="Description"
             onUpdated={handleDealUpdated}
             rows={5}
           />

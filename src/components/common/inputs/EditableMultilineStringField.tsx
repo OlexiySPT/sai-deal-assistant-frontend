@@ -12,7 +12,7 @@ interface EditableMultilineStringFieldProps {
   id: number;
   validation?: "None" | "NotNull" | "NotEmpty" | "Email" | "Url";
   onUpdated?: () => void;
-  header?: string;
+  label?: string;
   className?: string;
   rows?: number;
 }
@@ -24,7 +24,7 @@ export default function EditableMultilineStringField({
   id,
   validation = "None",
   onUpdated,
-  header,
+  label,
   className = "",
   rows = 2,
 }: EditableMultilineStringFieldProps) {
@@ -89,7 +89,7 @@ export default function EditableMultilineStringField({
           {/* Header line */}
           <div className="flex items-center justify-between mb-1">
             <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-              {header}:
+              {label}:
             </span>
             <div className="flex gap-1">
               <EditButton onClick={handleEdit} size="sm" aria-label="Edit" />
@@ -127,7 +127,7 @@ export default function EditableMultilineStringField({
             {/* Header line */}
             <div className="flex items-center justify-between mb-1  z-50 relative">
               <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-                {header}:
+                {label}:
               </span>
               <div className="flex gap-1">
                 <OkButton onClick={handleSave} size="sm" aria-label="Save" />
