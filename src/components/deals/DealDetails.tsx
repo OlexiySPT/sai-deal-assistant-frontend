@@ -7,11 +7,13 @@ import {
 } from "../../features/deals/dealsSlice";
 import EditButton from "../common/buttons/EditButton";
 import EditableStringField from "../common/inputs/EditableStringField";
+import AutocompleteEditableStringField from "../common/inputs/AutocompleteEditableStringField";
 import EditableMultilineStringField from "../common/inputs/EditableMultilineStringField";
 import { CreateOrUpdateDealDialog } from "./CreateOrUpdateDealDialog";
 import AddButton from "../common/buttons/AddButton";
 import { DealTagsEditor } from "./DealTagsEditor";
 import { selectDealLoading } from "../../features/deals/dealsSlice";
+import { getCachedDealStatuses } from "../../features/deals/dealsAPI";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -19,6 +21,17 @@ interface DealDetailsProps {
 
 export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const dispatch = useAppDispatch();
+  const [statusOptions, setStatusOptions] = useState<string[]>([]);
+  useEffect(() => {
+    let mounted = true;
+    getCachedDealStatuses().then((opts) => {
+      if (mounted) setStatusOptions(opts || []);
+      console.log;
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
   const deal = useAppSelector(selectCurrentDealWithDependents);
   const loading = useAppSelector(selectDealLoading);
   const [showContactPersons, setShowContactPersons] = useState(false);
@@ -162,6 +175,17 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             validation="Url"
             label="Website"
             onUpdated={handleDealUpdated}
+            className="mb-2"
+          />
+          <AutocompleteEditableStringField
+            value={deal.status}
+            entity="Deal"
+            field="status"
+            id={deal.id}
+            validation="None"
+            label="Status"
+            onUpdated={handleDealUpdated}
+            options={Array.isArray(statusOptions) ? statusOptions : []}
             className="mb-2"
           />
           <div className="flex gap-2">

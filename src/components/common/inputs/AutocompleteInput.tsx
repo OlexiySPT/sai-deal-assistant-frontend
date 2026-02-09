@@ -45,10 +45,11 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       return;
     }
 
+    const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
     const filtered = value
-      ? suggestions.filter((s) => s.toLowerCase().includes(value.toLowerCase()))
+      ? safeSuggestions.filter((s) => s.toLowerCase().includes(value.toLowerCase()))
       : showAllOnEmpty || (hasEditedRef.current && value === "")
-        ? suggestions
+        ? safeSuggestions
         : [];
 
     setDropdown(filtered);
@@ -63,18 +64,20 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
   }, [value, suggestions, showAllOnEmpty]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const safeDropdown = Array.isArray(dropdown) ? dropdown : [];
+    const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
     if (e.key === "ArrowDown" || e.key === "Down") {
       // mark that user interacted via keyboard
       initialMountRef.current = false;
       e.preventDefault();
-      if (dropdown.length > 0) {
+      if (safeDropdown.length > 0) {
         setDropdownVisible(true);
         const current = dropdownIndex;
         // Move down but do not wrap when reaching the last item
         const newIndex =
           current < 0
             ? 0
-            : current < dropdown.length - 1
+            : current < safeDropdown.length - 1
               ? current + 1
               : current;
         setDropdownIndex(newIndex);
@@ -85,9 +88,9 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
           ) as HTMLElement | null;
           el?.scrollIntoView({ block: "nearest" });
         });
-      } else if (suggestions.length > 0) {
+      } else if (safeSuggestions.length > 0) {
         // Open dropdown when user presses Down (even if input is empty and showAllOnEmpty is false)
-        setDropdown(suggestions);
+        setDropdown(safeSuggestions);
         const newIndex = 0;
         setDropdownIndex(newIndex);
         setDropdownVisible(true);

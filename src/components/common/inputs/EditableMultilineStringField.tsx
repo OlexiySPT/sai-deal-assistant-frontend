@@ -41,6 +41,7 @@ const fullScreenStyles: React.CSSProperties = {
   justifyContent: "flex-start",
   alignItems: "stretch",
 };
+
 export default function EditableMultilineStringField({
   value,
   entity,
