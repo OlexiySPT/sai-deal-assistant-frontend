@@ -5,6 +5,7 @@ import OkButton from "../buttons/OkButton";
 import CancelButton from "../buttons/CancelButton";
 import EditButton from "../buttons/EditButton";
 import AutocompleteInput from "./AutocompleteInput";
+import InputLabel from "./InputLabel";
 
 interface AutocompleteEditableStringFieldProps {
   value: string | null | undefined;
@@ -86,11 +87,7 @@ export default function AutocompleteEditableStringField({
   return (
     <div className={`relative w-full`}>
       <div className={`flex gap-2 items-start w-full ${className}`}>
-        {label && (
-          <span className="mt-2 mr-2 text-sm font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">
-            {label}:
-          </span>
-        )}
+        <InputLabel label={label} />
         <div className="flex-1 w-full">
           {!editMode ? (
             <div className="flex items-center w-full">
@@ -139,9 +136,11 @@ export default function AutocompleteEditableStringField({
                   className="input input-sm border rounded px-2 py-1 min-h-[32px] text-sm w-full z-50 relative"
                   value={inputValue}
                   onChange={setInputValue}
-                  options={Array.isArray(options) ? options : []}
-                  disabled={loading}
+                  suggestions={Array.isArray(options) ? options : []}
+                  showAllOnEmpty={true}
                   autoFocus
+                  onEnterPressed={handleSave}
+                  onEscapePressed={handleCancel}
                   onKeyDown={processKeyDown}
                 />
                 <OkButton

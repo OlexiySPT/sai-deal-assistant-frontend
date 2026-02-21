@@ -6,23 +6,27 @@ interface AutocompleteInputProps {
   suggestions: string[];
   placeholder?: string;
   onSelect?: (v: string) => void; // selection from list
-  onEnter?: (v: string) => void; // user pressed Enter
+  onEnter?: (v: string) => void; // user pressed Enter (legacy)
+  onEnterPressed?: (v: string) => void; // Enter pressed when dropdown is not visible
+  onEscapePressed?: () => void; // Escape pressed when dropdown is not visible
   className?: string;
   showAllOnEmpty?: boolean;
   inputRef?: React.RefObject<HTMLInputElement>;
 }
 
-export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
+function AutocompleteInput({
   value,
   onChange,
   suggestions,
   placeholder,
   onSelect,
   onEnter,
+  onEnterPressed,
+  onEscapePressed,
   className,
   showAllOnEmpty = false,
   inputRef,
-}) => {
+}: AutocompleteInputProps) {
   const [dropdown, setDropdown] = useState<string[]>([]);
   const [dropdownIndex, setDropdownIndex] = useState<number>(-1);
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -47,7 +51,9 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
 
     const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
     const filtered = value
-      ? safeSuggestions.filter((s) => s.toLowerCase().includes(value.toLowerCase()))
+      ? safeSuggestions.filter((s) =>
+          s.toLowerCase().includes(value.toLowerCase()),
+        )
       : showAllOnEmpty || (hasEditedRef.current && value === "")
         ? safeSuggestions
         : [];
@@ -149,6 +155,8 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
         setDropdown([]);
         setDropdownIndex(-1);
         setDropdownVisible(false);
+      } else if (!dropdownVisible && onEnterPressed) {
+        onEnterPressed(value);
       } else if (onEnter) {
         // For Enter without a highlighted dropdown item, similarly suppress reopen
         suppressReopenRef.current = true;
@@ -160,6 +168,9 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       return;
     }
     if (e.key === "Escape") {
+      if (!dropdownVisible && onEscapePressed) {
+        onEscapePressed();
+      }
       setDropdownVisible(false);
       return;
     }
@@ -225,6 +236,6 @@ export const AutocompleteInput: React.FC<AutocompleteInputProps> = ({
       )}
     </div>
   );
-};
+}
 
 export default AutocompleteInput;

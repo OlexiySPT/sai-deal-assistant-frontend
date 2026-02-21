@@ -13,63 +13,66 @@ interface MultiSelectProps {
   className?: string;
 }
 
-export const MultiSelect: React.FC<MultiSelectProps> = ({
+export function MultiSelect({
   options,
   selectedValues,
   onChange,
   placeholder = "Select...",
   className = "",
-}) => {
+}: MultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [pendingValues, setPendingValues] =
     useState<(number | string)[]>(selectedValues);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Sync pendingValues with selectedValues when closed
-  useEffect(() => {
-    if (!isOpen) setPendingValues(selectedValues);
-  }, [isOpen, selectedValues]);
+  useEffect(
+    function syncPending() {
+      if (!isOpen) setPendingValues(selectedValues);
+    },
+    [isOpen, selectedValues],
+  );
 
   // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+  useEffect(function setupClickOutside() {
+    function handleClickOutside(event: MouseEvent) {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
-    };
+    }
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggleOption = (id: number | string) => {
+  function toggleOption(id: number | string) {
     if (pendingValues.includes(id)) {
       setPendingValues(pendingValues.filter((val) => val !== id));
     } else {
       setPendingValues([...pendingValues, id]);
     }
-  };
+  }
 
-  const clearAll = () => {
+  function clearAll() {
     setPendingValues([]);
-  };
+  }
 
-  const applyFilter = () => {
+  function applyFilter() {
     onChange(pendingValues);
     setIsOpen(false);
-  };
+  }
 
-  const getDisplayText = () => {
+  function getDisplayText() {
     if (selectedValues.length === 0) return placeholder;
     if (selectedValues.length === 1) {
       const option = options.find((opt) => opt.id === selectedValues[0]);
       return option?.label || placeholder;
     }
     return `${selectedValues.length} selected`;
-  };
+  }
 
   return (
     <div ref={dropdownRef} className={`relative ${className}`}>
@@ -146,4 +149,4 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
       )}
     </div>
   );
-};
+}

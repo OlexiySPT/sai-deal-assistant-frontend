@@ -11,9 +11,10 @@ import AutocompleteEditableStringField from "../common/inputs/AutocompleteEditab
 import EditableMultilineStringField from "../common/inputs/EditableMultilineStringField";
 import { CreateOrUpdateDealDialog } from "./CreateOrUpdateDealDialog";
 import AddButton from "../common/buttons/AddButton";
-import { DealTagsEditor } from "./DealTagsEditor";
 import { selectDealLoading } from "../../features/deals/dealsSlice";
 import { getCachedDealStatuses } from "../../features/deals/dealsAPI";
+import AutocompleteStringListEditor from "../common/inputs/AutocompleteStringListEditor";
+import { getExistingTags } from "../../features/dealTags/dealTagsAPI";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -22,16 +23,7 @@ interface DealDetailsProps {
 export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const dispatch = useAppDispatch();
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
-  useEffect(() => {
-    let mounted = true;
-    getCachedDealStatuses().then((opts) => {
-      if (mounted) setStatusOptions(opts || []);
-      console.log;
-    });
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const [tagsOptions, setTagsOptions] = useState<string[]>([]);
   const deal = useAppSelector(selectCurrentDealWithDependents);
   const loading = useAppSelector(selectDealLoading);
   const [showContactPersons, setShowContactPersons] = useState(false);
@@ -39,14 +31,21 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [showTagsEditor, setShowTagsEditor] = useState(false);
-  const handleTagsEditClick = () => setShowTagsEditor(true);
-  const handleTagsEditorClose = () => {
-    setShowTagsEditor(false);
-    if (dealId) {
-      dispatch(fetchDealWithDependents(dealId)); // refresh tags
-    }
-  };
+
+  useEffect(() => {
+    let mounted = true;
+    getCachedDealStatuses().then((opts) => {
+      if (mounted) setStatusOptions(opts || []);
+      console.log;
+    });
+    getExistingTags().then((opts) => {
+      if (mounted) setTagsOptions(opts || []);
+      console.log;
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -95,7 +94,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
     setEditDialogOpen(false);
   };
   const handleDealUpdated = () => {
-    setEditDialogOpen(false);
     if (dealId) {
       dispatch(fetchDealWithDependents(dealId));
     }
@@ -153,18 +151,13 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
 
           {/* Tags */}
           <div className="mb-1">
-            <div className="flex flex-wrap gap-1">
-              <span>Tags:</span>
-              {deal.tags?.map((tag: any) => (
-                <span
-                  key={tag.id}
-                  className="px-3 py-0 rounded-full bg-purple-200 dark:bg-purple-900 text-purple-700 dark:text-purple-300 text-sm"
-                >
-                  {tag.tag}
-                </span>
-              ))}
-              <EditButton title="Edit Tags" onClick={handleTagsEditClick} />
-            </div>
+            <AutocompleteStringListEditor
+              value={deal.tags ? deal.tags.map((t: any) => t.tag) : []}
+              suggestions={tagsOptions} // Provide tag suggestions if available
+              onChange={() => {}}
+              className="flex flex-wrap gap-1"
+              label="Tags"
+            />
           </div>
 
           <EditableStringField
@@ -411,11 +404,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
         onCreated={handleDealUpdated}
         dealId={dealId}
       />
-      {showTagsEditor && dealId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <DealTagsEditor dealId={dealId} onClose={handleTagsEditorClose} />
-        </div>
-      )}
     </div>
   );
 };

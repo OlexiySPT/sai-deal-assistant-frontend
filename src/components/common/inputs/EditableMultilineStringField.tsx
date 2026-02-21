@@ -5,6 +5,7 @@ import OkButton from "../buttons/OkButton";
 import CancelButton from "../buttons/CancelButton";
 import EditButton from "../buttons/EditButton";
 import FullScreenButton from "../buttons/FullScreenButton";
+import InputLabel from "./InputLabel";
 
 interface EditableMultilineStringFieldProps {
   value: string | null | undefined;
@@ -115,9 +116,7 @@ export default function EditableMultilineStringField({
         <>
           {/* Header line */}
           <div className="flex items-center justify-between mb-1">
-            <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-              {label}:
-            </span>
+            <InputLabel label={label} />
             <div className="flex gap-1">
               <EditButton onClick={handleEdit} size="sm" aria-label="Edit" />
             </div>

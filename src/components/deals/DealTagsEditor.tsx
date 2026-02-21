@@ -7,6 +7,7 @@ import {
   clearExistingTagsCache,
 } from "../../features/dealTags/dealTagsAPI";
 import AutocompleteInput from "../common/inputs/AutocompleteInput";
+import CloseButton from "../common/buttons/CloseButton";
 
 interface DealTagsEditorProps {
   dealId: number;
@@ -105,12 +106,7 @@ export const DealTagsEditor: React.FC<DealTagsEditorProps> = ({
           />
           {error && <div className="text-red-600 text-sm mt-1">{error}</div>}
         </div>
-        <button
-          onClick={onClose}
-          className="ml-2 px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 text-sm whitespace-nowrap"
-        >
-          Close
-        </button>
+        <CloseButton onClick={onClose} className="ml-2" />
       </div>
     </div>
   );

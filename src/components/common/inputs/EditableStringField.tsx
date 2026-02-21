@@ -4,6 +4,7 @@ import fieldUpdateAPI from "../../../features/fieldUpdate/fieldUpdateAPI";
 import OkButton from "../buttons/OkButton";
 import CancelButton from "../buttons/CancelButton";
 import EditButton from "../buttons/EditButton";
+import InputLabel from "./InputLabel";
 
 interface EditableStringFieldProps {
   value: string | null | undefined;
@@ -83,11 +84,7 @@ export default function EditableStringField({
   return (
     <div className={`relative w-full`}>
       <div className={`flex gap-2 items-start w-full ${className}`}>
-        {label && (
-          <span className="mt-2 mr-2 text-sm font-semibold text-gray-600 dark:text-gray-400 whitespace-nowrap">
-            {label}:
-          </span>
-        )}
+        <InputLabel label={label} />
         <div className="flex-1 w-full">
           {!editMode ? (
             <div className="flex items-center w-full">
@@ -104,7 +101,8 @@ export default function EditableStringField({
                   let isUrl = false;
                   try {
                     const url = new URL(value);
-                    isUrl = url.protocol === "http:" || url.protocol === "https:";
+                    isUrl =
+                      url.protocol === "http:" || url.protocol === "https:";
                   } catch {}
                   if (isUrl) {
                     return (
@@ -157,7 +155,10 @@ export default function EditableStringField({
                 />
               </div>
               {error && (
-                <div className="absolute left-0 w-full z-50 bg-red-100 dark:bg-red-800 border border-red-400 text-red-700 dark:text-red-300 text-xs rounded px-3 py-1 shadow-lg animate-fade-in" style={{ top: 'calc(100% + 0.5rem)' }}>
+                <div
+                  className="absolute left-0 w-full z-50 bg-red-100 dark:bg-red-800 border border-red-400 text-red-700 dark:text-red-300 text-xs rounded px-3 py-1 shadow-lg animate-fade-in"
+                  style={{ top: "calc(100% + 0.5rem)" }}
+                >
                   {error}
                 </div>
               )}
