@@ -145,7 +145,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
               id={deal.id}
               validation="NotEmpty"
               onUpdated={handleDealUpdated}
-              className="text-3xl font-bold text-gray-900 dark:text-gray-100"
+              size="lg"
             />
           </div>
 
@@ -168,7 +168,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             validation="Url"
             label="Website"
             onUpdated={handleDealUpdated}
-            className="mb-2"
+            size="sm"
           />
           <AutocompleteEditableStringField
             value={deal.status}
@@ -179,7 +179,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             label="Status"
             onUpdated={handleDealUpdated}
             options={Array.isArray(statusOptions) ? statusOptions : []}
-            className="mb-2"
+            size="sm"
           />
           <div className="flex gap-2">
             {deal.type && (

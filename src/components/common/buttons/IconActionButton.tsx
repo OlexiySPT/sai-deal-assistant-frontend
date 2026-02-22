@@ -1,7 +1,8 @@
 import React from "react";
+import { getHeightBySize } from "../sizeUtils";
 
 export interface IconActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl";
   colorClass: string; // e.g. 'green' or 'red'
   icon: React.ReactNode;
   ariaLabel: string;
@@ -27,9 +28,9 @@ export function IconActionButton({
     <button
       type="button"
       {...props}
-      className={`inline-flex items-center justify-center rounded p-1 focus:outline-none transition-colors ${
-        size === "sm" ? "w-7 h-7 text-base" : "w-8 h-8 text-lg"
-      } ${colorStyles} disabled:opacity-50 disabled:pointer-events-none ${className}`}
+      className={`inline-flex items-center justify-center rounded p-1 focus:outline-none transition-colors aspect-square ${
+        colorStyles
+      } w-${getHeightBySize(size)} h-${getHeightBySize(size)} disabled:opacity-50 disabled:pointer-events-none ${className}`}
       aria-label={ariaLabel}
     >
       {icon}
