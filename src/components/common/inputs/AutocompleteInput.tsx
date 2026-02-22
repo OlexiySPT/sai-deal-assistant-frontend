@@ -182,11 +182,12 @@ function AutocompleteInput({
   };
 
   return (
-    <div className="relative" style={{ minWidth: 0 }}>
+    <div className="relative w-full" style={{ minWidth: 0 }}>
       <input
         ref={inputRef}
         className={className}
         placeholder={placeholder}
+        autoFocus
         value={value}
         onChange={(e) => {
           // mark that the user has edited the input (typing)

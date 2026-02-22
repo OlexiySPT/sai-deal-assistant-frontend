@@ -145,7 +145,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
               id={deal.id}
               validation="NotEmpty"
               onUpdated={handleDealUpdated}
-              size="lg"
+              size="xl"
             />
           </div>
 

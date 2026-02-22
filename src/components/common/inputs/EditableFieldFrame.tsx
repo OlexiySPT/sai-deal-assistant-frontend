@@ -19,6 +19,8 @@ export interface EditableFieldFrameChildProps {
   error: string | null;
   setError: React.Dispatch<React.SetStateAction<string | null>>;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  handleCancel: () => void;
+  handleSave: () => void;
 }
 
 interface EditableFieldFrameProps {
@@ -128,6 +130,8 @@ export default function EditableFieldFrame({
     error,
     setError,
     handleKeyDown,
+    handleCancel,
+    handleSave,
   };
 
   return (
