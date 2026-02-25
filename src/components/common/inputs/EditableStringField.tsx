@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import EditableFieldFrame, {
   EditableFieldFrameChildProps,
-} from "./EditableFieldFrame";
+} from "./frames/EditableFieldFrame";
 import { SizeType } from "../sizeUtils";
 
 interface EditableStringFieldProps {

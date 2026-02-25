@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import EditButton from "../buttons/EditButton";
-import OkButton from "../buttons/OkButton";
-import CancelButton from "../buttons/CancelButton";
-import InputLabel from "./InputLabel";
-import { getHeightBySize, SizeType } from "../sizeUtils";
+import EditButton from "../../buttons/EditButton";
+import OkButton from "../../buttons/OkButton";
+import CancelButton from "../../buttons/CancelButton";
+import InputLabel from "../InputLabel";
+import { getHeightBySize, SizeType } from "../../sizeUtils";
 
 interface EditablePartFrameBaseProps {
   label?: string;

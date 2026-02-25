@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import EditablePartFrame from "./EditablePartFrame";
 import {
   UpdateStringFieldCommand,
   UpdateNumericFieldCommand,
   UpdateDateFieldCommand,
-} from "../../../features/fieldUpdate/fieldUpdateAPI";
-import fieldUpdateAPI from "../../../features/fieldUpdate/fieldUpdateAPI";
-import { getHeightBySize, SizeType } from "../sizeUtils";
+} from "../../../../features/fieldUpdate/fieldUpdateAPI";
+import fieldUpdateAPI from "../../../../features/fieldUpdate/fieldUpdateAPI";
+import { getHeightBySize, SizeType } from "../../sizeUtils";
 import EditablePartFrameBase from "./EditablePartFrameBase";
 
 export interface EditableFieldFrameChildProps {
