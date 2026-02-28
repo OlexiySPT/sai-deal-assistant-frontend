@@ -1,12 +1,78 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useAppDispatch } from "../app/hooks";
 import { ActivityBar } from "../components/layout/ActivityBar";
 import { DealsList } from "../components/deals/DealsList";
 import { DealDetails } from "../components/deals/DealDetails";
+import { fetchDealWithDependents } from "../features/deals/dealsSlice";
 
 export const Home = () => {
+  const dispatch = useAppDispatch();
+
   const [selectedDealId, setSelectedDealId] = useState<number | null>(null);
+  // separate state used to trigger actual detail fetches (debounced when navigating via keyboard)
+  const [selectedDealForFetch, setSelectedDealForFetch] = useState<
+    number | null
+  >(null);
+  const fetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [leftPanelWidth, setLeftPanelWidth] = useState(20); // percentage
   const [activeView, setActiveView] = useState<string | null>("deals");
+
+  const handleSelectDeal = (id: number, opts?: { immediate?: boolean }) => {
+    setSelectedDealId(id);
+    // update URL will be handled by effect that watches selectedDealId
+    if (fetchTimerRef.current) {
+      clearTimeout(fetchTimerRef.current);
+      fetchTimerRef.current = null;
+    }
+
+    if (opts?.immediate) {
+      setSelectedDealForFetch(id);
+      dispatch(fetchDealWithDependents(id));
+    } else {
+      // debounce fetch to avoid rapid fetches when navigating with keyboard
+      fetchTimerRef.current = setTimeout(() => {
+        setSelectedDealForFetch(id);
+        dispatch(fetchDealWithDependents(id));
+        fetchTimerRef.current = null;
+      }, 300);
+    }
+  };
+
+  // Initialize selected deal from URL and keep in sync with history
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("dealId");
+    if (id) {
+      setSelectedDealId(Number(id));
+      // fetch immediately on initial load from URL
+      setSelectedDealForFetch(Number(id));
+      dispatch(fetchDealWithDependents(Number(id)));
+    }
+
+    const handlePop = () => {
+      const p = new URLSearchParams(window.location.search);
+      const d = p.get("dealId");
+      const newId = d ? Number(d) : null;
+      setSelectedDealId(newId);
+      if (newId) {
+        setSelectedDealForFetch(newId);
+        dispatch(fetchDealWithDependents(newId));
+      }
+    };
+
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, [dispatch]);
+
+  // Push selected deal into URL when it changes
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (selectedDealId) params.set("dealId", String(selectedDealId));
+    else params.delete("dealId");
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, "", newUrl);
+  }, [selectedDealId]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,7 +112,7 @@ export const Home = () => {
           >
             <DealsList
               selectedDealId={selectedDealId}
-              onSelectDeal={setSelectedDealId}
+              onSelectDeal={handleSelectDeal}
             />
           </div>
 
@@ -73,7 +139,7 @@ export const Home = () => {
           <div className="md:hidden border-b border-gray-200 dark:border-gray-700">
             <DealsList
               selectedDealId={selectedDealId}
-              onSelectDeal={setSelectedDealId}
+              onSelectDeal={handleSelectDeal}
             />
           </div>
         )}
