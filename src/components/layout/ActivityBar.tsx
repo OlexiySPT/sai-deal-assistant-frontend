@@ -15,7 +15,7 @@ export const ActivityBar: React.FC<ActivityBarProps> = ({
   };
 
   return (
-    <div className="w-12 bg-gray-800 dark:bg-gray-950 flex flex-col items-center py-2 border-r border-gray-700 dark:border-gray-800">
+    <div className="h-full w-12 bg-gray-800 dark:bg-gray-950 flex flex-col items-center py-2 border-r border-gray-700 dark:border-gray-800">
       {/* Deals Icon */}
       <button
         onClick={() => handleIconClick("deals")}
@@ -25,6 +25,21 @@ export const ActivityBar: React.FC<ActivityBarProps> = ({
             : "text-gray-400 hover:text-white"
         }`}
         title="Deals"
+      >
+        {/* Plain Dollar Sign */}
+        <span className="text-2xl font-bold">$</span>
+      </button>
+
+      {/* Placeholder for future icons */}
+
+      <button
+        onClick={() => handleIconClick("search")}
+        className={`w-12 h-12 flex items-center justify-center transition-colors mt-1 ${
+          activeView === "search"
+            ? "text-white border-l-2 border-blue-500 bg-gray-700"
+            : "text-gray-400 hover:text-white"
+        }`}
+        title="Search"
       >
         <svg
           className="w-6 h-6"
@@ -36,27 +51,10 @@ export const ActivityBar: React.FC<ActivityBarProps> = ({
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={2}
-            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
           />
         </svg>
       </button>
-
-      {/* Placeholder for future icons */}
-      {/* 
-      <button
-        onClick={() => handleIconClick("search")}
-        className={`w-12 h-12 flex items-center justify-center transition-colors mt-1 ${
-          activeView === "search"
-            ? "text-white border-l-2 border-blue-500 bg-gray-700"
-            : "text-gray-400 hover:text-white"
-        }`}
-        title="Search"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </button>
-      */}
 
       {/* Settings at the bottom */}
       <div className="flex-1" />
