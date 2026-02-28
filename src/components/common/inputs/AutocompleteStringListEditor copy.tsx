@@ -3,9 +3,6 @@ import AutocompleteInput from "./AutocompleteInput";
 import CloseButton from "../buttons/CloseButton";
 import EditButton from "../buttons/EditButton";
 import InputLabel from "./InputLabel";
-import EditablePartFrame, {
-  EditablePartFrameChildProps,
-} from "./frames/EditablePartFrame";
 
 interface AutocompleteStringListEditorProps {
   value: string[];
@@ -27,8 +24,6 @@ export default function AutocompleteStringListEditor({
 }: AutocompleteStringListEditorProps) {
   const [input, setInput] = useState("");
   const [tags, setTags] = useState<string[]>(value);
-  const [addedTags, setAddedTags] = useState<string[]>();
-  const [deletedTags, setDeletedTags] = useState<string[]>();
   const [error, setError] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -45,7 +40,6 @@ export default function AutocompleteStringListEditor({
     const trimmed = tag.trim();
     if (!trimmed || tags.includes(trimmed)) return;
     const newTags = [...tags, trimmed];
-    setAddedTags((prev) => (prev ? [...prev, trimmed] : [trimmed]));
     setTags(newTags);
     setInput("");
     setError(null);
@@ -55,7 +49,6 @@ export default function AutocompleteStringListEditor({
   function handleDeleteTag(tag: string) {
     const newTags = tags.filter((t) => t !== tag);
     setTags(newTags);
-    setDeletedTags((prev) => (prev ? [...prev, tag] : [tag]));
     setError(null);
     onChange(newTags);
   }
@@ -70,11 +63,6 @@ export default function AutocompleteStringListEditor({
     }
   }
 
-  function handleSave() {
-    // In this component, changes are immediately propagated via onChange, so save just exits edit mode
-    setEditMode(false);
-    onClose?.();
-  }
   function handleEdit(): void {
     setEditMode(true);
   }
@@ -89,6 +77,7 @@ export default function AutocompleteStringListEditor({
     const tagsDivClass = `flex flex-wrap gap-2 mb-2 ${className} ${editMode ? "z-50 relative" : ""}`;
     return (
       <div className={tagsDivClass}>
+        <InputLabel label={label} />
         {tags.map((tag) => (
           <span key={tag} className={tagClass}>
             {tag}
@@ -104,47 +93,42 @@ export default function AutocompleteStringListEditor({
             )}
           </span>
         ))}
+        {editMode || (
+          <EditButton onClick={handleEdit} size="sm" aria-label="Edit" />
+        )}
       </div>
     );
   }
+  if (!editMode) {
+    return drawTags();
+  }
+
   return (
-    <EditablePartFrame
-      readView={function (props: EditablePartFrameChildProps): React.ReactNode {
-        return <>{drawTags()}</>;
-      }}
-      editView={function (props: EditablePartFrameChildProps): React.ReactNode {
-        return (
-          <>
-            {drawTags()}
-            <div
-              className="absolute left-0 w-fulltext-xs rounded px-3 py-1 shadow-lg animate-fade-in"
-              style={{ top: "calc(100% + 0.5rem)" }}
-            >
-              <AutocompleteInput
-                inputRef={inputRef}
-                value={input}
-                onChange={setInput}
-                suggestions={suggestions.filter((t) => !tags.includes(t))}
-                placeholder="Add or search tag..."
-                onSelect={handleAddTag}
-                onEnter={handleAddTag}
-                onEscapePressed={handleClose}
-                onKeyDown={handleInputKeyDown}
-                className=" margin-left-sm w-full border rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-              />
-            </div>
-          </>
-        );
-      }}
-      onSave={function (): void {
-        handleSave();
-      }}
-      onCancel={function (): void {
-        handleClose();
-      }}
-      label={label}
-      className={className}
-      size={"sm"}
-    />
+    <>
+      {/* Overlay to block all other interactions */}
+      <div
+        className="fixed inset-0 z-40 bg-black bg-opacity-10"
+        style={{ pointerEvents: "auto" }}
+      />
+      {drawTags()}
+      <div className="flex items-center gap-2 mt-2 z-50 relative">
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <AutocompleteInput
+            inputRef={inputRef}
+            value={input}
+            onChange={setInput}
+            suggestions={suggestions.filter((t) => !tags.includes(t))}
+            placeholder="Add or search tag..."
+            onSelect={handleAddTag}
+            onEnter={handleAddTag}
+            onEscapePressed={handleClose}
+            onKeyDown={handleInputKeyDown}
+            className=" margin-left-sm w-full border rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+          />
+          {error && <div className="text-red-600 text-sm mt-1">{error}</div>}
+        </div>
+        <CloseButton onClick={handleClose} className="ml-2" />
+      </div>
+    </>
   );
 }

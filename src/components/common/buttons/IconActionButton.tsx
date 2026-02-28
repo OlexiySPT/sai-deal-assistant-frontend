@@ -1,15 +1,15 @@
 import React from "react";
-import { getHeightBySize } from "../sizeUtils";
+import { getHeightBySize, SizeType } from "../sizeUtils";
 
 export interface IconActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  size?: "sm" | "md" | "lg" | "xl" | "2xl";
+  size?: SizeType;
   colorClass: string; // e.g. 'green' or 'red'
   icon: React.ReactNode;
   ariaLabel: string;
 }
 
 export function IconActionButton({
-  size = "md",
+  size = "sm",
   colorClass,
   icon,
   ariaLabel,

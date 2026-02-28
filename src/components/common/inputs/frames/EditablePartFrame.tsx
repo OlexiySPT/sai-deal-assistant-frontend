@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getHeightBySize, SizeType } from "../../sizeUtils";
+import { SizeType } from "../../sizeUtils";
 import EditablePartFrameBase from "./EditablePartFrameBase";
 
 export interface EditablePartFrameChildProps {
@@ -10,9 +10,9 @@ export interface EditablePartFrameChildProps {
 interface EditablePartFrameProps {
   label?: string;
   className?: string;
+  size?: SizeType;
   readView: (props: EditablePartFrameChildProps) => React.ReactNode;
   editView: (props: EditablePartFrameChildProps) => React.ReactNode;
-  size?: SizeType;
   onSave: () => void;
   onCancel?: () => void;
 }

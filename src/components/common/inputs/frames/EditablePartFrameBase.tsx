@@ -3,13 +3,18 @@ import EditButton from "../../buttons/EditButton";
 import OkButton from "../../buttons/OkButton";
 import CancelButton from "../../buttons/CancelButton";
 import InputLabel from "../InputLabel";
-import { getHeightBySize, SizeType } from "../../sizeUtils";
+import {
+  getControlHeightBySize,
+  getHeightBySize,
+  SizeType,
+} from "../../sizeUtils";
 
 interface EditablePartFrameBaseProps {
   label?: string;
   className?: string;
   size?: SizeType;
   editMode: boolean;
+  error?: string | null;
   readView: () => React.ReactNode;
   editView: () => React.ReactNode;
   handleEdit: () => void;
@@ -24,14 +29,14 @@ export default function EditablePartFrameBase({
   editView,
   size = "sm",
   editMode,
+  error,
   handleEdit,
   handleCancel,
   handleSave,
 }: EditablePartFrameBaseProps) {
   return (
     <div
-      className={`flex items-center gap-2 w-full text-${size} h-[${getHeightBySize(size)}px] ${className}`}
-      style={{ minHeight: getHeightBySize(size) }}
+      className={`flex items-center gap-2 w-full text-${size} ${className} h-${getControlHeightBySize(size)}`}
     >
       {label && <InputLabel label={label} />}
       <div className="flex-1 w-full">
@@ -60,6 +65,14 @@ export default function EditablePartFrameBase({
                 aria-label="Cancel"
               />
             </div>
+            {error && (
+              <div
+                className="absolute left-0 w-full z-50 bg-red-100 dark:bg-red-800 border border-red-400 text-red-700 dark:text-red-300 text-xs rounded px-3 py-1 shadow-lg animate-fade-in"
+                style={{ top: "calc(100% + 0.5rem)" }}
+              >
+                {error}
+              </div>
+            )}
           </div>
         )}
       </div>

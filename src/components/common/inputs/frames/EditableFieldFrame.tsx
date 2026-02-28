@@ -5,7 +5,7 @@ import {
   UpdateDateFieldCommand,
 } from "../../../../features/fieldUpdate/fieldUpdateAPI";
 import fieldUpdateAPI from "../../../../features/fieldUpdate/fieldUpdateAPI";
-import { getHeightBySize, SizeType } from "../../sizeUtils";
+import { SizeType } from "../../sizeUtils";
 import EditablePartFrameBase from "./EditablePartFrameBase";
 
 export interface EditableFieldFrameChildProps {
@@ -134,6 +134,7 @@ export default function EditableFieldFrame({
   return (
     <EditablePartFrameBase
       editMode={editMode}
+      error={error}
       label={label}
       className={className}
       size={size}
