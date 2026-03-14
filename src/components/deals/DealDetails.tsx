@@ -14,7 +14,11 @@ import AddButton from "../common/buttons/AddButton";
 import { selectDealLoading } from "../../features/deals/dealsSlice";
 import { getCachedDealStatuses } from "../../features/deals/dealsAPI";
 import AutocompleteStringListEditor from "../common/inputs/AutocompleteStringListEditor";
-import { getExistingTags } from "../../features/dealTags/dealTagsAPI";
+import {
+  addDealTag,
+  deleteDealTag,
+  getExistingTags,
+} from "../../features/dealTags/dealTagsAPI";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -153,8 +157,10 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           <div className="mb-1">
             <AutocompleteStringListEditor
               value={deal.tags ? deal.tags.map((t: any) => t.tag) : []}
-              suggestions={tagsOptions} // Provide tag suggestions if available
-              onChange={() => {}}
+              suggestions={tagsOptions}
+              editMode={true}
+              onAdd={(tag) => addDealTag({ dealId: deal.id, tag })}
+              onDelete={(tag) => deleteDealTag({ dealId: deal.id, tag })}
               className="flex flex-wrap gap-1"
               label="Tags"
             />

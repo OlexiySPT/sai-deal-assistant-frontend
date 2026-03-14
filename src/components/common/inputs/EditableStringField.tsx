@@ -51,14 +51,14 @@ export default function EditableStringField({
               href={value}
               target="_blank"
               rel="noopener noreferrer"
-              className={`text-blue-600 hover:underline px-2 py-1 bg-transparent w-full block truncate`}
+              className="text-blue-600 hover:underline px-2 py-1 bg-transparent w-full block truncate"
             >
               {value}
             </a>
           );
         }
         return (
-          <span className={`px-2 py-1 bg-transparent w-full block truncate`}>
+          <span className="px-2 py-1 bg-transparent w-full block truncate">
             {value}
           </span>
         );
@@ -71,7 +71,7 @@ export default function EditableStringField({
       }: EditableFieldFrameChildProps): React.ReactNode {
         return (
           <input
-            className={"input border rounded px-2 py-1 w-full block truncate"}
+            className="input border rounded px-2 py-1 w-full block truncate"
             type="text"
             value={inputValue as string}
             onChange={(e) => setInputValue(e.target.value)}

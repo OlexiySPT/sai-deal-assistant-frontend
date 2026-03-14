@@ -1,18 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import AutocompleteInput from "./AutocompleteInput";
-import CloseButton from "../buttons/CloseButton";
-import EditButton from "../buttons/EditButton";
 import InputLabel from "./InputLabel";
-import EditablePartFrame, {
-  EditablePartFrameChildProps,
-} from "./frames/EditablePartFrame";
+import AddButton from "../buttons/AddButton";
+import OkButton from "../buttons/OkButton";
+import CancelButton from "../buttons/CancelButton";
 
 interface AutocompleteStringListEditorProps {
   value: string[];
   suggestions: string[];
   editMode: boolean;
-  onChange: (tags: string[]) => void;
-  onClose?: () => void;
+  onDelete: (tag: string) => void;
+  onAdd: (tag: string) => void;
   className?: string;
   label?: string;
 }
@@ -20,17 +18,15 @@ interface AutocompleteStringListEditorProps {
 export default function AutocompleteStringListEditor({
   value,
   suggestions,
-  onChange,
-  onClose,
+  onDelete,
+  onAdd,
   className = "",
   label = "",
 }: AutocompleteStringListEditorProps) {
   const [input, setInput] = useState("");
   const [tags, setTags] = useState<string[]>(value);
-  const [addedTags, setAddedTags] = useState<string[]>();
-  const [deletedTags, setDeletedTags] = useState<string[]>();
   const [error, setError] = useState<string | null>(null);
-  const [editMode, setEditMode] = useState(false);
+  const [addMode, setAddMode] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -38,88 +34,72 @@ export default function AutocompleteStringListEditor({
   }, [value]);
 
   useEffect(() => {
-    if (editMode) inputRef.current?.focus();
-  }, [editMode]);
+    if (addMode) inputRef.current?.focus();
+  }, [addMode]);
 
   function handleAddTag(tag: string) {
     const trimmed = tag.trim();
     if (!trimmed || tags.includes(trimmed)) return;
     const newTags = [...tags, trimmed];
-    setAddedTags((prev) => (prev ? [...prev, trimmed] : [trimmed]));
     setTags(newTags);
     setInput("");
     setError(null);
-    onChange(newTags);
+    onAdd(trimmed);
+    setAddMode(false);
   }
 
   function handleDeleteTag(tag: string) {
     const newTags = tags.filter((t) => t !== tag);
     setTags(newTags);
-    setDeletedTags((prev) => (prev ? [...prev, tag] : [tag]));
     setError(null);
-    onChange(newTags);
+    onDelete(tag);
   }
 
   function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       e.preventDefault();
       handleAddTag(input);
-    } else if (e.key === "Escape" && onClose) {
+    } else if (e.key === "Escape") {
       e.preventDefault();
-      onClose();
+      setAddMode(false);
     }
   }
 
-  function handleSave() {
-    // In this component, changes are immediately propagated via onChange, so save just exits edit mode
-    setEditMode(false);
-    onClose?.();
-  }
-  function handleEdit(): void {
-    setEditMode(true);
+  function handleAdd(): void {
+    setInput("");
+    setAddMode(true);
   }
 
   function handleClose(): void {
-    setEditMode(false);
-    onClose?.();
+    setAddMode(false);
   }
-  function drawTags() {
-    const tagClass =
-      "flex items-center px-1 rounded-md bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm";
-    const tagsDivClass = `flex flex-wrap gap-2 mb-2 ${className} ${editMode ? "z-50 relative" : ""}`;
-    return (
+
+  const tagClass =
+    "flex items-center px-1 rounded-md bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm";
+  const tagsDivClass = `flex flex-wrap gap-2 mb-2 ${className}`;
+  return (
+    <>
       <div className={tagsDivClass}>
+        {label && <InputLabel label={label} />}
         {tags.map((tag) => (
           <span key={tag} className={tagClass}>
             {tag}
-            {editMode ? (
-              <button
-                onClick={() => handleDeleteTag(tag)}
-                className="ml-1 text-xs text-gray-400 hover:text-red-500"
-              >
-                ×
-              </button>
-            ) : (
-              <span className="w-3"></span>
-            )}
+            <button
+              onClick={() => handleDeleteTag(tag)}
+              className="ml-1 text-xs text-gray-400 hover:text-red-500"
+            >
+              ×
+            </button>
           </span>
         ))}
-      </div>
-    );
-  }
-  return (
-    <EditablePartFrame
-      readView={function (props: EditablePartFrameChildProps): React.ReactNode {
-        return <>{drawTags()}</>;
-      }}
-      editView={function (props: EditablePartFrameChildProps): React.ReactNode {
-        return (
+        {addMode ? (
           <>
-            {drawTags()}
+            {/* Overlay to block all other interactions */}
             <div
-              className="absolute left-0 w-fulltext-xs rounded px-3 py-1 shadow-lg animate-fade-in"
-              style={{ top: "calc(100% + 0.5rem)" }}
-            >
+              className="fixed inset-0 z-40 bg-black bg-opacity-10"
+              style={{ pointerEvents: "auto" }}
+            />
+            <div className="z-50 relative flex items-center gap-1">
               <AutocompleteInput
                 inputRef={inputRef}
                 value={input}
@@ -129,22 +109,24 @@ export default function AutocompleteStringListEditor({
                 onSelect={handleAddTag}
                 onEnter={handleAddTag}
                 onEscapePressed={handleClose}
-                onKeyDown={handleInputKeyDown}
-                className=" margin-left-sm w-full border rounded px-2 py-1 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                showAllOnEmpty={true}
+                className="h-7 border rounded px-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600"
+              />
+              <OkButton
+                onClick={() => handleAddTag(input)}
+                disabled={!input.trim() || tags.includes(input.trim())}
+                className="h-7 px-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded"
+              />
+              <CancelButton
+                onClick={handleClose}
+                className="h-7 px-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded"
               />
             </div>
           </>
-        );
-      }}
-      onSave={function (): void {
-        handleSave();
-      }}
-      onCancel={function (): void {
-        handleClose();
-      }}
-      label={label}
-      className={className}
-      size={"sm"}
-    />
+        ) : (
+          <AddButton onClick={handleAdd} />
+        )}
+      </div>
+    </>
   );
 }
