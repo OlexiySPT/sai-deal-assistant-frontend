@@ -19,6 +19,8 @@ import {
   deleteDealTag,
   getExistingTags,
 } from "../../features/dealTags/dealTagsAPI";
+import { EnumValue, getEnumValues } from "../../features/enums/enumsAPI";
+import DropdownEditableField from "../common/inputs/DropdownEditableField";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -27,6 +29,8 @@ interface DealDetailsProps {
 export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const dispatch = useAppDispatch();
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
+  const [typesOptions, setTypesOptions] = useState<any[]>([]);
+  const [stateOptions, setStateOptions] = useState<any[]>([]);
   const [tagsOptions, setTagsOptions] = useState<string[]>([]);
   const deal = useAppSelector(selectCurrentDealWithDependents);
   const loading = useAppSelector(selectDealLoading);
@@ -40,11 +44,15 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
     let mounted = true;
     getCachedDealStatuses().then((opts) => {
       if (mounted) setStatusOptions(opts || []);
-      console.log;
+    });
+    getEnumValues("dealType").then((opts) => {
+      if (mounted) setTypesOptions(opts || []);
+    });
+    getEnumValues("dealState").then((opts) => {
+      if (mounted) setStateOptions(opts || []);
     });
     getExistingTags().then((opts) => {
       if (mounted) setTagsOptions(opts || []);
-      console.log;
     });
     return () => {
       mounted = false;
@@ -188,21 +196,42 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             size="sm"
           />
           <div className="flex gap-2">
-            {deal.type && (
-              <span className="px-3 py-0 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm">
-                {deal.type}
-              </span>
-            )}
-            {deal.state && (
-              <span className="px-3 py-0 rounded-full bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-sm">
-                {deal.state}
-              </span>
-            )}
-            {deal.status && (
-              <span className="px-3 py-0 rounded-full bg-green-200 dark:bg-green-900 text-green-700 dark:text-green-300 text-sm">
-                {deal.status}
-              </span>
-            )}
+            <DropdownEditableField
+              value={deal.typeId}
+              entity="Deal"
+              field="typeId"
+              id={deal.id}
+              validation="NotNull"
+              label="Type"
+              onUpdated={handleDealUpdated}
+              size="sm"
+              options={
+                Array.isArray(typesOptions)
+                  ? typesOptions.map((opt) => ({
+                      id: opt.Id,
+                      value: opt.Type,
+                    }))
+                  : []
+              }
+            />
+            <DropdownEditableField
+              value={deal.stateId}
+              entity="Deal"
+              field="stateId"
+              id={deal.id}
+              validation="NotNull"
+              label="State"
+              onUpdated={handleDealUpdated}
+              size="sm"
+              options={
+                Array.isArray(stateOptions)
+                  ? stateOptions.map((opt) => ({
+                      id: opt.Id,
+                      value: opt.State,
+                    }))
+                  : []
+              }
+            />
           </div>
         </div>
 

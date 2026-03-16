@@ -48,8 +48,8 @@ export interface DealWithDependentsDto {
   aiBriefDescription: string | null;
   industry: string | null;
   status: string | null;
-  type: string | null;
-  state: string | null;
+  typeId: number;
+  stateId: number;
   contactPersons: any[] | null;
   events: any[] | null;
   tags: any[] | null;

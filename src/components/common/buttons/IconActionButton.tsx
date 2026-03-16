@@ -1,5 +1,9 @@
 import React from "react";
-import { getHeightBySize, SizeType } from "../sizeUtils";
+import {
+  getControlHeightBySize,
+  getHeightBySize,
+  SizeType,
+} from "../sizeUtils";
 
 export interface IconActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: SizeType;
@@ -30,7 +34,7 @@ export function IconActionButton({
       {...props}
       className={`inline-flex items-center justify-center rounded p-1 focus:outline-none transition-colors aspect-square ${
         colorStyles
-      } w-${getHeightBySize(size)} h-${getHeightBySize(size)} disabled:opacity-50 disabled:pointer-events-none ${className}`}
+      } w-${getControlHeightBySize(size)} h-${getControlHeightBySize(size)} disabled:opacity-50 disabled:pointer-events-none ${className}`}
       aria-label={ariaLabel}
     >
       {icon}

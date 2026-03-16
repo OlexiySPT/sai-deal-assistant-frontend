@@ -3,7 +3,7 @@ export type SizeType = "sm" | "md" | "lg" | "xl" | "2xl";
 export function getHeightBySize(size?: SizeType) {
   switch (size) {
     case "sm":
-      return 7;
+      return 6;
     case "md":
       return 8;
     case "lg":
@@ -13,14 +13,14 @@ export function getHeightBySize(size?: SizeType) {
     case "2xl":
       return 11;
     default:
-      return 7;
+      return 6;
   }
 }
 
 export function getControlHeightBySize(size?: SizeType) {
   switch (size) {
     case "sm":
-      return 8;
+      return 7;
     case "md":
       return 12;
     case "lg":

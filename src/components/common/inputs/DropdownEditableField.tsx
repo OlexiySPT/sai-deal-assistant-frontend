@@ -1,23 +1,22 @@
-import React, { useState } from "react";
+import React from "react";
 import EditableFieldFrame, {
   EditableFieldFrameChildProps,
 } from "./frames/EditableFieldFrame";
 import { getControlHeightBySize, SizeType } from "../sizeUtils";
-import AutocompleteInput from "./AutocompleteInput";
 
-interface AutocompleteEditableStringFieldProps {
-  value: string | null | undefined;
+interface DropdownEditableFieldProps {
+  value: number | null | undefined;
   entity: string;
   field: string;
   id: number;
-  validation?: "None" | "NotNull" | "NotEmpty" | "Email" | "Url";
+  validation?: "None" | "NotNull";
   onUpdated?: () => void;
   label?: string;
   size?: SizeType;
-  options: string[];
+  options: Array<{ id: number; value: string }>;
 }
 
-export default function AutocompleteEditableStringField({
+export default function DropdownEditableField({
   value,
   entity,
   field,
@@ -27,7 +26,7 @@ export default function AutocompleteEditableStringField({
   label,
   size = "sm",
   options,
-}: AutocompleteEditableStringFieldProps) {
+}: DropdownEditableFieldProps) {
   return (
     <EditableFieldFrame
       value={value}
@@ -39,12 +38,13 @@ export default function AutocompleteEditableStringField({
       label={label}
       size={size}
       readView={function (): React.ReactNode {
-        if (!value) {
+        const selected = options.find((opt) => opt.id === value);
+        if (!selected) {
           return <span className="text-gray-400">(empty)</span>;
         }
         return (
-          <span className={`px-2 py-1 bg-transparent w-full block truncate`}>
-            {value}
+          <span className="px-2 py-1 bg-transparent w-full block truncate">
+            {selected.value}
           </span>
         );
       }}
@@ -55,15 +55,20 @@ export default function AutocompleteEditableStringField({
         handleSave,
       }: EditableFieldFrameChildProps): React.ReactNode {
         return (
-          <AutocompleteInput
+          <select
             className={`h-${getControlHeightBySize(size)} input border rounded px-2 py-1 w-full block truncate`}
-            value={inputValue}
-            onChange={setInputValue}
-            suggestions={Array.isArray(options) ? options : []}
-            showAllOnEmpty={true}
-            onEnterPressed={handleSave}
-            onEscapePressed={handleCancel}
-          />
+            value={inputValue ?? ""}
+            onChange={(e) => setInputValue(Number(e.target.value))}
+          >
+            {validation === "NotNull" ? null : (
+              <option value="">(empty)</option>
+            )}
+            {options.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {opt.value}
+              </option>
+            ))}
+          </select>
         );
       }}
     />
