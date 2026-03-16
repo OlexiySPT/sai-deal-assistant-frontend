@@ -7,9 +7,10 @@ import {
 } from "../../features/deals/dealsSlice";
 import EditButton from "../common/buttons/EditButton";
 import EditableStringField from "../common/inputs/EditableStringField";
+import EditableNumberField from "../common/inputs/EditableNumberField";
 import AutocompleteEditableStringField from "../common/inputs/AutocompleteEditableStringField";
 import EditableMultilineStringField from "../common/inputs/EditableMultilineStringField";
-import { CreateOrUpdateDealDialog } from "./CreateOrUpdateDealDialog";
+import { CreateDealDialog } from "./CreateDealDialog";
 import AddButton from "../common/buttons/AddButton";
 import { selectDealLoading } from "../../features/deals/dealsSlice";
 import { getCachedDealStatuses } from "../../features/deals/dealsAPI";
@@ -31,6 +32,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
   const [typesOptions, setTypesOptions] = useState<any[]>([]);
   const [stateOptions, setStateOptions] = useState<any[]>([]);
+  const [amountTypeOptions, setAmountTypeOptions] = useState<any[]>([]);
   const [tagsOptions, setTagsOptions] = useState<string[]>([]);
   const deal = useAppSelector(selectCurrentDealWithDependents);
   const loading = useAppSelector(selectDealLoading);
@@ -50,6 +52,9 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
     });
     getEnumValues("dealState").then((opts) => {
       if (mounted) setStateOptions(opts || []);
+    });
+    getEnumValues("amountType").then((opts) => {
+      if (mounted) setAmountTypeOptions(opts || []);
     });
     getExistingTags().then((opts) => {
       if (mounted) setTagsOptions(opts || []);
@@ -161,16 +166,54 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             />
           </div>
 
-          {/* Tags */}
-          <div className="mb-1">
-            <AutocompleteStringListEditor
-              value={deal.tags ? deal.tags.map((t: any) => t.tag) : []}
-              suggestions={tagsOptions}
-              editMode={true}
-              onAdd={(tag) => addDealTag({ dealId: deal.id, tag })}
-              onDelete={(tag) => deleteDealTag({ dealId: deal.id, tag })}
-              className="flex flex-wrap gap-1"
-              label="Tags"
+          <div className="flex gap-2">
+            <EditableNumberField
+              value={deal.proposalAmount}
+              entity="Deal"
+              field="proposalAmount"
+              id={deal.id}
+              validation="None"
+              label="Amount"
+              onUpdated={handleDealUpdated}
+              decimalAccuracy={0}
+              thousandsSeparator={true}
+            />
+            <EditableStringField
+              value={deal.currencyCode}
+              entity="Deal"
+              field="currencyCode"
+              id={deal.id}
+              validation="NotEmpty"
+              onUpdated={handleDealUpdated}
+            />
+            <DropdownEditableField
+              value={deal.typeId}
+              entity="Deal"
+              field="typeId"
+              id={deal.id}
+              validation="NotNull"
+              label=""
+              onUpdated={handleDealUpdated}
+              size="sm"
+              options={
+                Array.isArray(amountTypeOptions)
+                  ? amountTypeOptions.map((opt) => ({
+                      id: opt.Id,
+                      value: opt.Type,
+                    }))
+                  : []
+              }
+            />
+            <AutocompleteEditableStringField
+              value={deal.status}
+              entity="Deal"
+              field="status"
+              id={deal.id}
+              validation="None"
+              label="Status"
+              onUpdated={handleDealUpdated}
+              options={Array.isArray(statusOptions) ? statusOptions : []}
+              size="sm"
             />
           </div>
 
@@ -182,17 +225,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             validation="Url"
             label="Website"
             onUpdated={handleDealUpdated}
-            size="sm"
-          />
-          <AutocompleteEditableStringField
-            value={deal.status}
-            entity="Deal"
-            field="status"
-            id={deal.id}
-            validation="None"
-            label="Status"
-            onUpdated={handleDealUpdated}
-            options={Array.isArray(statusOptions) ? statusOptions : []}
             size="sm"
           />
           <div className="flex gap-2">
@@ -234,7 +266,18 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             />
           </div>
         </div>
-
+        {/* Tags */}
+        <div className="mb-1">
+          <AutocompleteStringListEditor
+            value={deal.tags ? deal.tags.map((t: any) => t.tag) : []}
+            suggestions={tagsOptions}
+            editMode={true}
+            onAdd={(tag) => addDealTag({ dealId: deal.id, tag })}
+            onDelete={(tag) => deleteDealTag({ dealId: deal.id, tag })}
+            className="flex flex-wrap gap-1"
+            label="Tags"
+          />
+        </div>
         {/* Description */}
         <div className="mb-6">
           <EditableMultilineStringField
@@ -261,7 +304,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             onUpdated={handleDealUpdated}
           />
         </div>
-
         {/* AI Information */}
         {(deal.aiSearchInfo || deal.aiBriefDescription) && (
           <div className="mb-6">
@@ -433,7 +475,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           </div>
         )}
       </div>
-      <CreateOrUpdateDealDialog
+      <CreateDealDialog
         open={editDialogOpen}
         onClose={handleEditDialogClose}
         onCreated={handleDealUpdated}

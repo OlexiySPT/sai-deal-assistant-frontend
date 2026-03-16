@@ -20,7 +20,7 @@ interface CreateDealDialogProps {
   dealId?: number | null; // If provided, dialog is in edit mode
 }
 
-export const CreateOrUpdateDealDialog: React.FC<CreateDealDialogProps> = ({
+export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
   open,
   onClose,
   onCreated,

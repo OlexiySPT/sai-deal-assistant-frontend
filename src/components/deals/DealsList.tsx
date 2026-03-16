@@ -14,7 +14,7 @@ import type { DealsQueryParams } from "../../features/deals/dealsAPI";
 import { MultiSelect } from "../common/inputs/MultiSelect";
 import AutocompleteInput from "../common/inputs/AutocompleteInput";
 import { getCachedDealStatuses } from "../../features/deals/dealsAPI";
-import { CreateOrUpdateDealDialog } from "./CreateOrUpdateDealDialog";
+import { CreateDealDialog } from "./CreateDealDialog";
 import AddButton from "../common/buttons/AddButton";
 
 // Deal state icon component
@@ -546,7 +546,7 @@ export const DealsList: React.FC<DealsListProps> = ({
           </div>
         </div>
       </div>
-      <CreateOrUpdateDealDialog
+      <CreateDealDialog
         open={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
         onCreated={handleDealCreated}
