@@ -19,8 +19,13 @@ export interface EditableFieldFrameChildProps {
   handleCancel: () => void;
   handleSave: () => void;
 }
+export enum EditableFieldValueType {
+  String,
+  Number,
+  Date,
+}
 
-interface EditableFieldFrameProps {
+export interface EditableFieldFrameProps {
   label?: string;
   value: any;
   entity: string;
@@ -31,6 +36,7 @@ interface EditableFieldFrameProps {
   className?: string;
   readView: (props: EditableFieldFrameChildProps) => React.ReactNode;
   editView: (props: EditableFieldFrameChildProps) => React.ReactNode;
+  valueType: EditableFieldValueType;
   size?: SizeType;
 }
 
@@ -42,6 +48,7 @@ export default function EditableFieldFrame({
   validation = "None",
   onUpdated,
   label,
+  valueType,
   className = "",
   readView,
   editView,
@@ -56,30 +63,34 @@ export default function EditableFieldFrame({
     setLoading(true);
     setError(null);
     try {
-      if (typeof value === "number") {
-        await fieldUpdateAPI.updateNumeric({
-          entity,
-          field,
-          id,
-          value: parseFloat(inputValue as string),
-          notNull: validation === "NotNull",
-        } as UpdateNumericFieldCommand);
-      } else if ((value as any) instanceof Date) {
-        await fieldUpdateAPI.updateDate({
-          entity,
-          field,
-          id,
-          value: inputValue,
-          notNull: validation === "NotNull",
-        } as UpdateDateFieldCommand);
-      } else {
-        await fieldUpdateAPI.updateString({
-          entity,
-          field,
-          id,
-          value: inputValue,
-          validation,
-        } as UpdateStringFieldCommand);
+      switch (valueType) {
+        case EditableFieldValueType.Number:
+          await fieldUpdateAPI.updateNumeric({
+            entity,
+            field,
+            id,
+            value: parseFloat(inputValue as string),
+            notNull: validation === "NotNull",
+          } as UpdateNumericFieldCommand);
+          break;
+        case EditableFieldValueType.Date:
+          await fieldUpdateAPI.updateDate({
+            entity,
+            field,
+            id,
+            value: inputValue,
+            notNull: validation === "NotNull",
+          } as UpdateDateFieldCommand);
+          break;
+        default:
+          await fieldUpdateAPI.updateString({
+            entity,
+            field,
+            id,
+            value: inputValue,
+            validation,
+          } as UpdateStringFieldCommand);
+          break;
       }
       if (onUpdated) onUpdated();
     } catch (err: any) {

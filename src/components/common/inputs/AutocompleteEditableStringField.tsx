@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import EditableFieldFrame, {
   EditableFieldFrameChildProps,
+  EditableFieldValueType,
 } from "./frames/EditableFieldFrame";
 import { getControlHeightBySize, SizeType } from "../sizeUtils";
 import AutocompleteInput from "./AutocompleteInput";
@@ -38,6 +39,7 @@ export default function AutocompleteEditableStringField({
       onUpdated={onUpdated}
       label={label}
       size={size}
+      valueType={EditableFieldValueType.String}
       readView={function (): React.ReactNode {
         if (!value) {
           return <span className="text-gray-400">(empty)</span>;

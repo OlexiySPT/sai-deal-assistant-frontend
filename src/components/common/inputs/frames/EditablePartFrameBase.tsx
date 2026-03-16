@@ -55,7 +55,10 @@ export default function EditablePartFrameBase({
               className="fixed inset-0 z-40 bg-black bg-opacity-10"
               style={{ pointerEvents: "auto" }}
             />
-            <div className="flex w-full gap-1 z-50 relative">
+            <div
+              className="flex w-full gap-1 z-50 relative"
+              style={{ position: "relative" }}
+            >
               {/* Edit part*/}
               {editView()}
               <OkButton onClick={handleSave} size={size} aria-label="Save" />
@@ -64,15 +67,15 @@ export default function EditablePartFrameBase({
                 size={size}
                 aria-label="Cancel"
               />
+              {error && (
+                <div
+                  className="absolute left-0 w-full bg-red-100 dark:bg-red-800 border border-red-400 text-red-700 dark:text-red-300 text-xs rounded px-3 py-1 shadow-lg animate-fade-in"
+                  style={{ top: "calc(100% + 0.5rem)", pointerEvents: "auto" }}
+                >
+                  {error}
+                </div>
+              )}
             </div>
-            {error && (
-              <div
-                className="absolute left-0 w-full z-50 bg-red-100 dark:bg-red-800 border border-red-400 text-red-700 dark:text-red-300 text-xs rounded px-3 py-1 shadow-lg animate-fade-in"
-                style={{ top: "calc(100% + 0.5rem)" }}
-              >
-                {error}
-              </div>
-            )}
           </div>
         )}
       </div>

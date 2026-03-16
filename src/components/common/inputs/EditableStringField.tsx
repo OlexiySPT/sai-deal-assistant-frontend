@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import EditableFieldFrame, {
   EditableFieldFrameChildProps,
+  EditableFieldValueType,
 } from "./frames/EditableFieldFrame";
 import { getControlHeightBySize, SizeType } from "../sizeUtils";
 
@@ -35,6 +36,7 @@ export default function EditableStringField({
       onUpdated={onUpdated}
       label={label}
       size={size}
+      valueType= {EditableFieldValueType.String}
       readView={function (): React.ReactNode {
         if (!value) {
           return <span className="text-gray-400">(empty)</span>;

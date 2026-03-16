@@ -189,12 +189,11 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             <DropdownEditableField
               value={deal.typeId}
               entity="Deal"
-              field="typeId"
+              field="amountTypeId"
               id={deal.id}
               validation="NotNull"
               label=""
               onUpdated={handleDealUpdated}
-              size="sm"
               options={
                 Array.isArray(amountTypeOptions)
                   ? amountTypeOptions.map((opt) => ({
@@ -204,18 +203,17 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                   : []
               }
             />
-            <AutocompleteEditableStringField
-              value={deal.status}
-              entity="Deal"
-              field="status"
-              id={deal.id}
-              validation="None"
-              label="Status"
-              onUpdated={handleDealUpdated}
-              options={Array.isArray(statusOptions) ? statusOptions : []}
-              size="sm"
-            />
           </div>
+          <AutocompleteEditableStringField
+            value={deal.status}
+            entity="Deal"
+            field="status"
+            id={deal.id}
+            validation="None"
+            label="Status"
+            onUpdated={handleDealUpdated}
+            options={Array.isArray(statusOptions) ? statusOptions : []}
+          />
 
           <EditableStringField
             value={deal.url}
