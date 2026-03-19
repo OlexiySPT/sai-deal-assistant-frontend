@@ -1,4 +1,5 @@
 import React from "react";
+import { button } from "../../cva/button.cva";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary";
@@ -11,15 +12,9 @@ export default function Button({
   className,
   ...props
 }: ButtonProps) {
-  const baseStyles = "px-4 py-2 rounded focus:outline-none";
-  const variantStyles =
-    variant === "primary"
-      ? "bg-blue-500 text-white hover:bg-blue-600"
-      : "bg-gray-500 text-white hover:bg-gray-600";
-
   return (
     <button
-      className={`${baseStyles} ${variantStyles} ${className}`}
+      className={`${button({ colorClass: variant === "primary" ? "blue" : "grey", size: "md" })} ${className}`}
       {...props}
     >
       {children}

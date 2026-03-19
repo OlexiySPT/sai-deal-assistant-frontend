@@ -1,4 +1,5 @@
-export type SizeType = "sm" | "md" | "lg" | "xl" | "2xl";
+export type SizeType = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+export type ColorClassType = "grey" | "green" | "red" | "blue";
 
 export function getHeightBySize(size?: SizeType) {
   switch (size) {

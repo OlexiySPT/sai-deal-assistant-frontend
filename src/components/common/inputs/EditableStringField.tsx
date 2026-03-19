@@ -3,7 +3,9 @@ import EditableFieldFrame, {
   EditableFieldFrameChildProps,
   EditableFieldValueType,
 } from "./frames/EditableFieldFrame";
-import { getControlHeightBySize, SizeType } from "../sizeUtils";
+import { getControlHeightBySize, SizeType } from "../StylingUtil";
+import { text } from "../../cva/text.cva";
+import { input } from "../../cva/input.cva";
 
 interface EditableStringFieldProps {
   value: string | null | undefined;
@@ -36,10 +38,12 @@ export default function EditableStringField({
       onUpdated={onUpdated}
       label={label}
       size={size}
-      valueType= {EditableFieldValueType.String}
+      valueType={EditableFieldValueType.String}
       readView={function (): React.ReactNode {
         if (!value) {
-          return <span className="text-gray-400">(empty)</span>;
+          return (
+            <span className={text({ style: "value", size })}>(empty)</span>
+          );
         }
         // URL detection
         let isUrl = false;
@@ -53,17 +57,13 @@ export default function EditableStringField({
               href={value}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:underline px-2 py-1 bg-transparent w-full block truncate"
+              className={text({ style: "url", size })}
             >
               {value}
             </a>
           );
         }
-        return (
-          <span className="px-2 py-1 bg-transparent w-full block truncate">
-            {value}
-          </span>
-        );
+        return <div className={text({ style: "value", size })}>{value}</div>;
       }}
       editView={function ({
         inputValue,
@@ -73,7 +73,7 @@ export default function EditableStringField({
       }: EditableFieldFrameChildProps): React.ReactNode {
         return (
           <input
-            className={`h-${getControlHeightBySize(size)} input border rounded px-2 py-1 w-full block truncate`}
+            className={input({ size })}
             type="text"
             value={inputValue as string}
             onChange={(e) => setInputValue(e.target.value)}

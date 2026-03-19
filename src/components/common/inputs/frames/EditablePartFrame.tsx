@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { SizeType } from "../../sizeUtils";
+import { SizeType } from "../../StylingUtil";
 import EditablePartFrameBase from "./EditablePartFrameBase";
 
 export interface EditablePartFrameChildProps {

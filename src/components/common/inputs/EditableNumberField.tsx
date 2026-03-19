@@ -3,7 +3,9 @@ import EditableFieldFrame, {
   EditableFieldFrameChildProps,
   EditableFieldValueType,
 } from "./frames/EditableFieldFrame";
-import { getControlHeightBySize, SizeType } from "../sizeUtils";
+import { getControlHeightBySize, SizeType } from "../StylingUtil";
+import { input } from "../../cva/input.cva";
+import { text } from "../../cva/text.cva";
 
 interface EditableNumberFieldProps {
   value: number | null | undefined;
@@ -56,10 +58,12 @@ export default function EditableNumberField({
       valueType={EditableFieldValueType.Number}
       readView={function (): React.ReactNode {
         if (value === null || value === undefined || isNaN(value)) {
-          return <span className="text-gray-400">(empty)</span>;
+          return (
+            <span className={text({ style: "value", size })}>(empty)</span>
+          );
         }
         return (
-          <span className="px-2 py-1 bg-transparent w-full block truncate">
+          <span className={text({ style: "value", size })}>
             {formatNumber(value, decimalAccuracy, thousandsSeparator)}
           </span>
         );
@@ -72,7 +76,7 @@ export default function EditableNumberField({
       }: EditableFieldFrameChildProps): React.ReactNode {
         return (
           <input
-            className={`h-${getControlHeightBySize(size)} input border rounded px-2 py-1 w-full block truncate hide-number-spin`} // Add custom class
+            className={`${input({ size })} hide-number-spin`} // Add custom class
             type="number"
             step={decimalAccuracy > 0 ? Math.pow(10, -decimalAccuracy) : 1}
             value={inputValue ?? ""}

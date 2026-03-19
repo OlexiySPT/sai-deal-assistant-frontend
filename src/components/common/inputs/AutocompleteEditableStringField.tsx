@@ -3,8 +3,10 @@ import EditableFieldFrame, {
   EditableFieldFrameChildProps,
   EditableFieldValueType,
 } from "./frames/EditableFieldFrame";
-import { getControlHeightBySize, SizeType } from "../sizeUtils";
+import { getControlHeightBySize, SizeType } from "../StylingUtil";
 import AutocompleteInput from "./AutocompleteInput";
+import { text } from "../../cva/text.cva";
+import { input } from "../../cva/input.cva";
 
 interface AutocompleteEditableStringFieldProps {
   value: string | null | undefined;
@@ -42,13 +44,11 @@ export default function AutocompleteEditableStringField({
       valueType={EditableFieldValueType.String}
       readView={function (): React.ReactNode {
         if (!value) {
-          return <span className="text-gray-400">(empty)</span>;
+          return (
+            <span className={text({ style: "value", size })}>(empty)</span>
+          );
         }
-        return (
-          <span className={`px-2 py-1 bg-transparent w-full block truncate`}>
-            {value}
-          </span>
-        );
+        return <span className={text({ style: "value", size })}>{value}</span>;
       }}
       editView={function ({
         inputValue,
@@ -58,7 +58,7 @@ export default function AutocompleteEditableStringField({
       }: EditableFieldFrameChildProps): React.ReactNode {
         return (
           <AutocompleteInput
-            className={`h-${getControlHeightBySize(size)} input border rounded px-2 py-1 w-full block truncate`}
+            className={input({ size })}
             value={inputValue}
             onChange={setInputValue}
             suggestions={Array.isArray(options) ? options : []}

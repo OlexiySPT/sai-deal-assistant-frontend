@@ -1,13 +1,15 @@
 import React from "react";
 import {
+  ColorClassType,
   getControlHeightBySize,
   getHeightBySize,
   SizeType,
-} from "../sizeUtils";
+} from "../StylingUtil";
+import { button } from "../../cva/button.cva";
 
 export interface IconActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: SizeType;
-  colorClass: string; // e.g. 'green' or 'red'
+  colorClass: ColorClassType;
   icon: React.ReactNode;
   ariaLabel: string;
 }
@@ -20,21 +22,11 @@ export function IconActionButton({
   className = "",
   ...props
 }: IconActionButtonProps) {
-  const colorStyles =
-    colorClass === "green"
-      ? `bg-green-100 hover:bg-green-200 dark:bg-green-800 dark:hover:bg-green-700 text-green-700 dark:text-green-300`
-      : colorClass === "red"
-        ? `bg-red-100 hover:bg-red-200 dark:bg-red-800 dark:hover:bg-red-700 text-red-700 dark:text-red-300`
-        : colorClass === "grey"
-          ? `bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-500`
-          : "";
   return (
     <button
       type="button"
       {...props}
-      className={`inline-flex items-center justify-center rounded p-1 focus:outline-none transition-colors aspect-square ${
-        colorStyles
-      } w-${getControlHeightBySize(size)} h-${getControlHeightBySize(size)} disabled:opacity-50 disabled:pointer-events-none ${className}`}
+      className={`${button({ colorClass, size })} ${className}`}
       aria-label={ariaLabel}
     >
       {icon}

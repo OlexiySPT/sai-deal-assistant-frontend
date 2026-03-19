@@ -10,10 +10,28 @@ const editIcon = (
     stroke="currentColor"
     strokeWidth={2}
   >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0L9 13zm0 0V17h4"
+    <polyline
+      points="24,20 1,20 1,1 24,1"
+      stroke="currentColor"
+      strokeWidth="1"
+      fill="none"
+    />
+    <line
+      x1="12"
+      y1="4"
+      x2="12"
+      y2="16"
+      stroke="currentColor"
+      strokeWidth="1"
+    />{" "}
+    <line x1="9" y1="4" x2="15" y2="4" stroke="currentColor" strokeWidth="1" />
+    <line
+      x1="9"
+      y1="16"
+      x2="15"
+      y2="16"
+      stroke="currentColor"
+      strokeWidth="1"
     />
   </svg>
 );
@@ -24,10 +42,9 @@ export default function EditButton(
   return (
     <IconActionButton
       {...props}
-      colorClass="gray"
+      colorClass="grey"
       ariaLabel="Edit"
       icon={editIcon}
-      className={`ml-2 ${props.className || ""}`}
     />
   );
 }

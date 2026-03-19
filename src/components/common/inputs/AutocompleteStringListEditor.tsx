@@ -4,6 +4,7 @@ import InputLabel from "./InputLabel";
 import AddButton from "../buttons/AddButton";
 import OkButton from "../buttons/OkButton";
 import CancelButton from "../buttons/CancelButton";
+import { modal } from "../../cva/modal.cva";
 
 interface AutocompleteStringListEditorProps {
   value: string[];
@@ -96,10 +97,12 @@ export default function AutocompleteStringListEditor({
           <>
             {/* Overlay to block all other interactions */}
             <div
-              className="fixed inset-0 z-40 bg-black bg-opacity-10"
+              className={modal({ part: "overlay" })}
               style={{ pointerEvents: "auto" }}
             />
-            <div className="z-50 relative flex items-center gap-1">
+            <div
+              className={`${modal({ part: "content" })} flex items-center gap-1`}
+            >
               <AutocompleteInput
                 inputRef={inputRef}
                 value={input}
@@ -115,12 +118,8 @@ export default function AutocompleteStringListEditor({
               <OkButton
                 onClick={() => handleAddTag(input)}
                 disabled={!input.trim() || tags.includes(input.trim())}
-                className="h-7 px-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded"
               />
-              <CancelButton
-                onClick={handleClose}
-                className="h-7 px-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded"
-              />
+              <CancelButton onClick={handleClose} />
             </div>
           </>
         ) : (

@@ -5,7 +5,7 @@ import {
   UpdateDateFieldCommand,
 } from "../../../../features/fieldUpdate/fieldUpdateAPI";
 import fieldUpdateAPI from "../../../../features/fieldUpdate/fieldUpdateAPI";
-import { SizeType } from "../../sizeUtils";
+import { SizeType } from "../../StylingUtil";
 import EditablePartFrameBase from "./EditablePartFrameBase";
 
 export interface EditableFieldFrameChildProps {

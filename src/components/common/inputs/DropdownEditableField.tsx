@@ -3,7 +3,9 @@ import EditableFieldFrame, {
   EditableFieldFrameChildProps,
   EditableFieldValueType,
 } from "./frames/EditableFieldFrame";
-import { getControlHeightBySize, SizeType } from "../sizeUtils";
+import { getControlHeightBySize, SizeType } from "../StylingUtil";
+import { text } from "../../cva/text.cva";
+import { input } from "../../cva/input.cva";
 
 interface DropdownEditableFieldProps {
   value: number | null | undefined;
@@ -42,10 +44,12 @@ export default function DropdownEditableField({
       readView={function (): React.ReactNode {
         const selected = options.find((opt) => opt.id === value);
         if (!selected) {
-          return <span className="text-gray-400">(empty)</span>;
+          return (
+            <span className={text({ style: "value", size })}>(empty)</span>
+          );
         }
         return (
-          <span className="px-2 py-1 bg-transparent w-full block truncate">
+          <span className={text({ style: "value", size })}>
             {selected.value}
           </span>
         );
@@ -58,7 +62,7 @@ export default function DropdownEditableField({
       }: EditableFieldFrameChildProps): React.ReactNode {
         return (
           <select
-            className={`h-${getControlHeightBySize(size)} input border rounded px-2 py-1 w-full block truncate`}
+            className={`${input({ size })} py-0 px-0`}
             value={inputValue ?? ""}
             onChange={(e) => setInputValue(Number(e.target.value))}
           >

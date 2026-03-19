@@ -23,11 +23,9 @@ export default function CloseButton(
   return (
     <IconActionButton
       {...props}
-      colorClass="gray"
+      colorClass="grey"
       ariaLabel="Close"
       icon={closeIcon}
-      className={`w-6 h-6 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors ${props.className || ""}`}
-      title={props.title || "Close"}
     />
   );
 }

@@ -7,7 +7,10 @@ import {
   getControlHeightBySize,
   getHeightBySize,
   SizeType,
-} from "../../sizeUtils";
+} from "../../StylingUtil";
+import { modal } from "../../../cva/modal.cva";
+import { text } from "../../../cva/text.cva";
+import { buble } from "../../../cva/buble.cva";
 
 interface EditablePartFrameBaseProps {
   label?: string;
@@ -39,46 +42,38 @@ export default function EditablePartFrameBase({
       className={`flex items-center gap-2 w-full text-${size} ${className} h-${getControlHeightBySize(size)}`}
     >
       {label && <InputLabel label={label} />}
-      <div className="flex-1 w-full">
-        {!editMode ? (
-          <div className="flex">
-            <span className="bg-transparent w-full">
-              {/*Read-only part */}
-              {readView()}
-            </span>
-            <EditButton onClick={handleEdit} size={size} aria-label="Edit" />
-          </div>
-        ) : (
-          <div className="flex flex-col w-full">
-            {/* Overlay to block all other interactions */}
-            <div
-              className="fixed inset-0 z-40 bg-black bg-opacity-10"
-              style={{ pointerEvents: "auto" }}
+      {!editMode ? (
+        <>
+          {/*Read-only part */}
+          {readView()}
+          <EditButton onClick={handleEdit} size={size} aria-label="Edit" />
+        </>
+      ) : (
+        <>
+          {/* Overlay to block all other interactions */}
+          <div className={modal({ part: "overlay" })} />
+          <div
+            className={`flex w-full gap-1 items-center ${modal({ part: "content" })} ${className}`}
+          >
+            {/* Edit part*/}
+            {editView()}
+            <OkButton onClick={handleSave} size={size} aria-label="Save" />
+            <CancelButton
+              onClick={handleCancel}
+              size={size}
+              aria-label="Cancel"
             />
-            <div
-              className="flex w-full gap-1 z-50 relative"
-              style={{ position: "relative" }}
-            >
-              {/* Edit part*/}
-              {editView()}
-              <OkButton onClick={handleSave} size={size} aria-label="Save" />
-              <CancelButton
-                onClick={handleCancel}
-                size={size}
-                aria-label="Cancel"
-              />
-              {error && (
-                <div
-                  className="absolute left-0 w-full bg-red-100 dark:bg-red-800 border border-red-400 text-red-700 dark:text-red-300 text-xs rounded px-3 py-1 shadow-lg animate-fade-in"
-                  style={{ top: "calc(100% + 0.5rem)", pointerEvents: "auto" }}
-                >
-                  {error}
-                </div>
-              )}
-            </div>
+            {error && (
+              <div
+                className={`${buble({ style: "info", size })}`}
+                style={{ top: "calc(100% + 0.5rem)", pointerEvents: "auto" }}
+              >
+                {error}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }
