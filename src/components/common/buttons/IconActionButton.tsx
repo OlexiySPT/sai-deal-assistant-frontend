@@ -5,7 +5,7 @@ import {
   getHeightBySize,
   SizeType,
 } from "../StylingUtil";
-import { button } from "../../cva/button.cva";
+import { button } from "../../cva/button-cva";
 
 export interface IconActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: SizeType;

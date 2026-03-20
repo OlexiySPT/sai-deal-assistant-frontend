@@ -2,10 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import AutocompleteInput from "./AutocompleteInput";
 import InputLabel from "./InputLabel";
 import AddButton from "../buttons/AddButton";
-import { SizeType } from "../StylingUtil";
-import EditablePartFrameBase from "./frames/EditablePartFrameBase";
-import { input } from "../../cva/input-cva";
-import { breadcrumb, breadcrumbsArea } from "../../cva/breadcrumbs-cva";
+import OkButton from "../buttons/OkButton";
+import CancelButton from "../buttons/CancelButton";
+import { modal } from "../../cva/modal-cva";
 
 interface AutocompleteStringListEditorProps {
   value: string[];
@@ -15,7 +14,6 @@ interface AutocompleteStringListEditorProps {
   onAdd: (tag: string) => void;
   className?: string;
   label?: string;
-  size?: SizeType;
 }
 
 export default function AutocompleteStringListEditor({
@@ -25,9 +23,8 @@ export default function AutocompleteStringListEditor({
   onAdd,
   className = "",
   label = "",
-  size = "sm",
 }: AutocompleteStringListEditorProps) {
-  const [inputValue, setInputValue] = useState("");
+  const [input, setInput] = useState("");
   const [tags, setTags] = useState<string[]>(value);
   const [error, setError] = useState<string | null>(null);
   const [addMode, setAddMode] = useState(false);
@@ -46,7 +43,7 @@ export default function AutocompleteStringListEditor({
     if (!trimmed || tags.includes(trimmed)) return;
     const newTags = [...tags, trimmed];
     setTags(newTags);
-    setInputValue("");
+    setInput("");
     setError(null);
     onAdd(trimmed);
     setAddMode(false);
@@ -62,7 +59,7 @@ export default function AutocompleteStringListEditor({
   function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleAddTag(inputValue);
+      handleAddTag(input);
     } else if (e.key === "Escape") {
       e.preventDefault();
       setAddMode(false);
@@ -70,60 +67,61 @@ export default function AutocompleteStringListEditor({
   }
 
   function handleAdd(): void {
-    setInputValue("");
+    setInput("");
     setAddMode(true);
   }
 
   function handleClose(): void {
     setAddMode(false);
   }
-  function editView() {
-    return (
-      <>
-        <AutocompleteInput
-          inputRef={inputRef}
-          className={`${input({ size })} flex`}
-          value={inputValue}
-          onChange={setInputValue}
-          suggestions={suggestions.filter((t) => !tags.includes(t))}
-          placeholder="Add or search tag..."
-          onSelect={handleAddTag}
-          onEnter={handleAddTag}
-          onEscapePressed={handleClose}
-          showAllOnEmpty={true}
-        />
-      </>
-    );
-  }
+
+  const tagClass =
+    "flex items-center px-1 rounded-md bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm";
+  const tagsDivClass = `flex flex-wrap gap-2 mb-2 ${className}`;
   return (
     <>
-      <div className={`${breadcrumbsArea({ size })} ${className}`}>
-        {label && <InputLabel label={label} size={size} />}
+      <div className={tagsDivClass}>
+        {label && <InputLabel label={label} />}
         {tags.map((tag) => (
-          <span key={tag} className={breadcrumb({ size })}>
+          <span key={tag} className={tagClass}>
             {tag}
             <button
               onClick={() => handleDeleteTag(tag)}
-              className="ml-1 text-xs"
+              className="ml-1 text-xs text-gray-400 hover:text-red-500"
             >
               ×
             </button>
           </span>
         ))}
         {addMode ? (
-          <div className="flex flex-nowrap items-center gap-1">
-            <EditablePartFrameBase
-              editMode={addMode}
-              error={error}
-              className={`w-auto flex-nowrap`}
-              size={size}
-              readView={() => null}
-              editView={() => editView()}
-              handleEdit={() => {}}
-              handleCancel={() => handleClose()}
-              handleSave={() => handleAddTag(inputValue)}
+          <>
+            {/* Overlay to block all other interactions */}
+            <div
+              className={modal({ part: "overlay" })}
+              style={{ pointerEvents: "auto" }}
             />
-          </div>
+            <div
+              className={`${modal({ part: "content" })} flex items-center gap-1`}
+            >
+              <AutocompleteInput
+                inputRef={inputRef}
+                value={input}
+                onChange={setInput}
+                suggestions={suggestions.filter((t) => !tags.includes(t))}
+                placeholder="Add or search tag..."
+                onSelect={handleAddTag}
+                onEnter={handleAddTag}
+                onEscapePressed={handleClose}
+                showAllOnEmpty={true}
+                className="h-7 border rounded px-2 text-sm bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600"
+              />
+              <OkButton
+                onClick={() => handleAddTag(input)}
+                disabled={!input.trim() || tags.includes(input.trim())}
+              />
+              <CancelButton onClick={handleClose} />
+            </div>
+          </>
         ) : (
           <AddButton onClick={handleAdd} />
         )}

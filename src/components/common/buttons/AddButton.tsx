@@ -23,7 +23,7 @@ export default function AddButton(
   return (
     <IconActionButton
       {...props}
-      colorClass="blue"
+      colorClass="grey"
       ariaLabel="Add"
       icon={addIcon}
     />

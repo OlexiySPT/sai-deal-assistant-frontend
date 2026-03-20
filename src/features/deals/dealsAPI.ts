@@ -3,6 +3,7 @@ import api from "../../services/api";
 // Types
 export interface DealDto {
   id: number;
+  company: string;
   name: string | null;
   description: string | null;
   url: string | null;
@@ -23,6 +24,7 @@ export interface DealDto {
 
 export interface DealListItemDto {
   id: number;
+  company: string;
   name: string | null;
   type: string | null;
   state: string | null;
@@ -41,6 +43,7 @@ export interface DealListItemDtoQueryResult {
 
 export interface DealWithDependentsDto {
   id: number;
+  company: string;
   name: string | null;
   description: string | null;
   url: string | null;
@@ -64,6 +67,7 @@ export interface DealWithDependentsDto {
 
 export interface CreateDealCommand {
   id: number;
+  company: string;
   name: string | null;
   description: string | null;
   url: string | null;
@@ -84,6 +88,7 @@ export interface CreateDealCommand {
 
 export interface UpdateDealCommand {
   id: number;
+  company: string;
   name: string | null;
   description: string | null;
   url: string | null;
@@ -103,6 +108,7 @@ export interface UpdateDealCommand {
 }
 
 export interface DealsQueryParams {
+  Company?: string;
   Name?: string;
   Description?: string;
   Industry?: string;

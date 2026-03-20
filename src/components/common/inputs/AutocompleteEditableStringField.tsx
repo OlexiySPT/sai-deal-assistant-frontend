@@ -5,8 +5,8 @@ import EditableFieldFrame, {
 } from "./frames/EditableFieldFrame";
 import { getControlHeightBySize, SizeType } from "../StylingUtil";
 import AutocompleteInput from "./AutocompleteInput";
-import { text } from "../../cva/text.cva";
-import { input } from "../../cva/input.cva";
+import { text } from "../../cva/text-cva";
+import { input } from "../../cva/input-cva";
 
 interface AutocompleteEditableStringFieldProps {
   value: string | null | undefined;

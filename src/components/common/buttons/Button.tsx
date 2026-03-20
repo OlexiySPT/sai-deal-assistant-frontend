@@ -1,5 +1,5 @@
 import React from "react";
-import { button } from "../../cva/button.cva";
+import { button } from "../../cva/button-cva";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary";

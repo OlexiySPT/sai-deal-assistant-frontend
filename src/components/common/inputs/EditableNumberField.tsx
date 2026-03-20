@@ -4,8 +4,8 @@ import EditableFieldFrame, {
   EditableFieldValueType,
 } from "./frames/EditableFieldFrame";
 import { getControlHeightBySize, SizeType } from "../StylingUtil";
-import { input } from "../../cva/input.cva";
-import { text } from "../../cva/text.cva";
+import { input } from "../../cva/input-cva";
+import { text } from "../../cva/text-cva";
 
 interface EditableNumberFieldProps {
   value: number | null | undefined;

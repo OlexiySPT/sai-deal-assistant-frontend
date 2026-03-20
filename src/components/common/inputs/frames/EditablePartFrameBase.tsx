@@ -8,9 +8,9 @@ import {
   getHeightBySize,
   SizeType,
 } from "../../StylingUtil";
-import { modal } from "../../../cva/modal.cva";
-import { text } from "../../../cva/text.cva";
-import { buble } from "../../../cva/buble.cva";
+import { modal } from "../../../cva/modal-cva";
+import { text } from "../../../cva/text-cva";
+import { buble } from "../../../cva/buble-cva";
 
 interface EditablePartFrameBaseProps {
   label?: string;
@@ -65,7 +65,7 @@ export default function EditablePartFrameBase({
             />
             {error && (
               <div
-                className={`${buble({ style: "info", size })}`}
+                className={`${buble({ style: "error", size })}`}
                 style={{ top: "calc(100% + 0.5rem)", pointerEvents: "auto" }}
               >
                 {error}

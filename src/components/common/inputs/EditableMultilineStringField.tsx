@@ -138,6 +138,7 @@ export default function EditableMultilineStringField({
               title={value ?? ""}
               onClick={handleEdit}
               readOnly
+              autoFocus
             />
           </div>
         </>

@@ -4,8 +4,8 @@ import EditableFieldFrame, {
   EditableFieldValueType,
 } from "./frames/EditableFieldFrame";
 import { getControlHeightBySize, SizeType } from "../StylingUtil";
-import { text } from "../../cva/text.cva";
-import { input } from "../../cva/input.cva";
+import { text } from "../../cva/text-cva";
+import { input } from "../../cva/input-cva";
 
 interface DropdownEditableFieldProps {
   value: number | null | undefined;
@@ -62,7 +62,7 @@ export default function DropdownEditableField({
       }: EditableFieldFrameChildProps): React.ReactNode {
         return (
           <select
-            className={`${input({ size })} py-0 px-0`}
+            className={`${input({ size })}`}
             value={inputValue ?? ""}
             onChange={(e) => setInputValue(Number(e.target.value))}
           >

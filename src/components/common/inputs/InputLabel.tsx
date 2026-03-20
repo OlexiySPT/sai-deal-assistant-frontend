@@ -1,4 +1,4 @@
-import { text } from "../../cva/text.cva";
+import { text } from "../../cva/text-cva";
 import { SizeType } from "../StylingUtil";
 
 export default function InputLabel({

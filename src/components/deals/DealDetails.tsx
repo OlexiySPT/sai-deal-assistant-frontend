@@ -41,6 +41,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("Description");
 
   useEffect(() => {
     let mounted = true;
@@ -143,335 +144,314 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   return (
     <div
       id="details-container"
-      className="h-full md:flex md:flex-row p-6 bg-white dark:bg-gray-800 overflow-y-auto md:overflow-hidden"
+      className="h-full p-6 bg-white dark:bg-gray-800 overflow-y-auto"
     >
-      {/* Left Column */}
-      <div
-        style={{
-          width: isMobile ? "100%" : `${100 - rightPanelWidth}%`,
-        }}
-        className="md:overflow-y-auto md:pr-2"
-      >
-        {/* Header */}
-        <div className="mb-6">
-          <div className="mb-2">
-            <EditableStringField
-              value={deal.name}
-              entity="Deal"
-              field="name"
-              id={deal.id}
-              validation="NotEmpty"
-              onUpdated={handleDealUpdated}
-              size="2xl"
-            />
-          </div>
-
-          <div className="flex gap-2">
-            <EditableNumberField
-              value={deal.proposalAmount}
-              entity="Deal"
-              field="proposalAmount"
-              id={deal.id}
-              validation="None"
-              label="Amount"
-              onUpdated={handleDealUpdated}
-              decimalAccuracy={0}
-              thousandsSeparator={true}
-            />
-            <EditableStringField
-              value={deal.currencyCode}
-              entity="Deal"
-              field="currencyCode"
-              id={deal.id}
-              validation="NotEmpty"
-              onUpdated={handleDealUpdated}
-            />
-            <DropdownEditableField
-              value={deal.typeId}
-              entity="Deal"
-              field="amountTypeId"
-              id={deal.id}
-              validation="NotNull"
-              label=""
-              onUpdated={handleDealUpdated}
-              options={
-                Array.isArray(amountTypeOptions)
-                  ? amountTypeOptions.map((opt) => ({
-                      id: opt.Id,
-                      value: opt.Type,
-                    }))
-                  : []
-              }
-            />
-          </div>
-          <AutocompleteEditableStringField
-            value={deal.status}
-            entity="Deal"
-            field="status"
-            id={deal.id}
-            validation="None"
-            label="Status"
-            onUpdated={handleDealUpdated}
-            options={Array.isArray(statusOptions) ? statusOptions : []}
-          />
-
+      {/* Header */}
+      <div className="grid grid-cols-1 md:grid-cols-[30%_1fr] gap-4 mb-4">
+        <div>
           <EditableStringField
-            value={deal.url}
+            value={deal.company}
             entity="Deal"
-            field="url"
+            field="company"
             id={deal.id}
-            validation="Url"
-            label="Website"
+            validation="NotEmpty"
             onUpdated={handleDealUpdated}
-            size="sm"
-          />
-          <div className="flex gap-2">
-            <DropdownEditableField
-              value={deal.typeId}
-              entity="Deal"
-              field="typeId"
-              id={deal.id}
-              validation="NotNull"
-              label="Type"
-              onUpdated={handleDealUpdated}
-              size="sm"
-              options={
-                Array.isArray(typesOptions)
-                  ? typesOptions.map((opt) => ({
-                      id: opt.Id,
-                      value: opt.Type,
-                    }))
-                  : []
-              }
-            />
-            <DropdownEditableField
-              value={deal.stateId}
-              entity="Deal"
-              field="stateId"
-              id={deal.id}
-              validation="NotNull"
-              label="State"
-              onUpdated={handleDealUpdated}
-              size="sm"
-              options={
-                Array.isArray(stateOptions)
-                  ? stateOptions.map((opt) => ({
-                      id: opt.Id,
-                      value: opt.State,
-                    }))
-                  : []
-              }
-            />
-          </div>
-        </div>
-        {/* Tags */}
-        <div className="mb-1">
-          <AutocompleteStringListEditor
-            value={deal.tags ? deal.tags.map((t: any) => t.tag) : []}
-            suggestions={tagsOptions}
-            editMode={true}
-            onAdd={(tag) => addDealTag({ dealId: deal.id, tag })}
-            onDelete={(tag) => deleteDealTag({ dealId: deal.id, tag })}
-            className="flex flex-wrap gap-1"
-            label="Tags"
+            size="lg"
           />
         </div>
-        {/* Description */}
-        <div className="mb-6">
-          <EditableMultilineStringField
-            value={deal.description}
-            entity="Deal"
-            field="description"
-            id={deal.id}
-            validation="None"
-            label="Description"
-            onUpdated={handleDealUpdated}
-            rows={5}
-          />
-        </div>
-
-        {/* Details Grid */}
-        <div className="mb-6">
+        <div>
           <EditableStringField
-            value={deal.industry}
+            value={deal.name}
             entity="Deal"
-            field="industry"
+            field="name"
             id={deal.id}
-            validation="None"
-            label="Industry"
+            validation="NotEmpty"
             onUpdated={handleDealUpdated}
+            size="lg"
           />
         </div>
-        {/* AI Information */}
-        {(deal.aiSearchInfo || deal.aiBriefDescription) && (
-          <div className="mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              AI Information
-            </h2>
-            {deal.aiBriefDescription && (
-              <div className="mb-3">
-                <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                  Brief Description
-                </h3>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {deal.aiBriefDescription}
-                </p>
-              </div>
-            )}
-            {deal.aiSearchInfo && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                  Search Info
-                </h3>
-                <p className="text-gray-700 dark:text-gray-300">
-                  {deal.aiSearchInfo}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Contact Persons - Collapsible (Desktop only) */}
-        {!isMobile && deal.contactPersons && deal.contactPersons.length > 0 && (
-          <div className="mb-6">
-            <h2
-              className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 flex items-center"
-              onClick={() => setShowContactPersons(!showContactPersons)}
-            >
-              <span className="mr-2">{showContactPersons ? "▼" : "►"}</span>
-              Contact Persons
-            </h2>
-            {showContactPersons && (
-              <div className="space-y-2">
-                {deal.contactPersons.map((person: any) => (
-                  <div
-                    key={person.id}
-                    className="p-3 bg-gray-50 dark:bg-gray-700 rounded"
-                  >
-                    <div className="font-medium text-gray-900 dark:text-gray-100">
-                      {person.name}
-                    </div>
-                    {person.position && (
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {person.position}
-                      </div>
-                    )}
-                    {person.email && (
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {person.email}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+      </div>
+      <div className="flex gap-2">
+        <EditableNumberField
+          value={deal.proposalAmount}
+          entity="Deal"
+          field="proposalAmount"
+          id={deal.id}
+          validation="None"
+          label="Amount"
+          onUpdated={handleDealUpdated}
+          decimalAccuracy={0}
+          thousandsSeparator={true}
+        />
+        <EditableStringField
+          value={deal.currencyCode}
+          entity="Deal"
+          field="currencyCode"
+          id={deal.id}
+          validation="NotEmpty"
+          onUpdated={handleDealUpdated}
+        />
+        <DropdownEditableField
+          value={deal.typeId}
+          entity="Deal"
+          field="amountTypeId"
+          id={deal.id}
+          validation="NotNull"
+          label=""
+          onUpdated={handleDealUpdated}
+          options={
+            Array.isArray(amountTypeOptions)
+              ? amountTypeOptions.map((opt) => ({
+                  id: opt.Id,
+                  value: opt.Type,
+                }))
+              : []
+          }
+        />
+      </div>
+      <AutocompleteEditableStringField
+        value={deal.status}
+        entity="Deal"
+        field="status"
+        id={deal.id}
+        validation="None"
+        label="Status"
+        onUpdated={handleDealUpdated}
+        options={Array.isArray(statusOptions) ? statusOptions : []}
+      />
+      <EditableStringField
+        value={deal.url}
+        entity="Deal"
+        field="url"
+        id={deal.id}
+        validation="Url"
+        label="Website"
+        onUpdated={handleDealUpdated}
+        size="sm"
+      />
+      <div className="flex gap-2">
+        <DropdownEditableField
+          value={deal.typeId}
+          entity="Deal"
+          field="typeId"
+          id={deal.id}
+          validation="NotNull"
+          label="Type"
+          onUpdated={handleDealUpdated}
+          size="sm"
+          options={
+            Array.isArray(typesOptions)
+              ? typesOptions.map((opt) => ({
+                  id: opt.Id,
+                  value: opt.Type,
+                }))
+              : []
+          }
+        />
+        <DropdownEditableField
+          value={deal.stateId}
+          entity="Deal"
+          field="stateId"
+          id={deal.id}
+          validation="NotNull"
+          label="State"
+          onUpdated={handleDealUpdated}
+          size="sm"
+          options={
+            Array.isArray(stateOptions)
+              ? stateOptions.map((opt) => ({
+                  id: opt.Id,
+                  value: opt.State,
+                }))
+              : []
+          }
+        />
+      </div>
+      {/* Tags */}
+      <div className="mb-1">
+        <AutocompleteStringListEditor
+          value={deal.tags ? deal.tags.map((t: any) => t.tag) : []}
+          suggestions={tagsOptions}
+          editMode={true}
+          onAdd={(tag) => addDealTag({ dealId: deal.id, tag })}
+          onDelete={(tag) => deleteDealTag({ dealId: deal.id, tag })}
+          className="flex flex-wrap gap-1"
+          label="Tags"
+        />
       </div>
 
-      {/* Splitter */}
-      <div
-        className="w-1 bg-gray-300 dark:bg-gray-600 hover:bg-blue-500 cursor-col-resize flex-shrink-0 hidden md:block"
-        onMouseDown={handleMouseDown}
-      />
-
-      {/* Right Column */}
-      <div
-        style={{
-          width: isMobile ? "100%" : `${rightPanelWidth}%`,
-        }}
-        className={`${isMobile ? "" : "overflow-y-auto"} md:pl-2 mt-6 md:mt-0`}
-      >
-        {/* Events */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-              Events
-            </h2>
-            <AddButton />
-          </div>
-          <div className="space-y-3">
-            {deal.events?.map((event: any) => (
-              <div
-                key={event.id}
-                className="p-4 bg-gray-50 dark:bg-gray-700 rounded"
+      {/* Tabs */}
+      <div className="mb-6">
+        <div className="flex border-b border-gray-300 dark:border-gray-600 mb-4">
+          {["Description", "AI Information", "Events", "Contact Persons"].map(
+            (tab) => (
+              <button
+                key={tab}
+                className={`px-4 py-2 -mb-px font-medium border-b-2 transition-colors duration-200 focus:outline-none ${
+                  activeTab === tab
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-600 dark:text-gray-300 hover:text-blue-500"
+                }`}
+                onClick={() => setActiveTab(tab)}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">
-                    {event.type || "Event"}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    {new Date(event.date).toLocaleDateString()}
-                  </div>
-                </div>
-                {event.agenda && (
-                  <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">
-                    <strong>Agenda:</strong> {event.agenda}
-                  </div>
-                )}
-                {event.result && (
-                  <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">
-                    <strong>Result:</strong> {event.result}
-                  </div>
-                )}
-                {event.contactPerson && (
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Contact: {event.contactPerson}
-                  </div>
-                )}
-                {event.notes && event.notes.length > 0 && (
-                  <div className="mt-2 pl-4 border-l-2 border-gray-300 dark:border-gray-600">
-                    {event.notes.map((note: any) => (
-                      <div
-                        key={note.id}
-                        className="text-sm text-gray-700 dark:text-gray-300 mb-1"
-                      >
-                        • {note.text}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+                {tab}
+              </button>
+            ),
+          )}
         </div>
-
-        {/* Contact Persons - Mobile only (below events) */}
-        {isMobile && deal.contactPersons && deal.contactPersons.length > 0 && (
-          <div className="mb-6">
-            <h2
-              className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 flex items-center"
-              onClick={() => setShowContactPersons(!showContactPersons)}
-            >
-              <span className="mr-2">{showContactPersons ? "▼" : "►"}</span>
-              Contact Persons
-            </h2>
-            {showContactPersons && (
-              <div className="space-y-2">
-                {deal.contactPersons.map((person: any) => (
-                  <div
-                    key={person.id}
-                    className="p-3 bg-gray-50 dark:bg-gray-700 rounded"
-                  >
-                    <div className="font-medium text-gray-900 dark:text-gray-100">
-                      {person.name}
-                    </div>
-                    {person.position && (
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {person.position}
-                      </div>
-                    )}
-                    {person.email && (
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {person.email}
-                      </div>
-                    )}
-                  </div>
-                ))}
+        <div>
+          {activeTab === "Description" && (
+            <div>
+              <div className="mb-6">
+                <EditableMultilineStringField
+                  value={deal.description}
+                  entity="Deal"
+                  field="description"
+                  id={deal.id}
+                  validation="None"
+                  label="Description"
+                  onUpdated={handleDealUpdated}
+                  rows={5}
+                />
               </div>
-            )}
-          </div>
-        )}
+              <div className="mb-6">
+                <EditableStringField
+                  value={deal.industry}
+                  entity="Deal"
+                  field="industry"
+                  id={deal.id}
+                  validation="None"
+                  label="Industry"
+                  onUpdated={handleDealUpdated}
+                />
+              </div>
+            </div>
+          )}
+          {activeTab === "AI Information" && (
+            <div>
+              {deal.aiSearchInfo || deal.aiBriefDescription ? (
+                <div>
+                  {deal.aiBriefDescription && (
+                    <div className="mb-3">
+                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                        Brief Description
+                      </h3>
+                      <p className="text-gray-700 dark:text-gray-300">
+                        {deal.aiBriefDescription}
+                      </p>
+                    </div>
+                  )}
+                  {deal.aiSearchInfo && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                        Search Info
+                      </h3>
+                      <p className="text-gray-700 dark:text-gray-300">
+                        {deal.aiSearchInfo}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-gray-500 dark:text-gray-400">
+                  No AI information available.
+                </div>
+              )}
+            </div>
+          )}
+          {activeTab === "Events" && (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  Events
+                </h2>
+                <AddButton />
+              </div>
+              <div className="space-y-3">
+                {deal.events?.length > 0 ? (
+                  deal.events.map((event: any) => (
+                    <div
+                      key={event.id}
+                      className="p-4 bg-gray-50 dark:bg-gray-700 rounded"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="font-medium text-gray-900 dark:text-gray-100">
+                          {event.type || "Event"}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          {new Date(event.date).toLocaleDateString()}
+                        </div>
+                      </div>
+                      {event.agenda && (
+                        <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">
+                          <strong>Agenda:</strong> {event.agenda}
+                        </div>
+                      )}
+                      {event.result && (
+                        <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">
+                          <strong>Result:</strong> {event.result}
+                        </div>
+                      )}
+                      {event.contactPerson && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Contact: {event.contactPerson}
+                        </div>
+                      )}
+                      {event.notes && event.notes.length > 0 && (
+                        <div className="mt-2 pl-4 border-l-2 border-gray-300 dark:border-gray-600">
+                          {event.notes.map((note: any) => (
+                            <div
+                              key={note.id}
+                              className="text-sm text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                              • {note.text}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-gray-500 dark:text-gray-400">
+                    No events available.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          {activeTab === "Contact Persons" && (
+            <div>
+              {deal.contactPersons && deal.contactPersons.length > 0 ? (
+                <div className="space-y-2">
+                  {deal.contactPersons.map((person: any) => (
+                    <div
+                      key={person.id}
+                      className="p-3 bg-gray-50 dark:bg-gray-700 rounded"
+                    >
+                      <div className="font-medium text-gray-900 dark:text-gray-100">
+                        {person.name}
+                      </div>
+                      {person.position && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          {person.position}
+                        </div>
+                      )}
+                      {person.email && (
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          {person.email}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-gray-500 dark:text-gray-400">
+                  No contact persons available.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
       <CreateDealDialog
         open={editDialogOpen}
