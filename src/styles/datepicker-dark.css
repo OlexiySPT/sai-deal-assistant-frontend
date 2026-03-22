@@ -1,0 +1,52 @@
+/* Dark theme overrides for react-datepicker */
+.react-datepicker__triangle {
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+}
+.react-datepicker__header,
+.react-datepicker__month,
+.react-datepicker__day,
+.react-datepicker__day-name,
+.react-datepicker__current-month,
+.react-datepicker__navigation,
+.react-datepicker__year-read-view--down-arrow,
+.react-datepicker__year-dropdown,
+.react-datepicker__month-dropdown {
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+/* Light mode: no override, use default */
+
+/* Dark mode overrides */
+html.dark .react-datepicker,
+html.dark .react-datepicker__header {
+  background-color: #1f2937 !important; /* gray-800 */
+  color: #f3f4f6 !important; /* gray-100 */
+  border-color: #374151 !important; /* gray-700 */
+}
+html.dark .react-datepicker__day,
+html.dark .react-datepicker__day-name,
+html.dark .react-datepicker__current-month {
+  color: #f3f4f6 !important; /* gray-100 */
+}
+html.dark .react-datepicker__day--selected,
+html.dark .react-datepicker__day--keyboard-selected {
+  background-color: #2563eb !important; /* blue-600 */
+  color: #fff !important;
+}
+html.dark .react-datepicker__day--today {
+  border-color: #f59e42 !important; /* amber-500 */
+}
+html.dark .react-datepicker__navigation {
+  filter: invert(1);
+}
+html.dark .react-datepicker__month-dropdown,
+html.dark .react-datepicker__year-dropdown {
+  background-color: #374151 !important; /* gray-700 */
+  color: #f3f4f6 !important;
+}
+html.dark .react-datepicker__year-option--selected {
+  background: #2563eb !important;
+  color: #fff !important;
+}
