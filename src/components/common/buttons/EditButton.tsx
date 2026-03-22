@@ -11,28 +11,12 @@ const editIcon = (
     strokeWidth={2}
   >
     <polyline
-      points="24,20 1,20 1,1 24,1"
+      points="24,19 1,19 1,5 24,5 24,19"
       stroke="currentColor"
       strokeWidth="1"
       fill="none"
     />
-    <line
-      x1="12"
-      y1="4"
-      x2="12"
-      y2="16"
-      stroke="currentColor"
-      strokeWidth="1"
-    />{" "}
-    <line x1="9" y1="4" x2="15" y2="4" stroke="currentColor" strokeWidth="1" />
-    <line
-      x1="9"
-      y1="16"
-      x2="15"
-      y2="16"
-      stroke="currentColor"
-      strokeWidth="1"
-    />
+    <line x1="6" y1="7" x2="6" y2="17" stroke="currentColor" strokeWidth="1" />
   </svg>
 );
 

@@ -26,7 +26,7 @@ export function IconActionButton({
     <button
       type="button"
       {...props}
-      className={`${button({ colorClass, size })} ${className}`}
+      className={`items-center ${button({ colorClass, size })} ${className}`}
       aria-label={ariaLabel}
     >
       {icon}

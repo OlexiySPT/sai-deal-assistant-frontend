@@ -39,7 +39,7 @@ export default function EditablePartFrameBase({
 }: EditablePartFrameBaseProps) {
   return (
     <div
-      className={`flex items-center gap-2 w-full text-${size} ${className} h-${getControlHeightBySize(size)}`}
+      className={` flex items-center gap-2 w-full text-${size} ${className} h-${getControlHeightBySize(size)}`}
     >
       {label && <InputLabel label={label} />}
       {!editMode ? (

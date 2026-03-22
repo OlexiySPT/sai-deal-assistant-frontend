@@ -3,6 +3,7 @@ import api from "../../services/api";
 // Types
 export interface DealDto {
   id: number;
+  startDate: Date;
   company: string;
   name: string | null;
   description: string | null;
@@ -24,6 +25,7 @@ export interface DealDto {
 
 export interface DealListItemDto {
   id: number;
+  startDate: Date;
   company: string;
   name: string | null;
   type: string | null;
@@ -43,6 +45,7 @@ export interface DealListItemDtoQueryResult {
 
 export interface DealWithDependentsDto {
   id: number;
+  startDate: Date;
   company: string;
   name: string | null;
   description: string | null;
@@ -63,10 +66,12 @@ export interface DealWithDependentsDto {
   exchangeRate: number | null;
   amountTypeId: number | null;
   amountType: string | null;
+  denormLastActionDate: Date | null;
 }
 
 export interface CreateDealCommand {
   id: number;
+  startDate: Date;
   company: string;
   name: string | null;
   description: string | null;
@@ -88,6 +93,7 @@ export interface CreateDealCommand {
 
 export interface UpdateDealCommand {
   id: number;
+  startDate: Date;
   company: string;
   name: string | null;
   description: string | null;

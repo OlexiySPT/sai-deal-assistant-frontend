@@ -22,6 +22,7 @@ import {
 } from "../../features/dealTags/dealTagsAPI";
 import { EnumValue, getEnumValues } from "../../features/enums/enumsAPI";
 import DropdownEditableField from "../common/inputs/DropdownEditableField";
+import EditableDateField from "../common/inputs/EditableDateField";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -171,6 +172,15 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           />
         </div>
       </div>
+      <EditableDateField
+        value={deal.startDate}
+        entity="Deal"
+        field="startDate"
+        id={deal.id}
+        validation="None"
+        label="Start Date"
+        onUpdated={handleDealUpdated}
+      />
       <div className="flex gap-2">
         <EditableNumberField
           value={deal.proposalAmount}
