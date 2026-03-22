@@ -43,11 +43,11 @@ export default function EditablePartFrameBase({
     >
       {label && <InputLabel label={label} />}
       {!editMode ? (
-        <>
+        <div className="flex w-full items-center justify-between gap-2">
           {/*Read-only part */}
-          {readView()}
-          <EditButton onClick={handleEdit} size={size} aria-label="Edit" />
-        </>
+          <div className="flex-1 min-w-0">{readView()}</div>
+          <EditButton onClick={handleEdit} size={"xs"} aria-label="Edit" />
+        </div>
       ) : (
         <>
           {/* Overlay to block all other interactions */}
