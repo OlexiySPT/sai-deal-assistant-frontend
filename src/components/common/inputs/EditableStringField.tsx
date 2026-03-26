@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import EditableFieldFrame, {
   EditableFieldFrameChildProps,
   EditableFieldValueType,
 } from "./frames/EditableFieldFrame";
-import { getControlHeightBySize, SizeType } from "../StylingUtil";
+import { SizeType } from "../StylingUtil";
 import { text } from "../../cva/text-cva";
 import { input } from "../../cva/input-cva";
 
@@ -16,6 +16,7 @@ interface EditableStringFieldProps {
   onUpdated?: () => void;
   label?: string;
   size?: SizeType;
+  width?: string;
 }
 
 export default function EditableStringField({
@@ -27,6 +28,7 @@ export default function EditableStringField({
   onUpdated,
   label,
   size = "sm",
+  width,
 }: EditableStringFieldProps) {
   return (
     <EditableFieldFrame
@@ -38,6 +40,7 @@ export default function EditableStringField({
       onUpdated={onUpdated}
       label={label}
       size={size}
+      width={width}
       valueType={EditableFieldValueType.String}
       readView={function (): React.ReactNode {
         if (!value) {
@@ -63,7 +66,7 @@ export default function EditableStringField({
             </a>
           );
         }
-        return <div className={text({ style: "value", size })}>{value}</div>;
+        return <span className={text({ style: "value", size })}>{value}</span>;
       }}
       editView={function ({
         inputValue,

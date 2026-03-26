@@ -38,6 +38,7 @@ export interface EditableFieldFrameProps {
   editView: (props: EditableFieldFrameChildProps) => React.ReactNode;
   valueType: EditableFieldValueType;
   size?: SizeType;
+  width?: string;
 }
 
 export default function EditableFieldFrame({
@@ -53,6 +54,7 @@ export default function EditableFieldFrame({
   readView,
   editView,
   size = "sm",
+  width,
 }: EditableFieldFrameProps) {
   const [editMode, setEditMode] = useState(false);
   const [inputValue, setInputValue] = useState(value ?? "");
@@ -154,6 +156,7 @@ export default function EditableFieldFrame({
       handleEdit={handleEdit}
       handleCancel={handleCancel}
       handleSave={handleSave}
+      width={width}
     />
   );
 }

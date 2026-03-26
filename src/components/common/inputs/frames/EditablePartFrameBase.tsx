@@ -1,15 +1,10 @@
-import React, { useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import EditButton from "../../buttons/EditButton";
 import OkButton from "../../buttons/OkButton";
 import CancelButton from "../../buttons/CancelButton";
 import InputLabel from "../InputLabel";
-import {
-  getControlHeightBySize,
-  getHeightBySize,
-  SizeType,
-} from "../../StylingUtil";
+import { getControlHeightBySize, SizeType } from "../../StylingUtil";
 import { modal } from "../../../cva/modal-cva";
-import { text } from "../../../cva/text-cva";
 import { buble } from "../../../cva/buble-cva";
 
 interface EditablePartFrameBaseProps {
@@ -23,6 +18,7 @@ interface EditablePartFrameBaseProps {
   handleEdit: () => void;
   handleCancel: () => void;
   handleSave: () => void;
+  width?: string;
 }
 
 export default function EditablePartFrameBase({
@@ -36,24 +32,85 @@ export default function EditablePartFrameBase({
   handleEdit,
   handleCancel,
   handleSave,
+  width,
 }: EditablePartFrameBaseProps) {
+  const fontSizeBySize: Record<SizeType, string> = {
+    xs: "0.75rem",
+    sm: "0.875rem",
+    md: "1rem",
+    lg: "1.125rem",
+    xl: "1.25rem",
+    "2xl": "1.5rem",
+  };
+
+  const labelWrapperRef = useRef<HTMLDivElement | null>(null);
+  const [labelWidthPx, setLabelWidthPx] = useState(0);
+
+  const normalizedTextWidth = width
+    ? /^\d+(\.\d+)?$/.test(width.trim())
+      ? `${width.trim()}ch`
+      : width
+    : undefined;
+
+  useLayoutEffect(() => {
+    if (!label || !labelWrapperRef.current) {
+      setLabelWidthPx(0);
+      return;
+    }
+
+    const el = labelWrapperRef.current;
+    const updateLabelWidth = () => {
+      setLabelWidthPx(el.getBoundingClientRect().width);
+    };
+
+    updateLabelWidth();
+    const observer = new ResizeObserver(updateLabelWidth);
+    observer.observe(el);
+
+    return () => observer.disconnect();
+  }, [label, size]);
+
+  const fixedWidthStyle = normalizedTextWidth
+    ? {
+        minWidth: `calc(${normalizedTextWidth} + ${labelWidthPx}px + 0.5rem)`,
+        maxWidth: `calc(${normalizedTextWidth} + ${labelWidthPx}px + 0.5rem)`,
+        width: `calc(${normalizedTextWidth} + ${labelWidthPx}px + 0.5rem)`,
+      }
+    : undefined;
+
+  const controlStyle: React.CSSProperties = {
+    ...(fixedWidthStyle ?? {}),
+    fontSize: fontSizeBySize[size],
+    height: `${getControlHeightBySize(size) * 0.25}rem`,
+  };
+
   return (
     <div
-      className={` flex items-center gap-2 w-full text-${size} ${className} h-${getControlHeightBySize(size)}`}
+      style={controlStyle}
+      className={`flex mb-1 items-center gap-2 w-full ${className}`}
     >
-      {label && <InputLabel label={label} />}
+      {label && (
+        <div
+          ref={labelWrapperRef}
+          className="shrink-0 h-full flex items-center"
+        >
+          <InputLabel label={label} size={size} />
+        </div>
+      )}
       {!editMode ? (
-        <div className="flex w-full items-center justify-between gap-2">
+        <div className="flex flex-1 min-w-0 items-center justify-between gap-2">
           {/*Read-only part */}
-          <div className="flex-1 min-w-0">{readView()}</div>
-          <EditButton onClick={handleEdit} size={"xs"} aria-label="Edit" />
+          <div className="flex flex-1 min-w-0 items-center overflow-hidden whitespace-nowrap truncate text-ellipsis">
+            {readView()}
+          </div>
+          <EditButton onClick={handleEdit} size="xs" aria-label="Edit" />
         </div>
       ) : (
         <>
           {/* Overlay to block all other interactions */}
           <div className={modal({ part: "overlay" })} />
           <div
-            className={`flex w-full gap-1 items-center ${modal({ part: "content" })} ${className}`}
+            className={`flex flex-1 min-w-0 gap-1 items-center ${modal({ part: "content" })} ${className}`}
           >
             {/* Edit part*/}
             {editView()}

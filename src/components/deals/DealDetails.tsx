@@ -148,18 +148,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
       className="h-full p-6 bg-white dark:bg-gray-800 overflow-y-auto"
     >
       {/* Header */}
-      <div className="grid grid-cols-1 md:grid-cols-[30%_1fr] gap-4 mb-4">
-        <div>
-          <EditableStringField
-            value={deal.company}
-            entity="Deal"
-            field="company"
-            id={deal.id}
-            validation="NotEmpty"
-            onUpdated={handleDealUpdated}
-            size="lg"
-          />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-[70%_28%] gap-4">
         <div>
           <EditableStringField
             value={deal.name}
@@ -171,17 +160,42 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             size="lg"
           />
         </div>
+        <div>
+          <EditableStringField
+            value={deal.company}
+            entity="Deal"
+            field="company"
+            id={deal.id}
+            validation="NotEmpty"
+            onUpdated={handleDealUpdated}
+            size="lg"
+          />
+        </div>
       </div>
-      <EditableDateField
-        value={deal.startDate}
-        entity="Deal"
-        field="startDate"
-        id={deal.id}
-        validation="None"
-        label="Start Date"
-        onUpdated={handleDealUpdated}
-      />
-      <div className="flex gap-2">
+      <div className="flex gap-4 justify-start flex-wrap">
+        <EditableStringField
+          value={deal.url}
+          entity="Deal"
+          field="url"
+          id={deal.id}
+          validation="Url"
+          label="Website"
+          onUpdated={handleDealUpdated}
+          size="sm"
+          width="50ch"
+        />
+        <EditableDateField
+          value={deal.startDate}
+          entity="Deal"
+          field="startDate"
+          id={deal.id}
+          validation="None"
+          label="Start Date"
+          onUpdated={handleDealUpdated}
+          width="20ch"
+        />
+      </div>
+      <div className="flex gap-4 justify-start flex-wrap">
         <EditableNumberField
           value={deal.proposalAmount}
           entity="Deal"
@@ -192,6 +206,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           onUpdated={handleDealUpdated}
           decimalAccuracy={0}
           thousandsSeparator={true}
+          width="16ch"
         />
         <EditableStringField
           value={deal.currencyCode}
@@ -200,14 +215,16 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           id={deal.id}
           validation="NotEmpty"
           onUpdated={handleDealUpdated}
+          width="14ch"
         />
         <DropdownEditableField
-          value={deal.typeId}
+          value={deal.amountTypeId}
           entity="Deal"
           field="amountTypeId"
           id={deal.id}
           validation="NotNull"
           label=""
+          width="18ch"
           onUpdated={handleDealUpdated}
           options={
             Array.isArray(amountTypeOptions)
@@ -218,28 +235,57 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
               : []
           }
         />
+        <EditableNumberField
+          value={deal.minClientAmount}
+          entity="Deal"
+          field="minClientAmount"
+          id={deal.id}
+          validation="None"
+          label="Client min"
+          onUpdated={handleDealUpdated}
+          decimalAccuracy={0}
+          thousandsSeparator={true}
+          width="16ch"
+        />
+        <EditableNumberField
+          value={deal.maxClientAmount}
+          entity="Deal"
+          field="maxClientAmount"
+          id={deal.id}
+          validation="None"
+          label="max"
+          onUpdated={handleDealUpdated}
+          decimalAccuracy={0}
+          thousandsSeparator={true}
+          width="16ch"
+        />
       </div>
-      <AutocompleteEditableStringField
-        value={deal.status}
-        entity="Deal"
-        field="status"
-        id={deal.id}
-        validation="None"
-        label="Status"
-        onUpdated={handleDealUpdated}
-        options={Array.isArray(statusOptions) ? statusOptions : []}
-      />
-      <EditableStringField
-        value={deal.url}
-        entity="Deal"
-        field="url"
-        id={deal.id}
-        validation="Url"
-        label="Website"
-        onUpdated={handleDealUpdated}
-        size="sm"
-      />
-      <div className="flex gap-2">
+      <div className="flex gap-4 justify-start flex-wrap">
+        <AutocompleteEditableStringField
+          value={deal.status}
+          entity="Deal"
+          field="status"
+          id={deal.id}
+          validation="None"
+          label="Status"
+          onUpdated={handleDealUpdated}
+          options={Array.isArray(statusOptions) ? statusOptions : []}
+          width="24ch"
+        />
+      </div>
+      <div className="flex gap-4 justify-start flex-wrap">
+        <EditableStringField
+          value={deal.industry}
+          entity="Deal"
+          field="industry"
+          id={deal.id}
+          validation="None"
+          label="Industry"
+          onUpdated={handleDealUpdated}
+          width="24ch"
+        />
+      </div>
+      <div className="flex gap-4 justify-start flex-wrap">
         <DropdownEditableField
           value={deal.typeId}
           entity="Deal"
@@ -257,6 +303,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                 }))
               : []
           }
+          width="32ch"
         />
         <DropdownEditableField
           value={deal.stateId}
@@ -275,6 +322,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                 }))
               : []
           }
+          width="22ch"
         />
       </div>
       {/* Tags */}
@@ -322,17 +370,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                   label="Description"
                   onUpdated={handleDealUpdated}
                   rows={5}
-                />
-              </div>
-              <div className="mb-6">
-                <EditableStringField
-                  value={deal.industry}
-                  entity="Deal"
-                  field="industry"
-                  id={deal.id}
-                  validation="None"
-                  label="Industry"
-                  onUpdated={handleDealUpdated}
                 />
               </div>
             </div>

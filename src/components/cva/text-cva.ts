@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const text = cva("items-center whitespace-nowrap bg-transparent", {
+export const text = cva("whitespace-nowrap bg-transparent", {
   variants: {
     style: {
       value: "text-gray-900 dark:text-gray-200",

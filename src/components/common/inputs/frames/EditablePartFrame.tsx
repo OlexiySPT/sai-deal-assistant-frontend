@@ -15,6 +15,7 @@ interface EditablePartFrameProps {
   editView: (props: EditablePartFrameChildProps) => React.ReactNode;
   onSave: () => void;
   onCancel?: () => void;
+  width?: string;
 }
 
 export default function EditablePartFrame({
@@ -25,6 +26,7 @@ export default function EditablePartFrame({
   size = "sm",
   onSave,
   onCancel,
+  width,
 }: EditablePartFrameProps) {
   const [editMode, setEditMode] = useState(false);
 
@@ -68,6 +70,7 @@ export default function EditablePartFrame({
       handleEdit={handleEdit}
       handleCancel={handleCancel}
       handleSave={handleSave}
+      width={width}
     />
   );
 }

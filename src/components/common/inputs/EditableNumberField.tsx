@@ -18,6 +18,7 @@ interface EditableNumberFieldProps {
   size?: SizeType;
   decimalAccuracy?: number; // Number of digits after decimal point
   thousandsSeparator?: boolean; // Whether to use thousands separator
+  width?: string;
 }
 
 function formatNumber(
@@ -44,6 +45,7 @@ export default function EditableNumberField({
   size = "sm",
   decimalAccuracy = 0,
   thousandsSeparator = false,
+  width,
 }: EditableNumberFieldProps) {
   return (
     <EditableFieldFrame
@@ -55,6 +57,7 @@ export default function EditableNumberField({
       onUpdated={onUpdated}
       label={label}
       size={size}
+      width={width}
       valueType={EditableFieldValueType.Number}
       readView={function (): React.ReactNode {
         if (value === null || value === undefined || isNaN(value)) {

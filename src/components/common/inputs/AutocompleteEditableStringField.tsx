@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import EditableFieldFrame, {
   EditableFieldFrameChildProps,
   EditableFieldValueType,
 } from "./frames/EditableFieldFrame";
-import { getControlHeightBySize, SizeType } from "../StylingUtil";
+import { SizeType } from "../StylingUtil";
 import AutocompleteInput from "./AutocompleteInput";
 import { text } from "../../cva/text-cva";
 import { input } from "../../cva/input-cva";
@@ -18,6 +18,7 @@ interface AutocompleteEditableStringFieldProps {
   label?: string;
   size?: SizeType;
   options: string[];
+  width?: string;
 }
 
 export default function AutocompleteEditableStringField({
@@ -30,6 +31,7 @@ export default function AutocompleteEditableStringField({
   label,
   size = "sm",
   options,
+  width,
 }: AutocompleteEditableStringFieldProps) {
   return (
     <EditableFieldFrame
@@ -42,6 +44,7 @@ export default function AutocompleteEditableStringField({
       label={label}
       size={size}
       valueType={EditableFieldValueType.String}
+      width={width}
       readView={function (): React.ReactNode {
         if (!value) {
           return (

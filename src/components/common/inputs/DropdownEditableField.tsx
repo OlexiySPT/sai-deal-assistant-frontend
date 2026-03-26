@@ -17,6 +17,7 @@ interface DropdownEditableFieldProps {
   label?: string;
   size?: SizeType;
   options: Array<{ id: number; value: string }>;
+  width?: string;
 }
 
 export default function DropdownEditableField({
@@ -29,6 +30,7 @@ export default function DropdownEditableField({
   label,
   size = "sm",
   options,
+  width,
 }: DropdownEditableFieldProps) {
   return (
     <EditableFieldFrame
@@ -41,6 +43,7 @@ export default function DropdownEditableField({
       label={label}
       size={size}
       valueType={EditableFieldValueType.Number}
+      width={width}
       readView={function (): React.ReactNode {
         const selected = options.find((opt) => opt.id === value);
         if (!selected) {

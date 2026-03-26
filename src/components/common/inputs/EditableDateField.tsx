@@ -19,6 +19,7 @@ interface EditableDateFieldProps {
   onUpdated?: () => void;
   label?: string;
   size?: SizeType;
+  width?: string;
 }
 
 export default function EditableDateField({
@@ -30,6 +31,7 @@ export default function EditableDateField({
   onUpdated,
   label,
   size = "sm",
+  width,
 }: EditableDateFieldProps) {
   return (
     <EditableFieldFrame
@@ -42,6 +44,7 @@ export default function EditableDateField({
       label={label}
       size={size}
       valueType={EditableFieldValueType.Date}
+      width={width}
       readView={function (): React.ReactNode {
         if (!value) {
           return (
@@ -54,8 +57,8 @@ export default function EditableDateField({
           const d = new Date(value);
           if (!isNaN(d.getTime())) {
             const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
             formatted = `${year}-${month}-${day}`;
           }
         } catch {}

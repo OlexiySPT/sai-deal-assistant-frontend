@@ -16,6 +16,7 @@ interface AutocompleteStringListEditorProps {
   className?: string;
   label?: string;
   size?: SizeType;
+  width?: string;
 }
 
 export default function AutocompleteStringListEditor({
@@ -26,6 +27,7 @@ export default function AutocompleteStringListEditor({
   className = "",
   label = "",
   size = "sm",
+  width,
 }: AutocompleteStringListEditorProps) {
   const [inputValue, setInputValue] = useState("");
   const [tags, setTags] = useState<string[]>(value);
@@ -122,6 +124,7 @@ export default function AutocompleteStringListEditor({
               handleEdit={() => {}}
               handleCancel={() => handleClose()}
               handleSave={() => handleAddTag(inputValue)}
+              width={width}
             />
           </div>
         ) : (
