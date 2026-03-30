@@ -125,7 +125,7 @@ export default function EditableMultilineStringField({
           <div className="flex flex-col flex-1 min-w-0">
             <textarea
               ref={textareaRef}
-              className="input input-sm border rounded px-2 py-1 max-w-xl w-full resize-none bg-transparent text-gray-900 dark:text-gray-100"
+              className="input input-sm border rounded px-2 py-1 w-full resize-none bg-transparent text-gray-900 dark:text-gray-100"
               rows={rows}
               value={value ?? ""}
               disabled={true}

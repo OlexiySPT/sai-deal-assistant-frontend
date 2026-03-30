@@ -11,7 +11,6 @@ import EditableNumberField from "../common/inputs/EditableNumberField";
 import AutocompleteEditableStringField from "../common/inputs/AutocompleteEditableStringField";
 import EditableMultilineStringField from "../common/inputs/EditableMultilineStringField";
 import { CreateDealDialog } from "./CreateDealDialog";
-import AddButton from "../common/buttons/AddButton";
 import { selectDealLoading } from "../../features/deals/dealsSlice";
 import { getCachedDealStatuses } from "../../features/deals/dealsAPI";
 import AutocompleteStringListEditor from "../common/inputs/AutocompleteStringListEditor";
@@ -23,6 +22,8 @@ import {
 import { EnumValue, getEnumValues } from "../../features/enums/enumsAPI";
 import DropdownEditableField from "../common/inputs/DropdownEditableField";
 import EditableDateField from "../common/inputs/EditableDateField";
+import { ContactPersonList } from "../contacts/ContactPersonList";
+import { EventList } from "../events/EventList";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -142,6 +143,8 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
     );
   }
 
+  const events = deal.events || [];
+
   return (
     <div
       id="details-container"
@@ -222,7 +225,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           entity="Deal"
           field="amountTypeId"
           id={deal.id}
-          validation="NotNull"
           label=""
           width="18ch"
           onUpdated={handleDealUpdated}
@@ -407,96 +409,14 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             </div>
           )}
           {activeTab === "Events" && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                  Events
-                </h2>
-                <AddButton />
-              </div>
-              <div className="space-y-3">
-                {deal.events?.length > 0 ? (
-                  deal.events.map((event: any) => (
-                    <div
-                      key={event.id}
-                      className="p-4 bg-gray-50 dark:bg-gray-700 rounded"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="font-medium text-gray-900 dark:text-gray-100">
-                          {event.type || "Event"}
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {new Date(event.date).toLocaleDateString()}
-                        </div>
-                      </div>
-                      {event.agenda && (
-                        <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">
-                          <strong>Agenda:</strong> {event.agenda}
-                        </div>
-                      )}
-                      {event.result && (
-                        <div className="text-sm text-gray-700 dark:text-gray-300 mb-1">
-                          <strong>Result:</strong> {event.result}
-                        </div>
-                      )}
-                      {event.contactPerson && (
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          Contact: {event.contactPerson}
-                        </div>
-                      )}
-                      {event.notes && event.notes.length > 0 && (
-                        <div className="mt-2 pl-4 border-l-2 border-gray-300 dark:border-gray-600">
-                          {event.notes.map((note: any) => (
-                            <div
-                              key={note.id}
-                              className="text-sm text-gray-700 dark:text-gray-300 mb-1"
-                            >
-                              • {note.text}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-gray-500 dark:text-gray-400">
-                    No events available.
-                  </div>
-                )}
-              </div>
-            </div>
+            <EventList
+              dealId={deal.id}
+              events={events}
+              onUpdated={handleDealUpdated}
+            />
           )}
           {activeTab === "Contact Persons" && (
-            <div>
-              {deal.contactPersons && deal.contactPersons.length > 0 ? (
-                <div className="space-y-2">
-                  {deal.contactPersons.map((person: any) => (
-                    <div
-                      key={person.id}
-                      className="p-3 bg-gray-50 dark:bg-gray-700 rounded"
-                    >
-                      <div className="font-medium text-gray-900 dark:text-gray-100">
-                        {person.name}
-                      </div>
-                      {person.position && (
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {person.position}
-                        </div>
-                      )}
-                      {person.email && (
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          {person.email}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-gray-500 dark:text-gray-400">
-                  No contact persons available.
-                </div>
-              )}
-            </div>
+            <ContactPersonList contactPersons={deal.contactPersons || []} />
           )}
         </div>
       </div>

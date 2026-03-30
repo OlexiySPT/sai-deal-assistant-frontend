@@ -12,6 +12,7 @@ import {
 } from "../../features/deals/dealsAPI";
 import { Dialog } from "../common/Dialog";
 import AutocompleteInput from "../common/inputs/AutocompleteInput";
+import { todayLocalYmd } from "../../utils/date";
 
 interface CreateDealDialogProps {
   open: boolean;
@@ -36,6 +37,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
 
   const [form, setForm] = useState({
     name: "",
+    company: "",
     description: "",
     url: "",
     aiSearchInfo: "",
@@ -44,6 +46,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
     status: "",
     typeId: 0,
     stateId: 0,
+    startDate: null,
   });
   const [isEdit, setIsEdit] = useState(false);
 
@@ -68,6 +71,8 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
         .then((deal) => {
           setForm({
             name: deal.name || "",
+            company: deal.company || "",
+            startDate: deal.startDate ? new Date(deal.startDate) : null,
             description: deal.description || "",
             url: deal.url || "",
             aiSearchInfo: deal.aiSearchInfo || "",
@@ -84,12 +89,14 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
       setIsEdit(false);
       setForm({
         name: "",
+        company: "",
+        startDate: todayLocalYmd(),
         description: "",
         url: "",
         aiSearchInfo: "",
         aiBriefDescription: "",
-        industry: "",
-        status: "",
+        industry: "DotNet",
+        status: "New",
         typeId: 3,
         stateId: 1,
       });
@@ -154,6 +161,16 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             <input
               name="name"
               value={form.name}
+              onChange={handleChange}
+              className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              required
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="w-32 text-sm font-medium">Company</label>
+            <input
+              name="company"
+              value={form.company}
               onChange={handleChange}
               className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
               required

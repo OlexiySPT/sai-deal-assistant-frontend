@@ -25,17 +25,10 @@ export interface DealDto {
 
 export interface DealListItemDto {
   id: number;
-  startDate: Date;
   company: string;
   name: string | null;
-  type: string | null;
   state: string | null;
-  description: string | null;
-  industry: string | null;
-  createdAt: string;
-  proposalAmount: number | null;
-  currencyCode: string | null;
-  amountType: string | null;
+  status: string | null;
 }
 
 export interface DealListItemDtoQueryResult {

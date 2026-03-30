@@ -167,13 +167,11 @@ const DealRow: React.FC<{
         <DealStateIcon state={deal.state} />
         <div className="flex-1 min-w-0">
           <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
-            {deal.name || "Untitled Deal"}
+            {deal.company || "Untitled Deal"}
           </div>
-          {deal.type && (
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              {deal.type}
-            </div>
-          )}
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            {deal.name}
+          </div>
         </div>
       </div>
     </div>
