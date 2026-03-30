@@ -5,7 +5,7 @@ export const StatusBar: React.FC = () => {
   const dealsLoading = useAppSelector((state) => state.deals.loading);
   const eventsLoading = useAppSelector((state) => state.events.loading);
   const contactPersonsLoading = useAppSelector(
-    (state) => state.contactPersons.loading
+    (state) => state.contactPersons.loading,
   );
   const dealTagsLoading = useAppSelector((state) => state.dealTags.loading);
   const enumsLoading = useAppSelector((state) => state.enums.loading);
@@ -14,7 +14,7 @@ export const StatusBar: React.FC = () => {
   const dealsError = useAppSelector((state) => state.deals.error);
   const eventsError = useAppSelector((state) => state.events.error);
   const contactPersonsError = useAppSelector(
-    (state) => state.contactPersons.error
+    (state) => state.contactPersons.error,
   );
   const dealTagsError = useAppSelector((state) => state.dealTags.error);
 
