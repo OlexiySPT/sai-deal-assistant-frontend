@@ -3,9 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchDealWithDependents,
   selectCurrentDealWithDependents,
-  selectDealsLoading,
 } from "../../features/deals/dealsSlice";
-import EditButton from "../common/buttons/EditButton";
 import EditableStringField from "../common/inputs/EditableStringField";
 import EditableNumberField from "../common/inputs/EditableNumberField";
 import AutocompleteEditableStringField from "../common/inputs/AutocompleteEditableStringField";
@@ -19,7 +17,7 @@ import {
   deleteDealTag,
   getExistingTags,
 } from "../../features/dealTags/dealTagsAPI";
-import { EnumValue, getEnumValues } from "../../features/enums/enumsAPI";
+import { getEnumValues } from "../../features/enums/enumsAPI";
 import DropdownEditableField from "../common/inputs/DropdownEditableField";
 import EditableDateField from "../common/inputs/EditableDateField";
 import { ContactPersonList } from "../contacts/ContactPersonList";
@@ -38,10 +36,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const [tagsOptions, setTagsOptions] = useState<string[]>([]);
   const deal = useAppSelector(selectCurrentDealWithDependents);
   const loading = useAppSelector(selectDealLoading);
-  const [showContactPersons, setShowContactPersons] = useState(false);
-  const [rightPanelWidth, setRightPanelWidth] = useState(40);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("Description");
 
@@ -66,46 +60,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
       mounted = false;
     };
   }, []);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  const handleMouseDown = () => {
-    setIsDragging(true);
-  };
-
-  useEffect(() => {
-    const handleMouseMoveListener = (e: MouseEvent) => {
-      if (isDragging) {
-        const container = document.getElementById("details-container");
-        if (container) {
-          const containerRect = container.getBoundingClientRect();
-          const newWidth =
-            ((containerRect.right - e.clientX) / containerRect.width) * 100;
-          setRightPanelWidth(Math.min(Math.max(newWidth, 20), 60));
-        }
-      }
-    };
-
-    const handleMouseUpListener = () => {
-      setIsDragging(false);
-    };
-
-    if (isDragging) {
-      document.addEventListener("mousemove", handleMouseMoveListener);
-      document.addEventListener("mouseup", handleMouseUpListener);
-      return () => {
-        document.removeEventListener("mousemove", handleMouseMoveListener);
-        document.removeEventListener("mouseup", handleMouseUpListener);
-      };
-    }
-  }, [isDragging]);
 
   const handleEditClick = () => {
     setEditDialogOpen(true);
@@ -165,13 +119,14 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
         </div>
         <div>
           <EditableStringField
-            value={deal.company}
-            entity="Deal"
-            field="company"
-            id={deal.id}
+            value={deal.firm?.name}
+            entity="Firm"
+            field="name"
+            id={deal.firmId}
             validation="NotEmpty"
             onUpdated={handleDealUpdated}
             size="lg"
+            label="Firm"
           />
         </div>
       </div>
@@ -411,12 +366,15 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           {activeTab === "Events" && (
             <EventList
               dealId={deal.id}
+              firmId={deal.firmId}
               events={events}
               onUpdated={handleDealUpdated}
             />
           )}
           {activeTab === "Contact Persons" && (
-            <ContactPersonList contactPersons={deal.contactPersons || []} />
+            <ContactPersonList
+              contactPersons={deal.firm?.contactPersons || []}
+            />
           )}
         </div>
       </div>

@@ -15,7 +15,7 @@ interface EditableDateFieldProps {
   entity: string;
   field: string;
   id: number;
-  validation?: "None" | "NotNull" | "NotEmpty" | "Date";
+  validation?: "None" | "NotNull" | "NotEmpty";
   onUpdated?: () => void;
   label?: string;
   size?: SizeType;
@@ -84,7 +84,9 @@ export default function EditableDateField({
             className={input({ size })}
             disabled={loading}
             autoFocus
-            onKeyDown={handleKeyDown}
+            onKeyDown={(event) =>
+              handleKeyDown(event as React.KeyboardEvent<HTMLInputElement>)
+            }
             placeholderText="Select date"
           />
         );

@@ -100,7 +100,7 @@ export function MultiSelect({
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-lg overflow-hidden">
           {pendingValues.length > 0 && (
             <div className="px-2 py-1.5 border-b border-gray-200 dark:border-gray-600 flex justify-between items-center">
               <button
@@ -112,13 +112,13 @@ export function MultiSelect({
               </button>
             </div>
           )}
-          {options.length === 0 ? (
-            <div className="px-2 py-1.5 text-xs text-gray-500 dark:text-gray-400">
-              No options available
-            </div>
-          ) : (
-            <>
-              {options.map((option) => (
+          <div className="max-h-60 overflow-y-auto">
+            {options.length === 0 ? (
+              <div className="px-2 py-1.5 text-xs text-gray-500 dark:text-gray-400">
+                No options available
+              </div>
+            ) : (
+              options.map((option) => (
                 <label
                   key={option.id}
                   className="flex items-center px-2 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer"
@@ -133,18 +133,18 @@ export function MultiSelect({
                     {option.label}
                   </span>
                 </label>
-              ))}
-              <div className="px-2 py-2 border-t border-gray-200 dark:border-gray-600 flex justify-end">
-                <button
-                  type="button"
-                  className="bg-blue-600 text-white text-xs px-3 py-1 rounded hover:bg-blue-700"
-                  onClick={applyFilter}
-                >
-                  Apply
-                </button>
-              </div>
-            </>
-          )}
+              ))
+            )}
+          </div>
+          <div className="px-2 py-2 border-t border-gray-200 dark:border-gray-600 flex justify-end">
+            <button
+              type="button"
+              className="bg-blue-600 text-white text-xs px-3 py-1 rounded hover:bg-blue-700"
+              onClick={applyFilter}
+            >
+              Apply
+            </button>
+          </div>
         </div>
       )}
     </div>

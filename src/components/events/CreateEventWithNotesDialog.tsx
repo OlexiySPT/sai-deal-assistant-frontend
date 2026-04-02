@@ -23,6 +23,7 @@ interface CreateEventWithNotesDialogProps {
   open: boolean;
   onClose: () => void;
   dealId: number;
+  firmId?: number | null;
   eventId?: number | null;
   onSaved?: () => void;
 }
@@ -39,7 +40,7 @@ function toLocalYmd(value?: string | null): string {
 
 export const CreateEventWithNotesDialog: React.FC<
   CreateEventWithNotesDialogProps
-> = ({ open, onClose, dealId, eventId, onSaved }) => {
+> = ({ open, onClose, dealId, firmId, eventId, onSaved }) => {
   const dispatch = useAppDispatch();
   const eventTypes = useAppSelector(selectEnumValues("eventtype"));
   const eventStates = useAppSelector(selectEnumValues("eventstate"));
@@ -66,8 +67,13 @@ export const CreateEventWithNotesDialog: React.FC<
   }, [dispatch]);
 
   const loadContactPersons = async (preferredId?: number) => {
+    if (!firmId) {
+      setContactPersons([]);
+      return;
+    }
+
     try {
-      const res = await getContactPersons(dealId);
+      const res = await getContactPersons(firmId);
       const items = res.items || [];
       setContactPersons(items);
       if (preferredId) {
@@ -82,7 +88,7 @@ export const CreateEventWithNotesDialog: React.FC<
     if (!open) return;
 
     loadContactPersons();
-  }, [dealId, open]);
+  }, [firmId, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -294,7 +300,7 @@ export const CreateEventWithNotesDialog: React.FC<
               <AddButton onClick={openCreateContactDialog} />
               <EditButton
                 onClick={openEditContactDialog}
-                disabled={!form.contactPersonId}
+                disabled={!firmId || !form.contactPersonId}
               />
             </div>
           </div>
@@ -340,7 +346,7 @@ export const CreateEventWithNotesDialog: React.FC<
           setContactDialogOpen(false);
           setEditingContactId(null);
         }}
-        dealId={dealId}
+        firmId={firmId || 0}
         contactId={editingContactId}
         onSaved={(savedContactId) => {
           loadContactPersons(savedContactId);

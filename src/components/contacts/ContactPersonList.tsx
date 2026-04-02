@@ -1,5 +1,7 @@
+import type { ContactPersonListItemDto } from "../../features/contactPersons/contactPersonsAPI";
+
 interface ContactPersonListProps {
-  contactPersons: any[];
+  contactPersons: ContactPersonListItemDto[];
 }
 
 export const ContactPersonList: React.FC<ContactPersonListProps> = ({
@@ -11,7 +13,7 @@ export const ContactPersonList: React.FC<ContactPersonListProps> = ({
     <div>
       {contacts.length > 0 ? (
         <div className="space-y-2">
-          {contacts.map((person: any) => (
+          {contacts.map((person) => (
             <div
               key={person.id}
               className="p-3 bg-gray-50 dark:bg-gray-700 rounded"

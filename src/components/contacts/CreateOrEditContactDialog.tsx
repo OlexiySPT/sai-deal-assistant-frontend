@@ -9,14 +9,14 @@ import {
 interface CreateOrEditContactDialogProps {
   open: boolean;
   onClose: () => void;
-  dealId: number;
+  firmId: number;
   contactId?: number | null;
   onSaved?: (savedContactId: number) => void;
 }
 
 export const CreateOrEditContactDialog: React.FC<
   CreateOrEditContactDialogProps
-> = ({ open, onClose, dealId, contactId, onSaved }) => {
+> = ({ open, onClose, firmId, contactId, onSaved }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -96,7 +96,7 @@ export const CreateOrEditContactDialog: React.FC<
         const created = await createContactPerson({
           id: 0,
           ...payload,
-          dealId,
+          firmId,
         });
         savedId = created.id;
       }

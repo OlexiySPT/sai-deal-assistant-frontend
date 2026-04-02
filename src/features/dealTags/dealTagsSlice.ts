@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { RootState } from "../../app/store";
 import * as dealTagsAPI from "./dealTagsAPI";
-import type { DealTagDto, AddDealTagIfNotExistsCommand } from "./dealTagsAPI";
+import type { AddOrDeleteDealTagCommand, DealTagDto } from "./dealTagsAPI";
 
 // State interface
 interface DealTagsState {
@@ -23,28 +23,28 @@ export const fetchDealTags = createAsyncThunk(
   "dealTags/fetchDealTags",
   async (dealId?: number) => {
     return await dealTagsAPI.getDealTags(dealId);
-  }
+  },
 );
 
 export const fetchExistingTags = createAsyncThunk(
   "dealTags/fetchExistingTags",
   async () => {
     return await dealTagsAPI.getExistingTags();
-  }
+  },
 );
 
 export const addDealTag = createAsyncThunk(
   "dealTags/addDealTag",
-  async (data: AddDealTagIfNotExistsCommand) => {
+  async (data: AddOrDeleteDealTagCommand) => {
     return await dealTagsAPI.addDealTag(data);
-  }
+  },
 );
 
 export const deleteDealTag = createAsyncThunk(
   "dealTags/deleteDealTag",
-  async (id: number) => {
-    return await dealTagsAPI.deleteDealTag(id);
-  }
+  async (data: AddOrDeleteDealTagCommand) => {
+    return await dealTagsAPI.deleteDealTag(data);
+  },
 );
 
 // Slice
@@ -104,7 +104,9 @@ const dealTagsSlice = createSlice({
       })
       .addCase(deleteDealTag.fulfilled, (state, action) => {
         state.loading = false;
-        state.dealTags = state.dealTags.filter((tag) => tag.id !== action.payload.id);
+        state.dealTags = state.dealTags.filter(
+          (tag) => tag.id !== action.payload.id,
+        );
       })
       .addCase(deleteDealTag.rejected, (state, action) => {
         state.loading = false;
@@ -118,8 +120,10 @@ export const { clearError } = dealTagsSlice.actions;
 
 // Selectors
 export const selectDealTags = (state: RootState) => state.dealTags.dealTags;
-export const selectExistingTags = (state: RootState) => state.dealTags.existingTags;
-export const selectDealTagsLoading = (state: RootState) => state.dealTags.loading;
+export const selectExistingTags = (state: RootState) =>
+  state.dealTags.existingTags;
+export const selectDealTagsLoading = (state: RootState) =>
+  state.dealTags.loading;
 export const selectDealTagsError = (state: RootState) => state.dealTags.error;
 
 export default dealTagsSlice.reducer;

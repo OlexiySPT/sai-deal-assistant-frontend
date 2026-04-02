@@ -10,6 +10,7 @@ import {
   getDealById,
   getCachedDealStatuses,
 } from "../../features/deals/dealsAPI";
+import { getFirmsDropdown } from "../../features/firms/firmsAPI";
 import { Dialog } from "../common/Dialog";
 import AutocompleteInput from "../common/inputs/AutocompleteInput";
 import { todayLocalYmd } from "../../utils/date";
@@ -19,6 +20,20 @@ interface CreateDealDialogProps {
   onClose: () => void;
   onCreated?: (deal: any) => void;
   dealId?: number | null; // If provided, dialog is in edit mode
+}
+
+interface DealFormState {
+  name: string;
+  firmId: number;
+  description: string;
+  url: string;
+  aiSearchInfo: string;
+  aiBriefDescription: string;
+  industry: string;
+  status: string;
+  typeId: number;
+  stateId: number;
+  startDate: string | null;
 }
 
 export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
@@ -35,9 +50,9 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
     dispatch(loadAllEnums());
   }, [dispatch]);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<DealFormState>({
     name: "",
-    company: "",
+    firmId: 0,
     description: "",
     url: "",
     aiSearchInfo: "",
@@ -51,12 +66,31 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
   const [isEdit, setIsEdit] = useState(false);
 
   const [statuses, setStatuses] = useState<string[]>([]);
+  const [firms, setFirms] = useState<Array<{ id: number; name: string }>>([]);
 
   useEffect(() => {
     let mounted = true;
     getCachedDealStatuses().then((data) => {
       if (mounted) setStatuses(data || []);
     });
+    getFirmsDropdown({
+      Page: 1,
+      PageSize: 200,
+      SortBy: "name",
+      SortDirection: "Asc",
+    })
+      .then((response) => {
+        if (!mounted) return;
+        setFirms(
+          (response.items || []).map((firm) => ({
+            id: firm.id,
+            name: firm.name || `Firm ${firm.id}`,
+          })),
+        );
+      })
+      .catch(() => {
+        if (mounted) setFirms([]);
+      });
     return () => {
       mounted = false;
     };
@@ -71,16 +105,16 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
         .then((deal) => {
           setForm({
             name: deal.name || "",
-            company: deal.company || "",
-            startDate: deal.startDate ? new Date(deal.startDate) : null,
+            firmId: deal.firmId || 0,
+            startDate: deal.startDate || null,
             description: deal.description || "",
             url: deal.url || "",
             aiSearchInfo: deal.aiSearchInfo || "",
             aiBriefDescription: deal.aiBriefDescription || "",
             industry: deal.industry || "",
             status: deal.status || "",
-            typeId: deal.typeId,
-            stateId: deal.stateId,
+            typeId: deal.typeId || 0,
+            stateId: deal.stateId || 0,
           });
         })
         .catch(() => setError("Failed to load deal"))
@@ -89,7 +123,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
       setIsEdit(false);
       setForm({
         name: "",
-        company: "",
+        firmId: 0,
         startDate: todayLocalYmd(),
         description: "",
         url: "",
@@ -115,7 +149,10 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
     const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: name === "typeId" || name === "stateId" ? Number(value) : value,
+      [name]:
+        name === "typeId" || name === "stateId" || name === "firmId"
+          ? Number(value)
+          : value,
     }));
   };
 
@@ -167,14 +204,23 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             />
           </div>
           <div className="flex items-center gap-2">
-            <label className="w-32 text-sm font-medium">Company</label>
-            <input
-              name="company"
-              value={form.company}
+            <label className="w-32 text-sm font-medium">Firm</label>
+            <select
+              name="firmId"
+              value={form.firmId}
               onChange={handleChange}
               className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
               required
-            />
+            >
+              <option value={0} disabled>
+                Select firm...
+              </option>
+              {firms.map((firm) => (
+                <option key={firm.id} value={firm.id}>
+                  {firm.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="flex items-center gap-2">
             <label className="w-32 text-sm font-medium">URL</label>

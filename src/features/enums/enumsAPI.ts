@@ -27,7 +27,8 @@ export const getEnumNames = async (): Promise<string[]> => {
 };
 
 const enumValuesCache: { [key: string]: EnumValue[] } = {};
-const enumValuesPending: { [key: string]: Promise<EnumValue[]> } = {};
+const enumValuesPending: { [key: string]: Promise<EnumValue[]> | undefined } =
+  {};
 export const getEnumValues = async (enumName: string): Promise<EnumValue[]> => {
   if (enumValuesCache[enumName]) return enumValuesCache[enumName];
   if (enumValuesPending[enumName]) return enumValuesPending[enumName];

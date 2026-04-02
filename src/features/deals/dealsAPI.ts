@@ -1,31 +1,36 @@
 import api from "../../services/api";
+import type { DealTagDto } from "../dealTags/dealTagsAPI";
+import type { EventWithDependenciesListItemDto } from "../events/eventsAPI";
+import type { FirmWithDependenciesDto } from "../firms/firmsAPI";
 
 // Types
 export interface DealDto {
   id: number;
-  startDate: Date;
-  company: string;
-  name: string | null;
-  description: string | null;
-  url: string | null;
-  aiSearchInfo: string | null;
-  aiBriefDescription: string | null;
-  industry: string | null;
-  status: string | null;
-  typeId: number;
-  stateId: number;
-  proposalAmount: number | null;
-  minClientAmount: number | null;
-  maxClientAmount: number | null;
-  currencyCode: string | null;
-  exchangeRate: number | null;
-  amountTypeId: number | null;
-  amountType: string | null;
+  startDate: string | null;
+  name?: string | null;
+  description?: string | null;
+  initialLetter?: string | null;
+  url?: string | null;
+  aiSearchInfo?: string | null;
+  aiBriefDescription?: string | null;
+  industry?: string | null;
+  status?: string | null;
+  typeId?: number;
+  stateId?: number;
+  firmId?: number;
+  proposalAmount?: number | null;
+  minClientAmount?: number | null;
+  maxClientAmount?: number | null;
+  currencyCode?: string | null;
+  exchangeRate?: number | null;
+  amountTypeId?: number | null;
+  amountType?: string | null;
 }
 
 export interface DealListItemDto {
   id: number;
-  company: string;
+  firmName: string | null;
+  lastActionDate: string | null;
   name: string | null;
   state: string | null;
   status: string | null;
@@ -38,10 +43,10 @@ export interface DealListItemDtoQueryResult {
 
 export interface DealWithDependentsDto {
   id: number;
-  startDate: Date;
-  company: string;
+  startDate: string | null;
   name: string | null;
   description: string | null;
+  initialLetter: string | null;
   url: string | null;
   aiSearchInfo: string | null;
   aiBriefDescription: string | null;
@@ -49,9 +54,10 @@ export interface DealWithDependentsDto {
   status: string | null;
   typeId: number;
   stateId: number;
-  contactPersons: any[] | null;
-  events: any[] | null;
-  tags: any[] | null;
+  firmId: number;
+  firm: FirmWithDependenciesDto | null;
+  events: EventWithDependenciesListItemDto[] | null;
+  tags: DealTagDto[] | null;
   proposalAmount: number | null;
   minClientAmount: number | null;
   maxClientAmount: number | null;
@@ -59,63 +65,65 @@ export interface DealWithDependentsDto {
   exchangeRate: number | null;
   amountTypeId: number | null;
   amountType: string | null;
-  denormLastActionDate: Date | null;
+  denormDenormLastActionDate?: string | null;
 }
 
 export interface CreateDealCommand {
   id: number;
-  startDate: Date;
-  company: string;
-  name: string | null;
-  description: string | null;
-  url: string | null;
-  aiSearchInfo: string | null;
-  aiBriefDescription: string | null;
-  industry: string | null;
-  status: string | null;
-  typeId: number;
-  stateId: number;
-  proposalAmount: number | null;
-  minClientAmount: number | null;
-  maxClientAmount: number | null;
-  currencyCode: string | null;
-  exchangeRate: number | null;
-  amountTypeId: number | null;
-  amountType: string | null;
+  startDate?: string | null;
+  name?: string | null;
+  description?: string | null;
+  initialLetter?: string | null;
+  url?: string | null;
+  aiSearchInfo?: string | null;
+  aiBriefDescription?: string | null;
+  industry?: string | null;
+  status?: string | null;
+  typeId?: number;
+  stateId?: number;
+  firmId?: number;
+  proposalAmount?: number | null;
+  minClientAmount?: number | null;
+  maxClientAmount?: number | null;
+  currencyCode?: string | null;
+  exchangeRate?: number | null;
+  amountTypeId?: number | null;
+  amountType?: string | null;
 }
 
 export interface UpdateDealCommand {
   id: number;
-  startDate: Date;
-  company: string;
-  name: string | null;
-  description: string | null;
-  url: string | null;
-  aiSearchInfo: string | null;
-  aiBriefDescription: string | null;
-  industry: string | null;
-  status: string | null;
-  typeId: number;
-  stateId: number;
-  proposalAmount: number | null;
-  minClientAmount: number | null;
-  maxClientAmount: number | null;
-  currencyCode: string | null;
-  exchangeRate: number | null;
-  amountTypeId: number | null;
-  amountType: string | null;
+  startDate?: string | null;
+  name?: string | null;
+  description?: string | null;
+  initialLetter?: string | null;
+  url?: string | null;
+  aiSearchInfo?: string | null;
+  aiBriefDescription?: string | null;
+  industry?: string | null;
+  status?: string | null;
+  typeId?: number;
+  stateId?: number;
+  firmId?: number;
+  proposalAmount?: number | null;
+  minClientAmount?: number | null;
+  maxClientAmount?: number | null;
+  currencyCode?: string | null;
+  exchangeRate?: number | null;
+  amountTypeId?: number | null;
+  amountType?: string | null;
 }
 
 export interface DealsQueryParams {
-  Company?: string;
   Name?: string;
   Description?: string;
   Industry?: string;
   Status?: string;
+  FirmId?: number;
   StateIds?: number | number[];
   TypeIds?: number | number[];
   SortBy?: string;
-  SortDirection?: 0 | 1;
+  SortDirection?: "Asc" | "Desc";
   Page?: number;
   PageSize?: number;
   SortDescending?: boolean;

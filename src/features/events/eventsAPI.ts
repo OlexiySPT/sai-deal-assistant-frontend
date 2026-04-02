@@ -4,7 +4,7 @@ import api from "../../services/api";
 export interface EventDto {
   id: number;
   date: string;
-  topic: string;
+  topic: string | null;
   pos: number;
   agenda: string | null;
   result: string | null;
@@ -46,7 +46,7 @@ export interface EventListItemDtoQueryResult {
 export interface CreateEventCommand {
   id: number;
   date: string;
-  topic: string;
+  topic: string | null;
   pos: number;
   agenda: string | null;
   result: string | null;
@@ -59,7 +59,7 @@ export interface CreateEventCommand {
 export interface UpdateEventCommand {
   id: number;
   date: string;
-  topic: string;
+  topic: string | null;
   pos: number;
   agenda: string | null;
   result: string | null;

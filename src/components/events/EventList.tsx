@@ -169,6 +169,7 @@ const MemoEventRow = React.memo(
 
 interface EventListProps {
   dealId: number;
+  firmId?: number | null;
   events: any[];
   selectedEventId?: number | null;
   onSelectEvent?: (id: number) => void;
@@ -177,6 +178,7 @@ interface EventListProps {
 
 export const EventList: React.FC<EventListProps> = ({
   dealId,
+  firmId,
   events,
   selectedEventId = null,
   onSelectEvent,
@@ -234,6 +236,7 @@ export const EventList: React.FC<EventListProps> = ({
         onClose={handleEventDialogClose}
         onSaved={onUpdated}
         dealId={dealId}
+        firmId={firmId}
         eventId={editingEventId}
       />
     </div>

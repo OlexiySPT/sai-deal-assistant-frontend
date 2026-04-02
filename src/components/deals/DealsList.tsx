@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchDeals,
@@ -16,142 +16,26 @@ import AutocompleteInput from "../common/inputs/AutocompleteInput";
 import { getCachedDealStatuses } from "../../features/deals/dealsAPI";
 import { CreateDealDialog } from "./CreateDealDialog";
 import AddButton from "../common/buttons/AddButton";
-
-// Deal state icon component
-const DealStateIcon: React.FC<{ state: string | null }> = ({ state }) => {
-  const stateKey = state?.toLowerCase() || "";
-
-  // Icons for different states
-  if (stateKey.includes("lead") || stateKey.includes("new")) {
-    return (
-      <svg
-        className="w-4 h-4 text-blue-500"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <title>New Lead</title>
-        <path
-          fillRule="evenodd"
-          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-          clipRule="evenodd"
-        />
-      </svg>
-    );
-  }
-
-  if (stateKey.includes("proposal") || stateKey.includes("pending")) {
-    return (
-      <svg
-        className="w-4 h-4 text-yellow-500"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <title>Proposal Pending</title>
-        <path
-          fillRule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-          clipRule="evenodd"
-        />
-      </svg>
-    );
-  }
-
-  if (stateKey.includes("negotiation") || stateKey.includes("progress")) {
-    return (
-      <svg
-        className="w-4 h-4 text-orange-500"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <title>In Negotiation</title>
-        <path
-          fillRule="evenodd"
-          d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
-          clipRule="evenodd"
-        />
-      </svg>
-    );
-  }
-
-  if (
-    stateKey.includes("won") ||
-    stateKey.includes("success") ||
-    stateKey.includes("closed won")
-  ) {
-    return (
-      <svg
-        className="w-4 h-4 text-green-500"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <title>Deal Won</title>
-        <path
-          fillRule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-          clipRule="evenodd"
-        />
-      </svg>
-    );
-  }
-
-  if (stateKey.includes("lost") || stateKey.includes("closed lost")) {
-    return (
-      <svg
-        className="w-4 h-4 text-red-500"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <title>Deal Lost</title>
-        <path
-          fillRule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-          clipRule="evenodd"
-        />
-      </svg>
-    );
-  }
-
-  if (stateKey.includes("qualified")) {
-    return (
-      <svg
-        className="w-4 h-4 text-purple-500"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <title>Qualified Lead</title>
-        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-        <path
-          fillRule="evenodd"
-          d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-          clipRule="evenodd"
-        />
-      </svg>
-    );
-  }
-
-  // Default icon
-  return (
-    <svg
-      className="w-4 h-4 text-gray-500"
-      fill="currentColor"
-      viewBox="0 0 20 20"
-    >
-      <title>{state || "Unknown State"}</title>
-      <path
-        fillRule="evenodd"
-        d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z"
-        clipRule="evenodd"
-      />
-    </svg>
-  );
-};
+import { DealStateIcon } from "./DealStateIcon";
 
 // New memoized row to avoid full list redraw on selection
 const DealRow: React.FC<{
   deal: any;
+  stateId: number | null;
+  states: any[];
   isSelected: boolean;
   onClick: (id: number, opts?: { immediate?: boolean }) => void;
-}> = ({ deal, isSelected, onClick }) => {
+}> = ({ deal, stateId, states, isSelected, onClick }) => {
+  const meta = [
+    deal.firmName,
+    deal.lastActionDate
+      ? new Date(deal.lastActionDate).toLocaleDateString()
+      : null,
+    deal.status,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
     <div
       data-deal-id={deal.id}
@@ -164,13 +48,13 @@ const DealRow: React.FC<{
       }`}
     >
       <div className="flex items-center gap-2">
-        <DealStateIcon state={deal.state} />
+        <DealStateIcon id={stateId} states={states} />
         <div className="flex-1 min-w-0">
           <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
-            {deal.company || "Untitled Deal"}
+            {deal.name || "Untitled Deal"}
           </div>
           <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {deal.name}
+            {meta || deal.state || "-"}
           </div>
         </div>
       </div>
@@ -181,7 +65,11 @@ const DealRow: React.FC<{
 const MemoDealRow = React.memo(
   DealRow,
   (prev, next) =>
-    prev.deal.id === next.deal.id && prev.isSelected === next.isSelected,
+    prev.deal.id === next.deal.id &&
+    prev.stateId === next.stateId &&
+    prev.states === next.states &&
+    prev.isSelected === next.isSelected &&
+    prev.onClick === next.onClick,
 );
 
 interface DealsListProps {
@@ -207,7 +95,7 @@ export const DealsList: React.FC<DealsListProps> = ({
     Page: 1,
     PageSize: 20,
     SortBy: "createdAt",
-    SortDirection: 1,
+    SortDirection: "Desc",
   });
   const industryInputTimeout = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -220,6 +108,8 @@ export const DealsList: React.FC<DealsListProps> = ({
   const [statuses, setStatuses] = useState<string[]>([]);
   const statusInputTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [statusDraft, setStatusDraft] = useState("");
+  const hasInitialStateIdsFromUrlRef = useRef(false);
+  const defaultStatesInitializedRef = useRef(false);
 
   // Initialize filters from URL params on mount
   useEffect(() => {
@@ -230,6 +120,8 @@ export const DealsList: React.FC<DealsListProps> = ({
     const status = params.get("status");
     const stateIds = params.get("stateIds");
     const typeIds = params.get("typeIds");
+
+    hasInitialStateIdsFromUrlRef.current = !!stateIds;
 
     setFilters((prev) => ({
       ...prev,
@@ -278,6 +170,31 @@ export const DealsList: React.FC<DealsListProps> = ({
     window.addEventListener("popstate", handlePop);
     return () => window.removeEventListener("popstate", handlePop);
   }, []);
+
+  // Initialize default state selection: all states except New/Won/Lost.
+  useEffect(() => {
+    if (defaultStatesInitializedRef.current) return;
+    if (hasInitialStateIdsFromUrlRef.current) return;
+    if (!dealStates || dealStates.length === 0) return;
+
+    const excluded = new Set([
+      "new",
+      "won",
+      "lost",
+      "closed won",
+      "closed lost",
+    ]);
+
+    const defaultStateIds = dealStates
+      .filter(
+        (state: any) => !excluded.has(String(state.State).trim().toLowerCase()),
+      )
+      .map((state: any) => Number(state.Id))
+      .filter((id: number) => Number.isFinite(id));
+
+    setSelectedStates(defaultStateIds);
+    defaultStatesInitializedRef.current = true;
+  }, [dealStates]);
 
   useEffect(() => {
     dispatch(loadAllEnums());
@@ -393,6 +310,13 @@ export const DealsList: React.FC<DealsListProps> = ({
   const totalPages = Math.ceil(totalItems / (filters.PageSize || 20));
   const currentPage = filters.Page || 1;
 
+  const stateIdByName = useMemo(() => {
+    const entries = dealStates
+      .map((state: any) => [String(state.State), Number(state.Id)] as const)
+      .filter(([, id]) => Number.isFinite(id));
+    return Object.fromEntries(entries) as Record<string, number>;
+  }, [dealStates]);
+
   const listRef = useRef<HTMLDivElement | null>(null);
 
   const handleListKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -505,6 +429,10 @@ export const DealsList: React.FC<DealsListProps> = ({
               <MemoDealRow
                 key={deal.id}
                 deal={deal}
+                stateId={
+                  deal.state ? (stateIdByName[deal.state] ?? null) : null
+                }
+                states={dealStates}
                 isSelected={selectedDealId === deal.id}
                 onClick={onSelectDeal}
               />
