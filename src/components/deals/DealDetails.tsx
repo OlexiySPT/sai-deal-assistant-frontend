@@ -7,6 +7,7 @@ import {
 import EditableStringField from "../common/inputs/EditableStringField";
 import EditableNumberField from "../common/inputs/EditableNumberField";
 import AutocompleteEditableStringField from "../common/inputs/AutocompleteEditableStringField";
+import AutocompleteDynamicDropDown from "../common/inputs/AutocompleteDynamicDropDown";
 import EditableMultilineStringField from "../common/inputs/EditableMultilineStringField";
 import { CreateDealDialog } from "./CreateDealDialog";
 import { selectDealLoading } from "../../features/deals/dealsSlice";
@@ -20,6 +21,7 @@ import {
 import { getEnumValues } from "../../features/enums/enumsAPI";
 import DropdownEditableField from "../common/inputs/DropdownEditableField";
 import EditableDateField from "../common/inputs/EditableDateField";
+import { getFirmsDropdown } from "../../features/firms/firmsAPI";
 import { ContactPersonList } from "../contacts/ContactPersonList";
 import { EventList } from "../events/EventList";
 
@@ -105,7 +107,23 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
       className="h-full p-6 bg-white dark:bg-gray-800 overflow-y-auto"
     >
       {/* Header */}
-      <div className="grid grid-cols-1 md:grid-cols-[70%_28%] gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[18%_80%] gap-4">
+        <div>
+          <AutocompleteDynamicDropDown
+            value={deal.firm?.name}
+            entity="Firm"
+            field="name"
+            id={deal.firmId}
+            validation="NotEmpty"
+            onUpdated={handleDealUpdated}
+            size="lg"
+            loadOptions={getFirmsDropdown}
+            showAllOnEmpty={false}
+            pageSize={5}
+            throttleMs={1000}
+            width="100%"
+          />
+        </div>
         <div>
           <EditableStringField
             value={deal.name}
@@ -115,18 +133,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             validation="NotEmpty"
             onUpdated={handleDealUpdated}
             size="lg"
-          />
-        </div>
-        <div>
-          <EditableStringField
-            value={deal.firm?.name}
-            entity="Firm"
-            field="name"
-            id={deal.firmId}
-            validation="NotEmpty"
-            onUpdated={handleDealUpdated}
-            size="lg"
-            label="Firm"
           />
         </div>
       </div>
