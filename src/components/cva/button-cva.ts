@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const button = cva(
-  "inline-flex items-center justify-center rounded p-1 focus:outline-none transition-colors aspect-square disabled:opacity-50 disabled:pointer-events-none",
+  "inline-flex shrink-0 items-center justify-center rounded-full p-1 align-middle leading-none focus:outline-none transition-colors aspect-square disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       colorClass: {

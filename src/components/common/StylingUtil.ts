@@ -20,17 +20,19 @@ export function getHeightBySize(size?: SizeType) {
 
 export function getControlHeightBySize(size?: SizeType) {
   switch (size) {
+    case "xs":
+      return 4;
     case "sm":
-      return 7;
+      return 6;
     case "md":
-      return 12;
+      return 8;
     case "lg":
-      return 12;
+      return 10;
     case "xl":
       return 12;
     case "2xl":
-      return 12;
+      return 14;
     default:
-      return 8;
+      return 6;
   }
 }

@@ -7,7 +7,9 @@ import {
 import EditableStringField from "../common/inputs/EditableStringField";
 import EditableNumberField from "../common/inputs/EditableNumberField";
 import AutocompleteEditableStringField from "../common/inputs/AutocompleteEditableStringField";
-import AutocompleteDynamicDropDown from "../common/inputs/AutocompleteDynamicDropDown";
+import AutocompleteDynamicDropDown, {
+  DynamicDropdownActionArgs,
+} from "../common/inputs/AutocompleteDynamicDropDown";
 import EditableMultilineStringField from "../common/inputs/EditableMultilineStringField";
 import { CreateDealDialog } from "./CreateDealDialog";
 import { selectDealLoading } from "../../features/deals/dealsSlice";
@@ -24,6 +26,7 @@ import EditableDateField from "../common/inputs/EditableDateField";
 import { getFirmsDropdown } from "../../features/firms/firmsAPI";
 import { ContactPersonList } from "../contacts/ContactPersonList";
 import { EventList } from "../events/EventList";
+import { CreateOrEditFirmDialog } from "../firms/CreateOrEditFirmDialog";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -39,6 +42,9 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const deal = useAppSelector(selectCurrentDealWithDependents);
   const loading = useAppSelector(selectDealLoading);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [firmDialogOpen, setFirmDialogOpen] = useState(false);
+  const [activeFirmId, setActiveFirmId] = useState<number | null>(null);
+  const [initialFirmName, setInitialFirmName] = useState("");
   const [activeTab, setActiveTab] = useState<string>("Description");
 
   useEffect(() => {
@@ -75,6 +81,33 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
     }
   };
 
+  const handleAddFirmRequested = (_args: DynamicDropdownActionArgs) => {
+    setActiveFirmId(null);
+    setInitialFirmName("");
+    setFirmDialogOpen(true);
+  };
+
+  const handleEditFirmRequested = ({
+    id,
+    value,
+  }: DynamicDropdownActionArgs) => {
+    if (!id) return;
+    setActiveFirmId(id);
+    setInitialFirmName(value);
+    setFirmDialogOpen(true);
+  };
+
+  const handleFirmDialogClose = () => {
+    setFirmDialogOpen(false);
+    setActiveFirmId(null);
+    setInitialFirmName("");
+  };
+
+  const handleFirmSaved = (_savedFirmId: number) => {
+    handleFirmDialogClose();
+    handleDealUpdated();
+  };
+
   if (!dealId) {
     return (
       <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
@@ -104,7 +137,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   return (
     <div
       id="details-container"
-      className="h-full p-6 bg-white dark:bg-gray-800 overflow-y-auto"
+      className="h-full px-3 bg-white dark:bg-gray-800 overflow-y-auto"
     >
       {/* Header */}
       <div className="grid grid-cols-1 md:grid-cols-[18%_80%] gap-4">
@@ -122,6 +155,8 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             pageSize={5}
             throttleMs={1000}
             width="100%"
+            onAddRequested={handleAddFirmRequested}
+            onEditRequested={handleEditFirmRequested}
           />
         </div>
         <div>
@@ -389,6 +424,13 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
         onClose={handleEditDialogClose}
         onCreated={handleDealUpdated}
         dealId={dealId}
+      />
+      <CreateOrEditFirmDialog
+        open={firmDialogOpen}
+        onClose={handleFirmDialogClose}
+        firmId={activeFirmId}
+        initialName={initialFirmName}
+        onSaved={handleFirmSaved}
       />
     </div>
   );

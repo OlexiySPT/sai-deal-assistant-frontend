@@ -6,6 +6,9 @@ import EditableFieldFrame, {
 import { SizeType } from "../StylingUtil";
 import { text } from "../../cva/text-cva";
 import { input } from "../../cva/input-cva";
+import AddButton from "../buttons/AddButton";
+import EditButton from "../buttons/EditButton";
+import ListItemEditButton from "../buttons/ListItemEditButton";
 
 export interface DynamicDropdownQueryParams {
   Name?: string;
@@ -30,6 +33,11 @@ export type DynamicDropdownLoadOptions = (
   params?: DynamicDropdownQueryParams,
 ) => Promise<DynamicDropdownQueryResult>;
 
+export interface DynamicDropdownActionArgs {
+  id: number | null | undefined;
+  value: string;
+}
+
 interface AutocompleteDynamicDropDownInputProps {
   value: string;
   onChange: (v: string) => void;
@@ -47,6 +55,10 @@ interface AutocompleteDynamicDropDownInputProps {
   minSearchLength?: number;
   sortBy?: string;
   sortDirection?: "Asc" | "Desc";
+  size?: SizeType;
+  selectedId?: number | null;
+  onAddRequested?: (args: DynamicDropdownActionArgs) => void;
+  onEditRequested?: (args: DynamicDropdownActionArgs) => void;
   buildParams?: (
     search: string,
     page: number,
@@ -73,6 +85,8 @@ export interface AutocompleteDynamicDropDownProps {
   sortBy?: string;
   sortDirection?: "Asc" | "Desc";
   onOptionSelected?: (item: DynamicDropdownItemDto) => void;
+  onAddRequested?: (args: DynamicDropdownActionArgs) => void;
+  onEditRequested?: (args: DynamicDropdownActionArgs) => void;
   buildParams?: (
     search: string,
     page: number,
@@ -112,6 +126,10 @@ export function AutocompleteDynamicDropDownInput({
   minSearchLength = 1,
   sortBy = "name",
   sortDirection = "Asc",
+  size = "sm",
+  selectedId,
+  onAddRequested,
+  onEditRequested,
   buildParams,
 }: AutocompleteDynamicDropDownInputProps) {
   const [items, setItems] = useState<DynamicDropdownItemDto[]>([]);
@@ -337,77 +355,84 @@ export function AutocompleteDynamicDropDownInput({
     }
   };
 
+  const actionArgs: DynamicDropdownActionArgs = {
+    id: selectedId ?? null,
+    value: (value ?? "").trim(),
+  };
+
   return (
-    <div className="relative w-full" style={{ minWidth: 0 }}>
-      <input
-        ref={inputRef}
-        className={className}
-        placeholder={placeholder}
-        autoFocus
-        value={value}
-        onChange={(e) => {
-          hasInteractedRef.current = true;
-          onChange(e.target.value);
-        }}
-        onFocus={() => {
-          if (initialFocusRef.current) {
+    <div className="flex w-full min-w-0 items-center gap-1">
+      <div className="relative flex-1 min-w-0" style={{ minWidth: 0 }}>
+        <input
+          ref={inputRef}
+          className={className}
+          placeholder={placeholder}
+          autoFocus
+          value={value}
+          onChange={(e) => {
+            hasInteractedRef.current = true;
+            onChange(e.target.value);
+          }}
+          onFocus={() => {
+            if (initialFocusRef.current) {
+              initialFocusRef.current = false;
+              return;
+            }
+
+            hasInteractedRef.current = true;
+            if (items.length > 0) {
+              setDropdownVisible(true);
+              return;
+            }
+            if (showAllOnEmpty && (value ?? "").trim().length === 0) {
+              scheduleRequest("", 1, false);
+            }
+          }}
+          onMouseDown={() => {
             initialFocusRef.current = false;
-            return;
-          }
+            hasInteractedRef.current = true;
+          }}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+        />
 
-          hasInteractedRef.current = true;
-          if (items.length > 0) {
-            setDropdownVisible(true);
-            return;
-          }
-          if (showAllOnEmpty && (value ?? "").trim().length === 0) {
-            scheduleRequest("", 1, false);
-          }
-        }}
-        onMouseDown={() => {
-          initialFocusRef.current = false;
-          hasInteractedRef.current = true;
-        }}
-        onKeyDown={handleKeyDown}
-        onBlur={handleBlur}
-      />
+        {dropdownVisible && (items.length > 0 || loading || error) && (
+          <div
+            ref={dropdownRef}
+            onScroll={handleScroll}
+            className="absolute left-0 mt-1 w-full z-10 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-lg max-h-56 overflow-y-auto"
+          >
+            {items.map((item, idx) => (
+              <div
+                key={item.id}
+                data-index={idx}
+                className={`px-3 py-1 cursor-pointer text-sm ${dropdownIndex === idx ? "bg-gray-100 dark:bg-gray-800" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
+                onMouseDown={() => selectItem(item)}
+              >
+                {getItemLabel(item)}
+              </div>
+            ))}
 
-      {dropdownVisible && (items.length > 0 || loading || error) && (
-        <div
-          ref={dropdownRef}
-          onScroll={handleScroll}
-          className="absolute left-0 mt-1 w-full z-10 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded shadow-lg max-h-56 overflow-y-auto"
-        >
-          {items.map((item, idx) => (
-            <div
-              key={item.id}
-              data-index={idx}
-              className={`px-3 py-1 cursor-pointer text-sm ${dropdownIndex === idx ? "bg-gray-100 dark:bg-gray-800" : "hover:bg-gray-100 dark:hover:bg-gray-800"}`}
-              onMouseDown={() => selectItem(item)}
-            >
-              {getItemLabel(item)}
-            </div>
-          ))}
+            {loading && (
+              <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-300">
+                Loading...
+              </div>
+            )}
 
-          {loading && (
-            <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-300">
-              Loading...
-            </div>
-          )}
+            {!loading && !error && items.length === 0 && (
+              <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-300">
+                No matches found
+              </div>
+            )}
 
-          {!loading && !error && items.length === 0 && (
-            <div className="px-3 py-2 text-xs text-gray-500 dark:text-gray-300">
-              No matches found
-            </div>
-          )}
-
-          {error && (
-            <div className="px-3 py-2 text-xs text-red-600 dark:text-red-300">
-              {error}
-            </div>
-          )}
-        </div>
-      )}
+            {error && (
+              <div className="px-3 py-2 text-xs text-red-600 dark:text-red-300">
+                {error}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -431,8 +456,37 @@ export default function AutocompleteDynamicDropDown({
   sortBy = "name",
   sortDirection = "Asc",
   onOptionSelected,
+  onAddRequested,
+  onEditRequested,
   buildParams,
 }: AutocompleteDynamicDropDownProps) {
+  const renderActionButtons = (currentValue: string | null | undefined) => {
+    const actionArgs: DynamicDropdownActionArgs = {
+      id: id ?? null,
+      value: (currentValue ?? "").trim(),
+    };
+
+    return (
+      <>
+        {onAddRequested && (
+          <AddButton
+            onClick={() => onAddRequested(actionArgs)}
+            size="xs"
+            title="Add new item"
+          />
+        )}
+        {onEditRequested && (
+          <ListItemEditButton
+            onClick={() => onEditRequested(actionArgs)}
+            size="xs"
+            title="Edit current item"
+            disabled={!id}
+          />
+        )}
+      </>
+    );
+  };
+
   return (
     <EditableFieldFrame
       value={value}
@@ -445,6 +499,11 @@ export default function AutocompleteDynamicDropDown({
       size={size}
       valueType={EditableFieldValueType.String}
       width={width}
+      readActions={
+        onAddRequested || onEditRequested
+          ? () => renderActionButtons(value)
+          : undefined
+      }
       readView={function (): React.ReactNode {
         if (!value) {
           return (
@@ -473,6 +532,10 @@ export default function AutocompleteDynamicDropDown({
             minSearchLength={minSearchLength}
             sortBy={sortBy}
             sortDirection={sortDirection}
+            size={size}
+            selectedId={id}
+            onAddRequested={onAddRequested}
+            onEditRequested={onEditRequested}
             onEnterPressed={handleSave}
             onEscapePressed={handleCancel}
             buildParams={buildParams}

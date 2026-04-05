@@ -35,6 +35,7 @@ export interface EditableFieldFrameProps {
   onUpdated?: () => void;
   className?: string;
   readView: (props: EditableFieldFrameChildProps) => React.ReactNode;
+  readActions?: (props: EditableFieldFrameChildProps) => React.ReactNode;
   editView: (props: EditableFieldFrameChildProps) => React.ReactNode;
   valueType: EditableFieldValueType;
   size?: SizeType;
@@ -52,6 +53,7 @@ export default function EditableFieldFrame({
   valueType,
   className = "",
   readView,
+  readActions,
   editView,
   size = "sm",
   width,
@@ -152,6 +154,7 @@ export default function EditableFieldFrame({
       className={className}
       size={size}
       readView={() => readView(childProps)}
+      readActions={readActions ? () => readActions(childProps) : undefined}
       editView={() => editView(childProps)}
       handleEdit={handleEdit}
       handleCancel={handleCancel}

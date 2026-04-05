@@ -14,6 +14,7 @@ interface EditablePartFrameBaseProps {
   editMode: boolean;
   error?: string | null;
   readView: () => React.ReactNode;
+  readActions?: () => React.ReactNode;
   editView: () => React.ReactNode;
   handleEdit: () => void;
   handleCancel: () => void;
@@ -25,6 +26,7 @@ export default function EditablePartFrameBase({
   label,
   className = "",
   readView,
+  readActions,
   editView,
   size = "sm",
   editMode,
@@ -81,43 +83,46 @@ export default function EditablePartFrameBase({
   const controlStyle: React.CSSProperties = {
     ...(fixedWidthStyle ?? {}),
     fontSize: fontSizeBySize[size],
-    height: `${getControlHeightBySize(size) * 0.25}rem`,
+    minHeight: `${getControlHeightBySize(size) * 0.25}rem`,
   };
 
   return (
     <div
       style={controlStyle}
-      className={`flex mb-1 items-center gap-2 w-full ${className}`}
+      className={`mb-1 flex w-full min-h-0 items-center gap-2 ${className}`}
     >
       {label && (
         <div
           ref={labelWrapperRef}
-          className="shrink-0 h-full flex items-center"
+          className="flex self-stretch shrink-0 items-center"
         >
           <InputLabel label={label} size={size} />
         </div>
       )}
       {!editMode ? (
-        <div className="flex flex-1 min-w-0 items-center justify-between gap-2">
+        <div className="flex flex-1 min-w-0 self-stretch items-center justify-between gap-2">
           {/*Read-only part */}
-          <div className="flex flex-1 min-w-0 items-center overflow-hidden whitespace-nowrap truncate text-ellipsis">
+          <div className="flex h-full flex-1 min-w-0 items-center overflow-hidden whitespace-nowrap truncate text-ellipsis">
             {readView()}
           </div>
-          <EditButton onClick={handleEdit} size="xs" aria-label="Edit" />
+          <div className="flex shrink-0 items-center gap-1">
+            {readActions?.()}
+            <EditButton onClick={handleEdit} size="xs" aria-label="Edit" />
+          </div>
         </div>
       ) : (
         <>
           {/* Overlay to block all other interactions */}
           <div className={modal({ part: "overlay" })} />
           <div
-            className={`flex flex-1 min-w-0 gap-1 items-center ${modal({ part: "content" })} ${className}`}
+            className={`relative flex flex-1 min-w-0 self-stretch items-center gap-1 ${modal({ part: "content" })} ${className}`}
           >
             {/* Edit part*/}
             {editView()}
-            <OkButton onClick={handleSave} size={size} aria-label="Save" />
+            <OkButton onClick={handleSave} size="xs" aria-label="Save" />
             <CancelButton
               onClick={handleCancel}
-              size={size}
+              size="xs"
               aria-label="Cancel"
             />
             {error && (

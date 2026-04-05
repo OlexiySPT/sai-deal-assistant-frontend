@@ -4,19 +4,24 @@ import { IconActionButton, IconActionButtonProps } from "./IconActionButton";
 const editIcon = (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="h-5 w-5"
-    fill="none"
+    className="h-[0.9em] w-[0.9em]"
     viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
+    fill="none"
+    aria-hidden="true"
   >
-    <polyline
-      points="24,19 1,19 1,5 24,5 24,19"
+    <path
+      d="M4 20l3.75-.75L18.5 8.5a1.414 1.414 0 0 0 0-2L17.5 5.5a1.414 1.414 0 0 0-2 0L4.75 16.25 4 20z"
       stroke="currentColor"
-      strokeWidth="1"
-      fill="none"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
-    <line x1="6" y1="7" x2="6" y2="17" stroke="currentColor" strokeWidth="1" />
+    <path
+      d="M14.5 6.5l3 3"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+    />
   </svg>
 );
 

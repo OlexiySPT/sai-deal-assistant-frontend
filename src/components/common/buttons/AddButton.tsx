@@ -3,7 +3,7 @@ import { IconActionButton, IconActionButtonProps } from "./IconActionButton";
 
 const addIcon = (
   <svg
-    className="w-5 h-5"
+    className="h-[0.9em] w-[0.9em]"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"

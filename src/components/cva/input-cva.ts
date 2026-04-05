@@ -1,7 +1,7 @@
 import { cva } from "class-variance-authority";
 
 export const input = cva(
-  " py-0 px-1 input border rounded w-full block truncate",
+  "block w-full truncate rounded border px-1 py-0 align-middle leading-none input",
   {
     variants: {
       size: {
