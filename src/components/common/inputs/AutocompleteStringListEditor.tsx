@@ -128,7 +128,7 @@ export default function AutocompleteStringListEditor({
             />
           </div>
         ) : (
-          <AddButton onClick={handleAdd} />
+          <AddButton onClick={handleAdd} size="xs" />
         )}
       </div>
     </>

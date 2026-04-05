@@ -339,7 +339,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
       {/* Tabs */}
       <div className="mb-6">
         <div className="flex border-b border-gray-300 dark:border-gray-600 mb-4">
-          {["Description", "AI Information", "Events", "Contact Persons"].map(
+          {["Description", "AI Information", "Events", "Firm Contact Persons"].map(
             (tab) => (
               <button
                 key={tab}
@@ -412,9 +412,11 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
               onUpdated={handleDealUpdated}
             />
           )}
-          {activeTab === "Contact Persons" && (
+          {activeTab === "Firm Contact Persons" && (
             <ContactPersonList
               contactPersons={deal.firm?.contactPersons || []}
+              firmId={deal.firmId}
+              onUpdated={handleDealUpdated}
             />
           )}
         </div>
