@@ -99,14 +99,14 @@ export default function AutocompleteStringListEditor({
   }
   return (
     <>
-      <div className={`${breadcrumbsArea({ size })} ${className}`}>
+      <div className={`${breadcrumbsArea({ size })} gap-1 ${className}`}>
         {label && <InputLabel label={label} size={size} />}
         {tags.map((tag) => (
-          <span key={tag} className={breadcrumb({ size })}>
+          <span key={tag} className={`${breadcrumb({ size })} items-center`}>
             {tag}
             <button
               onClick={() => handleDeleteTag(tag)}
-              className="ml-1 text-xs"
+              className="ml-1 text-xs leading-none"
             >
               ×
             </button>
@@ -128,7 +128,7 @@ export default function AutocompleteStringListEditor({
             />
           </div>
         ) : (
-          <AddButton onClick={handleAdd} size="xs" />
+          <AddButton onClick={handleAdd} size="sm" />
         )}
       </div>
     </>

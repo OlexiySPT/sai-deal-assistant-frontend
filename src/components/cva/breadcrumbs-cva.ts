@@ -1,6 +1,6 @@
 import { cva } from "class-variance-authority";
 
-export const breadcrumb = cva("flex items-center px-1 rounded-md", {
+export const breadcrumb = cva("flex items-center px-2 rounded-full", {
   variants: {
     colorClass: {
       grey: "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300",

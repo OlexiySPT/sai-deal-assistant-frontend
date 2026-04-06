@@ -10,9 +10,15 @@ import {
   getDealById,
   getCachedDealStatuses,
 } from "../../features/deals/dealsAPI";
-import { getFirmsDropdown } from "../../features/firms/firmsAPI";
+import { getFirmById, getFirmsDropdown } from "../../features/firms/firmsAPI";
 import { Dialog } from "../common/Dialog";
 import AutocompleteInput from "../common/inputs/AutocompleteInput";
+import {
+  AutocompleteDynamicDropDownInput,
+  DynamicDropdownActionArgs,
+  DynamicDropdownItemDto,
+} from "../common/inputs/AutocompleteDynamicDropDown";
+import { CreateOrEditFirmDialog } from "../firms/CreateOrEditFirmDialog";
 import { todayLocalYmd } from "../../utils/date";
 
 interface CreateDealDialogProps {
@@ -66,31 +72,16 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
   const [isEdit, setIsEdit] = useState(false);
 
   const [statuses, setStatuses] = useState<string[]>([]);
-  const [firms, setFirms] = useState<Array<{ id: number; name: string }>>([]);
+  const [firmName, setFirmName] = useState("");
+  const [firmDialogOpen, setFirmDialogOpen] = useState(false);
+  const [activeFirmId, setActiveFirmId] = useState<number | null>(null);
+  const [initialFirmName, setInitialFirmName] = useState("");
 
   useEffect(() => {
     let mounted = true;
     getCachedDealStatuses().then((data) => {
       if (mounted) setStatuses(data || []);
     });
-    getFirmsDropdown({
-      Page: 1,
-      PageSize: 200,
-      SortBy: "name",
-      SortDirection: "Asc",
-    })
-      .then((response) => {
-        if (!mounted) return;
-        setFirms(
-          (response.items || []).map((firm) => ({
-            id: firm.id,
-            name: firm.name || `Firm ${firm.id}`,
-          })),
-        );
-      })
-      .catch(() => {
-        if (mounted) setFirms([]);
-      });
     return () => {
       mounted = false;
     };
@@ -116,6 +107,18 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             typeId: deal.typeId || 0,
             stateId: deal.stateId || 0,
           });
+
+          if (deal.firmId) {
+            getFirmById(deal.firmId)
+              .then((firm) => {
+                setFirmName(firm.name || `Firm ${deal.firmId}`);
+              })
+              .catch(() => {
+                setFirmName("");
+              });
+          } else {
+            setFirmName("");
+          }
         })
         .catch(() => setError("Failed to load deal"))
         .finally(() => setLoading(false));
@@ -134,12 +137,59 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
         typeId: 3,
         stateId: 1,
       });
+      setFirmName("");
     }
     // eslint-disable-next-line
   }, [dealId, open]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleFirmChange = (value: string) => {
+    setFirmName(value);
+    setError(null);
+    setForm((prev) => ({ ...prev, firmId: 0 }));
+  };
+
+  const handleFirmSelected = (item: DynamicDropdownItemDto) => {
+    setFirmName(item.name?.trim() || `Firm ${item.id}`);
+    setError(null);
+    setForm((prev) => ({ ...prev, firmId: item.id }));
+  };
+
+  const handleAddFirmRequested = (_args: DynamicDropdownActionArgs) => {
+    setActiveFirmId(null);
+    setInitialFirmName("");
+    setFirmDialogOpen(true);
+  };
+
+  const handleEditFirmRequested = ({
+    id,
+    value,
+  }: DynamicDropdownActionArgs) => {
+    if (!id) return;
+    setActiveFirmId(id);
+    setInitialFirmName(value);
+    setFirmDialogOpen(true);
+  };
+
+  const handleFirmDialogClose = () => {
+    setFirmDialogOpen(false);
+    setActiveFirmId(null);
+    setInitialFirmName("");
+  };
+
+  const handleFirmSaved = async (savedFirmId: number) => {
+    try {
+      const savedFirm = await getFirmById(savedFirmId);
+      setFirmName(savedFirm.name || `Firm ${savedFirmId}`);
+    } catch {
+      setFirmName("");
+    } finally {
+      setForm((prev) => ({ ...prev, firmId: savedFirmId }));
+      handleFirmDialogClose();
+    }
+  };
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -160,6 +210,13 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (!form.firmId) {
+      setError("Please select a firm.");
+      setLoading(false);
+      return;
+    }
+
     try {
       let deal;
       if (isEdit && dealId) {
@@ -180,149 +237,160 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
   };
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      title={isEdit ? "Edit Deal" : "Create Deal"}
-      dialogClassName="max-w-3xl"
-    >
-      <form
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        onSubmit={handleSubmit}
-        autoComplete="off"
+    <>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        title={isEdit ? "Edit Deal" : "Create Deal"}
+        dialogClassName="max-w-3xl"
       >
-        {/* Left column - 60% width */}
-        <div className="space-y-4 md:col-span-1">
-          <div className="flex items-center gap-2">
-            <label className="w-32 text-sm font-medium">Name</label>
-            <input
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-              required
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="w-32 text-sm font-medium">Firm</label>
-            <select
-              name="firmId"
-              value={form.firmId}
-              onChange={handleChange}
-              className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-              required
-            >
-              <option value={0} disabled>
-                Select firm...
-              </option>
-              {firms.map((firm) => (
-                <option key={firm.id} value={firm.id}>
-                  {firm.name}
+        <form
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          onSubmit={handleSubmit}
+          autoComplete="off"
+        >
+          {/* Left column - 60% width */}
+          <div className="space-y-4 md:col-span-1">
+            <div className="flex items-center gap-2">
+              <label className="w-32 text-sm font-medium">Firm</label>
+              <div className="flex-1" style={{ minWidth: 0 }}>
+                <AutocompleteDynamicDropDownInput
+                  className="w-full border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                  value={firmName}
+                  onChange={handleFirmChange}
+                  loadOptions={getFirmsDropdown}
+                  placeholder="Search or select firm..."
+                  onSelect={handleFirmSelected}
+                  showAllOnEmpty={true}
+                  pageSize={10}
+                  throttleMs={350}
+                  sortBy="name"
+                  sortDirection="Asc"
+                  selectedId={form.firmId || null}
+                  onAddRequested={handleAddFirmRequested}
+                  onEditRequested={handleEditFirmRequested}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="w-32 text-sm font-medium">Name</label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                required
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="w-32 text-sm font-medium">URL</label>
+              <input
+                name="url"
+                value={form.url}
+                onChange={handleChange}
+                className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="w-32 text-sm font-medium">Industry</label>
+              <input
+                name="industry"
+                value={form.industry}
+                onChange={handleChange}
+                className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="w-32 text-sm font-medium">Type</label>
+              <select
+                name="typeId"
+                value={form.typeId}
+                onChange={handleChange}
+                className="flex-1 border rounded px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600"
+                required
+              >
+                <option value={0} disabled>
+                  Select type...
                 </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="w-32 text-sm font-medium">URL</label>
-            <input
-              name="url"
-              value={form.url}
-              onChange={handleChange}
-              className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="w-32 text-sm font-medium">Industry</label>
-            <input
-              name="industry"
-              value={form.industry}
-              onChange={handleChange}
-              className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="w-32 text-sm font-medium">Type</label>
-            <select
-              name="typeId"
-              value={form.typeId}
-              onChange={handleChange}
-              className="flex-1 border rounded px-2 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600"
-              required
-            >
-              <option value={0} disabled>
-                Select type...
-              </option>
-              {dealTypes.map((type: any) => (
-                <option key={type.Id} value={type.Id}>
-                  {type.Type}
+                {dealTypes.map((type: any) => (
+                  <option key={type.Id} value={type.Id}>
+                    {type.Type}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="w-32 text-sm font-medium">State</label>
+              <select
+                name="stateId"
+                value={form.stateId}
+                onChange={handleChange}
+                className="flex-1 border rounded px-2 py-1 bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-300 border-gray-300 dark:border-gray-600"
+                required
+              >
+                <option value={0} disabled>
+                  Select state...
                 </option>
-              ))}
-            </select>
+                {dealStates.map((state: any) => (
+                  <option key={state.Id} value={state.Id}>
+                    {state.State}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="w-32 text-sm font-medium">Status</label>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <AutocompleteInput
+                  value={form.status || ""}
+                  onChange={(v) => setForm((prev) => ({ ...prev, status: v }))}
+                  suggestions={statuses}
+                  placeholder="Type or select status..."
+                  onSelect={(s) => setForm((prev) => ({ ...prev, status: s }))}
+                  onEnter={(v) => setForm((prev) => ({ ...prev, status: v }))}
+                  className="w-full border rounded px-2 py-1 bg-green-200 dark:bg-green-900 text-green-700 dark:text-green-300 border-gray-300 dark:border-gray-600"
+                />
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <label className="w-32 text-sm font-medium">State</label>
-            <select
-              name="stateId"
-              value={form.stateId}
-              onChange={handleChange}
-              className="flex-1 border rounded px-2 py-1 bg-blue-200 dark:bg-blue-900 text-blue-700 dark:text-blue-300 border-gray-300 dark:border-gray-600"
-              required
-            >
-              <option value={0} disabled>
-                Select state...
-              </option>
-              {dealStates.map((state: any) => (
-                <option key={state.Id} value={state.Id}>
-                  {state.State}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="w-32 text-sm font-medium">Status</label>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <AutocompleteInput
-                value={form.status || ""}
-                onChange={(v) => setForm((prev) => ({ ...prev, status: v }))}
-                suggestions={statuses}
-                placeholder="Type or select status..."
-                onSelect={(s) => setForm((prev) => ({ ...prev, status: s }))}
-                onEnter={(v) => setForm((prev) => ({ ...prev, status: v }))}
-                className="w-full border rounded px-2 py-1 bg-green-200 dark:bg-green-900 text-green-700 dark:text-green-300 border-gray-300 dark:border-gray-600"
+          {/* Right column - 40% width */}
+          <div className="space-y-4 flex flex-col h-full md:col-span-1">
+            <div className="flex flex-col h-full">
+              <label className="text-sm font-medium mb-1">Description</label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                className="border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 flex-1 min-h-[180px]"
               />
             </div>
           </div>
-        </div>
-        {/* Right column - 40% width */}
-        <div className="space-y-4 flex flex-col h-full md:col-span-1">
-          <div className="flex flex-col h-full">
-            <label className="text-sm font-medium mb-1">Description</label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              className="border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 flex-1 min-h-[180px]"
-            />
+          {/* Submit and error message below both columns */}
+          <div className="md:col-span-2 flex flex-col items-start gap-2 mt-2">
+            {error && <div className="text-red-600 text-sm">{error}</div>}
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              disabled={loading}
+            >
+              {loading
+                ? isEdit
+                  ? "Saving..."
+                  : "Saving..."
+                : isEdit
+                  ? "Update Deal"
+                  : "Create Deal"}
+            </button>
           </div>
-        </div>
-        {/* Submit and error message below both columns */}
-        <div className="md:col-span-2 flex flex-col items-start gap-2 mt-2">
-          {error && <div className="text-red-600 text-sm">{error}</div>}
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-            disabled={loading}
-          >
-            {loading
-              ? isEdit
-                ? "Saving..."
-                : "Saving..."
-              : isEdit
-                ? "Update Deal"
-                : "Create Deal"}
-          </button>
-        </div>
-      </form>
-    </Dialog>
+        </form>
+      </Dialog>
+      <CreateOrEditFirmDialog
+        open={firmDialogOpen}
+        onClose={handleFirmDialogClose}
+        firmId={activeFirmId}
+        initialName={initialFirmName}
+        onSaved={handleFirmSaved}
+      />
+    </>
   );
 };

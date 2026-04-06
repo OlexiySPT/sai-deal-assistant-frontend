@@ -1,12 +1,60 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useEffect,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 import {
   deleteContactPerson,
   type ContactPersonListItemDto,
 } from "../../features/contactPersons/contactPersonsAPI";
-import AddButton from "../common/buttons/AddButton";
 import CancelButton from "../common/buttons/CancelButton";
-import ListItemEditButton from "../common/buttons/ListItemEditButton";
 import { CreateOrEditContactDialog } from "./CreateOrEditContactDialog";
+
+// Contact person row — matches EventList row style
+const ContactRow: React.FC<{
+  person: ContactPersonListItemDto;
+  onClick: (id: number) => void;
+  onRemove: (id: number, name?: string | null) => void;
+  removing: boolean;
+}> = ({ person, onClick, onRemove, removing }) => {
+  const details = [person.position, person.email].filter(Boolean).join(" · ");
+
+  return (
+    <div
+      className="group px-3 py-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center"
+      onClick={() => onClick(person.id)}
+    >
+      <div className="flex-1 min-w-0">
+        <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
+          {person.name || "Contact"}
+        </div>
+        {details && (
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+            {details}
+          </div>
+        )}
+      </div>
+      <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <CancelButton
+          size="xs"
+          disabled={removing}
+          title={`Delete ${person.name || "contact"}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(person.id, person.name);
+          }}
+        />
+      </span>
+    </div>
+  );
+};
+
+const MemoContactRow = React.memo(
+  ContactRow,
+  (prev, next) =>
+    prev.person.id === next.person.id && prev.removing === next.removing,
+);
 
 interface ContactPersonListProps {
   contactPersons: ContactPersonListItemDto[];
@@ -14,11 +62,14 @@ interface ContactPersonListProps {
   onUpdated?: () => void;
 }
 
-export const ContactPersonList: React.FC<ContactPersonListProps> = ({
-  contactPersons,
-  firmId,
-  onUpdated,
-}) => {
+export interface ContactPersonListHandle {
+  openCreate: () => void;
+}
+
+export const ContactPersonList = forwardRef<
+  ContactPersonListHandle,
+  ContactPersonListProps
+>(({ contactPersons, firmId, onUpdated }, ref) => {
   const [contacts, setContacts] = useState(contactPersons || []);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activeContactId, setActiveContactId] = useState<number | null>(null);
@@ -35,6 +86,10 @@ export const ContactPersonList: React.FC<ContactPersonListProps> = ({
     setActiveContactId(null);
     setDialogOpen(true);
   };
+
+  useImperativeHandle(ref, () => ({
+    openCreate: openCreateDialog,
+  }));
 
   const openEditDialog = (contactId: number) => {
     setActiveContactId(contactId);
@@ -77,65 +132,26 @@ export const ContactPersonList: React.FC<ContactPersonListProps> = ({
   };
 
   return (
-    <div>
-      <div className="mb-3 flex items-center justify-end">
-        <AddButton
-          onClick={openCreateDialog}
-          size="xs"
-          disabled={!firmId}
-          title={firmId ? "Add contact person" : "Select a firm first"}
-        />
-      </div>
+    <div className="flex flex-col h-full">
+      {error && <div className="px-3 py-1 text-sm text-red-600">{error}</div>}
 
-      {error && <div className="mb-3 text-sm text-red-600">{error}</div>}
-
-      {contacts.length > 0 ? (
-        <div className="space-y-2">
-          {contacts.map((person) => (
-            <div
+      <div className="flex-1 overflow-y-auto">
+        {contacts.length === 0 ? (
+          <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+            No contact persons available.
+          </div>
+        ) : (
+          contacts.map((person) => (
+            <MemoContactRow
               key={person.id}
-              className="rounded bg-gray-50 p-3 dark:bg-gray-700"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="font-medium text-gray-900 dark:text-gray-100">
-                    {person.name}
-                  </div>
-                  {person.position && (
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {person.position}
-                    </div>
-                  )}
-                  {person.email && (
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      {person.email}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-1">
-                  <ListItemEditButton
-                    onClick={() => openEditDialog(person.id)}
-                    size="xs"
-                    title={`Edit ${person.name || "contact"}`}
-                  />
-                  <CancelButton
-                    onClick={() => handleDelete(person.id, person.name)}
-                    size="xs"
-                    title={`Delete ${person.name || "contact"}`}
-                    aria-label={`Delete ${person.name || "contact"}`}
-                    disabled={deletingContactId === person.id}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-gray-500 dark:text-gray-400">
-          No contact persons available.
-        </div>
-      )}
+              person={person}
+              onClick={openEditDialog}
+              onRemove={handleDelete}
+              removing={deletingContactId === person.id}
+            />
+          ))
+        )}
+      </div>
 
       <CreateOrEditContactDialog
         open={dialogOpen}
@@ -146,4 +162,4 @@ export const ContactPersonList: React.FC<ContactPersonListProps> = ({
       />
     </div>
   );
-};
+});

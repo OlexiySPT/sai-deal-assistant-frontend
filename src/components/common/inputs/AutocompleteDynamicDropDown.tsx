@@ -7,7 +7,6 @@ import { SizeType } from "../StylingUtil";
 import { text } from "../../cva/text-cva";
 import { input } from "../../cva/input-cva";
 import AddButton from "../buttons/AddButton";
-import EditButton from "../buttons/EditButton";
 import ListItemEditButton from "../buttons/ListItemEditButton";
 
 export interface DynamicDropdownQueryParams {
@@ -433,6 +432,23 @@ export function AutocompleteDynamicDropDownInput({
           </div>
         )}
       </div>
+
+      {onAddRequested && (
+        <AddButton
+          onClick={() => onAddRequested(actionArgs)}
+          size="xs"
+          title="Add new item"
+        />
+      )}
+
+      {onEditRequested && (
+        <ListItemEditButton
+          onClick={() => onEditRequested(actionArgs)}
+          size="xs"
+          title="Edit current item"
+          disabled={!selectedId}
+        />
+      )}
     </div>
   );
 }

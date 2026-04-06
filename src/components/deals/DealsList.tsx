@@ -41,7 +41,7 @@ const DealRow: React.FC<{
       data-deal-id={deal.id}
       onClick={() => onClick(deal.id, { immediate: true })}
       role="button"
-      className={`px-3 py-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition ${
+      className={`px-3 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition ${
         isSelected
           ? "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500"
           : ""

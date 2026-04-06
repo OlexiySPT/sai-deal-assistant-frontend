@@ -1,6 +1,7 @@
-import React, { useState } from "react";
-import AddButton from "../common/buttons/AddButton";
+import React, { useState, useImperativeHandle, forwardRef } from "react";
+import CancelButton from "../common/buttons/CancelButton";
 import { CreateEventWithNotesDialog } from "./CreateEventWithNotesDialog";
+import { deleteEvent } from "../../features/events/eventsAPI";
 
 // Returns a color class based on event state
 function stateColorClass(state: string | null): string {
@@ -124,39 +125,66 @@ const EventTypeIcon: React.FC<{
   );
 };
 
-// Memoized event row
+// Memoized event row with remove button
 const EventRow: React.FC<{
   event: any;
   isSelected: boolean;
   onClick: (id: number) => void;
-}> = ({ event, isSelected, onClick }) => {
+  onRemove: (id: number) => void;
+  removing: boolean;
+}> = ({ event, isSelected, onClick, onRemove, removing }) => {
   const dateStr = event.date ? new Date(event.date).toLocaleDateString() : "";
-  const bottom = [dateStr, event.contactPerson].filter(Boolean).join(" · ");
 
   return (
     <div
       data-event-id={event.id}
-      onClick={() => onClick(event.id)}
-      role="button"
-      className={`px-3 py-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition ${
+      className={`group px-3 py-1.5 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition flex items-center ${
         isSelected
           ? "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500"
           : ""
       }`}
     >
-      <div className="flex items-center gap-2">
+      <div
+        className="flex items-center gap-2 flex-1 min-w-0"
+        onClick={() => onClick(event.id)}
+      >
         <EventTypeIcon type={event.type} state={event.state} />
         <div className="flex-1 min-w-0">
           <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
             {event.topic || event.type || "Event"}
           </div>
-          {bottom && (
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
-              {bottom}
-            </div>
-          )}
+          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+            {dateStr && <span>{dateStr}</span>}
+            {event.contactPerson && (
+              <span className="flex items-center gap-0.5 truncate">
+                <svg
+                  className="w-3 h-3 shrink-0"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {event.contactPerson}
+              </span>
+            )}
+          </div>
         </div>
       </div>
+      <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <CancelButton
+          size="xs"
+          disabled={removing}
+          title="Remove event"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(event.id);
+          }}
+        />
+      </span>
     </div>
   );
 };
@@ -164,7 +192,9 @@ const EventRow: React.FC<{
 const MemoEventRow = React.memo(
   EventRow,
   (prev, next) =>
-    prev.event.id === next.event.id && prev.isSelected === next.isSelected,
+    prev.event.id === next.event.id &&
+    prev.isSelected === next.isSelected &&
+    prev.removing === next.removing,
 );
 
 interface EventListProps {
@@ -176,69 +206,89 @@ interface EventListProps {
   onUpdated?: () => void;
 }
 
-export const EventList: React.FC<EventListProps> = ({
-  dealId,
-  firmId,
-  events,
-  selectedEventId = null,
-  onSelectEvent,
-  onUpdated,
-}) => {
-  const [eventDialogOpen, setEventDialogOpen] = useState(false);
-  const [editingEventId, setEditingEventId] = useState<number | null>(null);
+export interface EventListHandle {
+  openCreate: () => void;
+}
 
-  const handleAddEventClick = () => {
-    setEditingEventId(null);
-    setEventDialogOpen(true);
-  };
+export const EventList = forwardRef<EventListHandle, EventListProps>(
+  (
+    {
+      dealId,
+      firmId,
+      events,
+      selectedEventId = null,
+      onSelectEvent,
+      onUpdated,
+    },
+    ref,
+  ) => {
+    const [eventDialogOpen, setEventDialogOpen] = useState(false);
+    const [editingEventId, setEditingEventId] = useState<number | null>(null);
+    const [removingId, setRemovingId] = useState<number | null>(null);
 
-  const handleRowClick = (id: number) => {
-    setEditingEventId(id);
-    setEventDialogOpen(true);
-    onSelectEvent?.(id);
-  };
+    const handleAddEventClick = () => {
+      setEditingEventId(null);
+      setEventDialogOpen(true);
+    };
 
-  const handleEventDialogClose = () => {
-    setEventDialogOpen(false);
-    setEditingEventId(null);
-  };
+    useImperativeHandle(ref, () => ({
+      openCreate: handleAddEventClick,
+    }));
 
-  return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="px-3 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-          Events
-        </h2>
-        <AddButton onClick={handleAddEventClick} />
+    const handleRowClick = (id: number) => {
+      setEditingEventId(id);
+      setEventDialogOpen(true);
+      onSelectEvent?.(id);
+    };
+
+    const handleEventDialogClose = () => {
+      setEventDialogOpen(false);
+      setEditingEventId(null);
+    };
+
+    const handleRemove = async (id: number) => {
+      if (!window.confirm("Are you sure you want to remove this event?"))
+        return;
+      setRemovingId(id);
+      try {
+        await deleteEvent(id);
+        onUpdated?.();
+      } finally {
+        setRemovingId(null);
+      }
+    };
+
+    return (
+      <div className="flex flex-col h-full">
+        {/* List */}
+        <div className="flex-1 overflow-y-auto">
+          {events.length === 0 ? (
+            <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              No events yet.
+            </div>
+          ) : (
+            events.map((event: any) => (
+              <MemoEventRow
+                key={event.id}
+                event={event}
+                isSelected={event.id === selectedEventId}
+                onClick={handleRowClick}
+                onRemove={handleRemove}
+                removing={removingId === event.id}
+              />
+            ))
+          )}
+        </div>
+
+        <CreateEventWithNotesDialog
+          open={eventDialogOpen}
+          onClose={handleEventDialogClose}
+          onSaved={onUpdated}
+          dealId={dealId}
+          firmId={firmId}
+          eventId={editingEventId}
+        />
       </div>
-
-      {/* List */}
-      <div className="flex-1 overflow-y-auto">
-        {events.length === 0 ? (
-          <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-            No events yet.
-          </div>
-        ) : (
-          events.map((event: any) => (
-            <MemoEventRow
-              key={event.id}
-              event={event}
-              isSelected={event.id === selectedEventId}
-              onClick={handleRowClick}
-            />
-          ))
-        )}
-      </div>
-
-      <CreateEventWithNotesDialog
-        open={eventDialogOpen}
-        onClose={handleEventDialogClose}
-        onSaved={onUpdated}
-        dealId={dealId}
-        firmId={firmId}
-        eventId={editingEventId}
-      />
-    </div>
-  );
-};
+    );
+  },
+);
