@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Dialog } from "../common/Dialog";
+import { button } from "../cva/button-cva";
 import {
   createContactPerson,
   getContactPersonById,
@@ -167,7 +168,7 @@ export const CreateOrEditContactDialog: React.FC<
         {error && <div className="text-red-600 text-sm">{error}</div>}
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className={`${button({ colorClass: "blue", size: "md" })} !aspect-auto w-auto h-auto px-4 py-2 !rounded`}
           disabled={loading}
         >
           {loading

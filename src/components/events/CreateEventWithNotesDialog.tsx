@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../styles/datepicker-dark.css";
+import { button } from "../cva/button-cva";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Dialog } from "../common/Dialog";
 import { todayLocalYmd } from "../../utils/date";
@@ -332,7 +333,7 @@ export const CreateEventWithNotesDialog: React.FC<
           {error && <div className="text-red-600 text-sm">{error}</div>}
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+            className={`${button({ colorClass: "blue", size: "md" })} !aspect-auto w-auto h-auto px-4 py-2 !rounded`}
             disabled={loading}
           >
             {loading ? "Saving..." : eventId ? "Update Event" : "Create Event"}

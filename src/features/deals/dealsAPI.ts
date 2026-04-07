@@ -116,6 +116,7 @@ export interface UpdateDealCommand {
 
 export interface DealsQueryParams {
   Name?: string;
+  FirmName?: string;
   Description?: string;
   Industry?: string;
   Status?: string;

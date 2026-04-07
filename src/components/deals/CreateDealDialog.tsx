@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { button } from "../cva/button-cva";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import {
   selectEnumValues,
@@ -370,7 +371,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             {error && <div className="text-red-600 text-sm">{error}</div>}
             <button
               type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              className={`${button({ colorClass: "blue", size: "md" })} !aspect-auto w-auto h-auto px-4 py-2 !rounded`}
               disabled={loading}
             >
               {loading

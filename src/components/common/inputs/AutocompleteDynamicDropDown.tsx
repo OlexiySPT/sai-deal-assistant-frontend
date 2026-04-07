@@ -58,6 +58,7 @@ interface AutocompleteDynamicDropDownInputProps {
   selectedId?: number | null;
   onAddRequested?: (args: DynamicDropdownActionArgs) => void;
   onEditRequested?: (args: DynamicDropdownActionArgs) => void;
+  selectOnly?: boolean;
   buildParams?: (
     search: string,
     page: number,
@@ -129,6 +130,7 @@ export function AutocompleteDynamicDropDownInput({
   selectedId,
   onAddRequested,
   onEditRequested,
+  selectOnly,
   buildParams,
 }: AutocompleteDynamicDropDownInputProps) {
   const [items, setItems] = useState<DynamicDropdownItemDto[]>([]);
@@ -139,13 +141,16 @@ export function AutocompleteDynamicDropDownInput({
   const [dropdownIndex, setDropdownIndex] = useState<number>(-1);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
+  const [localText, setLocalText] = useState(value ?? "");
+  const effectiveValue = selectOnly ? localText : value;
+
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const requestIdRef = useRef(0);
   const requestTimerRef = useRef<number | null>(null);
   const suppressFetchRef = useRef(false);
   const hasInteractedRef = useRef(false);
   const initialFocusRef = useRef(true);
-  const lastSearchRef = useRef((value ?? "").trim());
+  const lastSearchRef = useRef((effectiveValue ?? "").trim());
 
   const hasMore = items.length < totalItems;
 
@@ -264,8 +269,8 @@ export function AutocompleteDynamicDropDownInput({
       return;
     }
 
-    scheduleRequest(value ?? "", 1, false);
-  }, [scheduleRequest, value]);
+    scheduleRequest(effectiveValue ?? "", 1, false);
+  }, [scheduleRequest, effectiveValue]);
 
   useEffect(() => {
     return () => {
@@ -275,9 +280,20 @@ export function AutocompleteDynamicDropDownInput({
     };
   }, []);
 
+  // Sync local text when parent value changes in selectOnly mode
+  useEffect(() => {
+    if (selectOnly) {
+      setLocalText(value ?? "");
+    }
+  }, [selectOnly, value]);
+
   const selectItem = (item: DynamicDropdownItemDto) => {
     suppressFetchRef.current = true;
-    onChange(getItemLabel(item));
+    if (selectOnly) {
+      setLocalText(getItemLabel(item));
+    } else {
+      onChange(getItemLabel(item));
+    }
     onSelect?.(item);
     setDropdownVisible(false);
     setDropdownIndex(-1);
@@ -290,7 +306,7 @@ export function AutocompleteDynamicDropDownInput({
 
       if (items.length === 0) {
         if (!loading) {
-          scheduleRequest(value ?? "", 1, false);
+          scheduleRequest(effectiveValue ?? "", 1, false);
         }
         return;
       }
@@ -325,9 +341,9 @@ export function AutocompleteDynamicDropDownInput({
       if (dropdownVisible && dropdownIndex >= 0 && items[dropdownIndex]) {
         selectItem(items[dropdownIndex]);
       } else if (!dropdownVisible && onEnterPressed) {
-        onEnterPressed(value);
+        onEnterPressed(effectiveValue);
       } else if (onEnter) {
-        onEnter(value);
+        onEnter(effectiveValue);
       }
       return;
     }
@@ -356,7 +372,7 @@ export function AutocompleteDynamicDropDownInput({
 
   const actionArgs: DynamicDropdownActionArgs = {
     id: selectedId ?? null,
-    value: (value ?? "").trim(),
+    value: (effectiveValue ?? "").trim(),
   };
 
   return (
@@ -367,10 +383,14 @@ export function AutocompleteDynamicDropDownInput({
           className={className}
           placeholder={placeholder}
           autoFocus
-          value={value}
+          value={effectiveValue}
           onChange={(e) => {
             hasInteractedRef.current = true;
-            onChange(e.target.value);
+            if (selectOnly) {
+              setLocalText(e.target.value);
+            } else {
+              onChange(e.target.value);
+            }
           }}
           onFocus={() => {
             if (initialFocusRef.current) {
@@ -383,7 +403,7 @@ export function AutocompleteDynamicDropDownInput({
               setDropdownVisible(true);
               return;
             }
-            if (showAllOnEmpty && (value ?? "").trim().length === 0) {
+            if (showAllOnEmpty && (effectiveValue ?? "").trim().length === 0) {
               scheduleRequest("", 1, false);
             }
           }}
@@ -550,8 +570,6 @@ export default function AutocompleteDynamicDropDown({
             sortDirection={sortDirection}
             size={size}
             selectedId={id}
-            onAddRequested={onAddRequested}
-            onEditRequested={onEditRequested}
             onEnterPressed={handleSave}
             onEscapePressed={handleCancel}
             buildParams={buildParams}

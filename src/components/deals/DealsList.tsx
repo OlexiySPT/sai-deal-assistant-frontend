@@ -101,8 +101,10 @@ export const DealsList: React.FC<DealsListProps> = ({
     null,
   );
   const [industryDraft, setIndustryDraft] = useState("");
-  const nameInputTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [nameDraft, setNameDraft] = useState("");
+  const firmNameInputTimeout = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const [firmNameDraft, setFirmNameDraft] = useState("");
 
   // Status (autocomplete) filter
   const [statuses, setStatuses] = useState<string[]>([]);
@@ -115,7 +117,7 @@ export const DealsList: React.FC<DealsListProps> = ({
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const page = params.get("page");
-    const name = params.get("name");
+    const firmName = params.get("firmName");
     const industry = params.get("industry");
     const status = params.get("status");
     const stateIds = params.get("stateIds");
@@ -126,7 +128,7 @@ export const DealsList: React.FC<DealsListProps> = ({
     setFilters((prev) => ({
       ...prev,
       Page: page ? Number(page) : prev.Page,
-      Name: name ?? prev.Name,
+      FirmName: firmName ?? prev.FirmName,
       Industry: industry ?? prev.Industry,
       Status: status ?? prev.Status,
     }));
@@ -138,14 +140,14 @@ export const DealsList: React.FC<DealsListProps> = ({
       setSelectedTypes(typeIds.split(",").map((s) => Number(s)));
     }
 
-    if (name) setNameDraft(name);
+    if (firmName) setFirmNameDraft(firmName);
     if (industry) setIndustryDraft(industry);
     if (status) setStatusDraft(status);
 
     const handlePop = () => {
       const p = new URLSearchParams(window.location.search);
       const pg = p.get("page");
-      const nm = p.get("name");
+      const fn = p.get("firmName");
       const ind = p.get("industry");
       const st = p.get("status");
       const sIds = p.get("stateIds");
@@ -154,7 +156,7 @@ export const DealsList: React.FC<DealsListProps> = ({
       setFilters((prev) => ({
         ...prev,
         Page: pg ? Number(pg) : prev.Page,
-        Name: nm ?? prev.Name,
+        FirmName: fn ?? prev.FirmName,
         Industry: ind ?? prev.Industry,
         Status: st ?? prev.Status,
       }));
@@ -162,7 +164,7 @@ export const DealsList: React.FC<DealsListProps> = ({
       setSelectedStates(sIds ? sIds.split(",").map((s) => Number(s)) : []);
       setSelectedTypes(tIds ? tIds.split(",").map((s) => Number(s)) : []);
 
-      setNameDraft(nm ?? "");
+      setFirmNameDraft(fn ?? "");
       setIndustryDraft(ind ?? "");
       setStatusDraft(st ?? "");
     };
@@ -232,15 +234,17 @@ export const DealsList: React.FC<DealsListProps> = ({
 
   // Throttle name filter
   useEffect(() => {
-    if (nameDraft === (filters.Name || "")) return;
-    if (nameInputTimeout.current) clearTimeout(nameInputTimeout.current);
-    nameInputTimeout.current = setTimeout(() => {
-      setFilters((prev) => ({ ...prev, Name: nameDraft, Page: 1 }));
+    if (firmNameDraft === (filters.FirmName || "")) return;
+    if (firmNameInputTimeout.current)
+      clearTimeout(firmNameInputTimeout.current);
+    firmNameInputTimeout.current = setTimeout(() => {
+      setFilters((prev) => ({ ...prev, FirmName: firmNameDraft, Page: 1 }));
     }, 300);
     return () => {
-      if (nameInputTimeout.current) clearTimeout(nameInputTimeout.current);
+      if (firmNameInputTimeout.current)
+        clearTimeout(firmNameInputTimeout.current);
     };
-  }, [nameDraft]);
+  }, [firmNameDraft]);
 
   useEffect(() => {
     dispatch(fetchDeals(filters));
@@ -258,8 +262,8 @@ export const DealsList: React.FC<DealsListProps> = ({
     const params = new URLSearchParams(window.location.search);
     if (filters.Page) params.set("page", String(filters.Page));
     else params.delete("page");
-    if (filters.Name) params.set("name", String(filters.Name));
-    else params.delete("name");
+    if (filters.FirmName) params.set("firmName", String(filters.FirmName));
+    else params.delete("firmName");
     if (filters.Industry) params.set("industry", String(filters.Industry));
     else params.delete("industry");
     if (filters.Status) params.set("status", String(filters.Status));
@@ -360,10 +364,10 @@ export const DealsList: React.FC<DealsListProps> = ({
         <div className="space-y-1.5">
           <input
             type="text"
-            placeholder="Search by name..."
+            placeholder="Search by firm name..."
             className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            value={nameDraft}
-            onChange={(e) => setNameDraft(e.target.value)}
+            value={firmNameDraft}
+            onChange={(e) => setFirmNameDraft(e.target.value)}
           />
           <MultiSelect
             options={dealStates.map((state: any) => ({
