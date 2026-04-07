@@ -7,7 +7,7 @@ export interface DealTagDto {
   dealId: number;
 }
 
-export interface AddOrDeleteDealTagCommand {
+export interface AddDealTagIfNotExistsCommand {
   tag: string | null;
   dealId: number;
 }
@@ -39,17 +39,17 @@ export const clearExistingTagsCache = () => {
 };
 
 export const addDealTag = async (
-  data: AddOrDeleteDealTagCommand,
+  data: AddDealTagIfNotExistsCommand,
 ): Promise<DealTagDto> => {
   const response = await api.post<DealTagDto>("/api/DealTags", data);
   return response.data;
 };
 
 export const deleteDealTag = async (
-  data: AddOrDeleteDealTagCommand,
+  data: AddDealTagIfNotExistsCommand,
 ): Promise<DealTagDto> => {
   const response = await api.delete<DealTagDto>(
-    `/api/DealTags?dealId=${data.dealId}&tag=${data.tag}`,
+    `/api/DealTags?DealId=${data.dealId}&Tag=${data.tag}`,
   );
   return response.data;
 };

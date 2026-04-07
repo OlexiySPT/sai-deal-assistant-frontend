@@ -5,7 +5,6 @@ import "../../styles/datepicker-dark.css";
 import { button } from "../cva/button-cva";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Dialog } from "../common/Dialog";
-import { todayLocalYmd } from "../../utils/date";
 import {
   createEvent,
   getEventById,
@@ -29,14 +28,11 @@ interface CreateEventWithNotesDialogProps {
   onSaved?: () => void;
 }
 
-function toLocalYmd(value?: string | null): string {
-  if (!value) return todayLocalYmd();
+function toLocalDateTimeIso(value?: string | null): string {
+  if (!value) return new Date().toISOString();
   const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return todayLocalYmd();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return y + "-" + m + "-" + day;
+  if (Number.isNaN(d.getTime())) return new Date().toISOString();
+  return d.toISOString();
 }
 
 export const CreateEventWithNotesDialog: React.FC<
@@ -54,7 +50,7 @@ export const CreateEventWithNotesDialog: React.FC<
   const [editingContactId, setEditingContactId] = useState<number | null>(null);
 
   const [form, setForm] = useState({
-    date: todayLocalYmd(),
+    date: new Date().toISOString(),
     topic: "",
     agenda: "",
     result: "",
@@ -96,7 +92,7 @@ export const CreateEventWithNotesDialog: React.FC<
 
     if (!eventId) {
       setForm({
-        date: todayLocalYmd(),
+        date: new Date().toISOString(),
         topic: "",
         agenda: "",
         result: "",
@@ -114,7 +110,7 @@ export const CreateEventWithNotesDialog: React.FC<
     getEventById(eventId)
       .then((eventDto) => {
         setForm({
-          date: toLocalYmd(eventDto.date),
+          date: toLocalDateTimeIso(eventDto.date),
           topic: eventDto.topic || "",
           agenda: eventDto.agenda || "",
           result: eventDto.result || "",
@@ -221,12 +217,15 @@ export const CreateEventWithNotesDialog: React.FC<
               onChange={(date: Date | null) => {
                 setForm((prev) => ({
                   ...prev,
-                  date: date ? date.toISOString().slice(0, 10) : "",
+                  date: date ? date.toISOString() : "",
                 }));
               }}
-              dateFormat="yyyy-MM-dd"
+              showTimeSelect
+              timeIntervals={15}
+              dateFormat="yyyy-MM-dd HH:mm"
+              timeFormat="HH:mm"
               className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-              placeholderText="Select date"
+              placeholderText="Select date & time"
             />
           </div>
 

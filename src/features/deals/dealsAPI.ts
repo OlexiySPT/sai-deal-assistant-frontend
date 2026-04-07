@@ -15,9 +15,9 @@ export interface DealDto {
   aiBriefDescription?: string | null;
   industry?: string | null;
   status?: string | null;
-  typeId?: number;
-  stateId?: number;
-  firmId?: number;
+  typeId: number;
+  stateId: number;
+  firmId: number;
   proposalAmount?: number | null;
   minClientAmount?: number | null;
   maxClientAmount?: number | null;
@@ -43,7 +43,7 @@ export interface DealListItemDtoQueryResult {
 
 export interface DealWithDependentsDto {
   id: number;
-  startDate: string | null;
+  startDate: string;
   name: string | null;
   description: string | null;
   initialLetter: string | null;
@@ -55,7 +55,7 @@ export interface DealWithDependentsDto {
   typeId: number;
   stateId: number;
   firmId: number;
-  firm: FirmWithDependenciesDto | null;
+  firm: FirmWithDependenciesDto;
   events: EventWithDependenciesListItemDto[] | null;
   tags: DealTagDto[] | null;
   proposalAmount: number | null;
@@ -156,6 +156,11 @@ export async function getDeals(
 
 export async function getDealById(id: number): Promise<DealDto> {
   const response = await api.get<DealDto>(`/api/Deals/${id}`);
+  return response.data;
+}
+
+export async function getDealListItem(id: number): Promise<DealListItemDto> {
+  const response = await api.get<DealListItemDto>(`/api/Deals/${id}/list-item`);
   return response.data;
 }
 

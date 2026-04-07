@@ -15,6 +15,92 @@ function stateColorClass(state: string | null): string {
   return "text-gray-400";
 }
 
+// Icon that represents the event STATE
+const EventStateIcon: React.FC<{ state: string | null }> = ({ state }) => {
+  const colorClass = stateColorClass(state);
+  const s = state?.toLowerCase() ?? "";
+
+  // Planned / Scheduled
+  if (s.includes("plan") || s.includes("schedul") || s.includes("upcoming")) {
+    return (
+      <svg
+        className={`w-3.5 h-3.5 ${colorClass} shrink-0`}
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <title>{state ?? "Planned"}</title>
+        <path
+          fillRule="evenodd"
+          d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+          clipRule="evenodd"
+        />
+      </svg>
+    );
+  }
+
+  // Cancelled / Missed
+  if (s.includes("cancel") || s.includes("miss")) {
+    return (
+      <svg
+        className={`w-3.5 h-3.5 ${colorClass} shrink-0`}
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <title>{state ?? "Cancelled"}</title>
+        <path
+          fillRule="evenodd"
+          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+          clipRule="evenodd"
+        />
+      </svg>
+    );
+  }
+
+  // Completed / Done / Held
+  if (s.includes("done") || s.includes("complet") || s.includes("held")) {
+    return (
+      <svg
+        className={`w-3.5 h-3.5 ${colorClass} shrink-0`}
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <title>{state ?? "Completed"}</title>
+        <path
+          fillRule="evenodd"
+          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+          clipRule="evenodd"
+        />
+      </svg>
+    );
+  }
+
+  // In Progress / Ongoing
+  if (s.includes("progress") || s.includes("ongoing")) {
+    return (
+      <svg
+        className={`w-3.5 h-3.5 ${colorClass} shrink-0`}
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <title>{state ?? "In Progress"}</title>
+        <path d="M6 10a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm5.5 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zm5.5 0a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
+      </svg>
+    );
+  }
+
+  // Default — dash
+  return (
+    <svg
+      className={`w-3.5 h-3.5 ${colorClass} shrink-0`}
+      fill="currentColor"
+      viewBox="0 0 20 20"
+    >
+      <title>{state ?? "Unknown"}</title>
+      <path d="M4 10a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z" />
+    </svg>
+  );
+};
+
 // Icon that represents the event TYPE; color encodes the event STATE
 const EventTypeIcon: React.FC<{
   type: string | null;
@@ -133,7 +219,17 @@ const EventRow: React.FC<{
   onRemove: (id: number) => void;
   removing: boolean;
 }> = ({ event, isSelected, onClick, onRemove, removing }) => {
-  const dateStr = event.date ? new Date(event.date).toLocaleDateString() : "";
+  const dateStr = event.date
+    ? (() => {
+        const d = new Date(event.date);
+        const y = d.getFullYear();
+        const mo = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        const h = String(d.getHours()).padStart(2, "0");
+        const mi = String(d.getMinutes()).padStart(2, "0");
+        return `${y}-${mo}-${day} ${h}:${mi}`;
+      })()
+    : "";
 
   return (
     <div
@@ -149,12 +245,18 @@ const EventRow: React.FC<{
         onClick={() => onClick(event.id)}
       >
         <EventTypeIcon type={event.type} state={event.state} />
+        <EventStateIcon state={event.state} />
         <div className="flex-1 min-w-0">
           <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
             {event.topic || event.type || "Event"}
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             {dateStr && <span>{dateStr}</span>}
+            {event.state && (
+              <span className={`font-medium ${stateColorClass(event.state)}`}>
+                {event.state}
+              </span>
+            )}
             {event.contactPerson && (
               <span className="flex items-center gap-0.5 truncate">
                 <svg

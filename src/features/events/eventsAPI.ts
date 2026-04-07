@@ -1,4 +1,5 @@
 import api from "../../services/api";
+import type { EventNoteDto } from "../eventNotes/eventNotesAPI";
 
 // Types
 export interface EventDto {
@@ -16,7 +17,7 @@ export interface EventDto {
 export interface EventListItemDto {
   id: number;
   date: string;
-  topic: string;
+  topic: string | null;
   type: string | null;
   contactPerson: string | null;
   state: string | null;
@@ -35,7 +36,7 @@ export interface EventWithDependenciesListItemDto {
   agenda: string | null;
   result: string | null;
   pos: number;
-  notes: any[] | null;
+  notes: EventNoteDto[] | null;
 }
 
 export interface EventListItemDtoQueryResult {

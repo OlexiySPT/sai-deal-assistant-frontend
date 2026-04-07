@@ -83,6 +83,13 @@ export const deleteDeal = createAsyncThunk(
   },
 );
 
+export const refreshDealListItem = createAsyncThunk(
+  "deals/refreshDealListItem",
+  async (id: number) => {
+    return await dealsAPI.getDealListItem(id);
+  },
+);
+
 // Slice
 const dealsSlice = createSlice({
   name: "deals",
@@ -177,6 +184,13 @@ const dealsSlice = createSlice({
       .addCase(deleteDeal.rejected, (state, action) => {
         state.listLoading = false;
         state.error = action.error.message || "Failed to delete deal";
+      })
+      // Refresh single list item
+      .addCase(refreshDealListItem.fulfilled, (state, action) => {
+        const idx = state.deals.findIndex((d) => d.id === action.payload.id);
+        if (idx !== -1) {
+          state.deals[idx] = action.payload;
+        }
       });
   },
 });

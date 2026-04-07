@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { RootState } from "../../app/store";
 import * as dealTagsAPI from "./dealTagsAPI";
-import type { AddOrDeleteDealTagCommand, DealTagDto } from "./dealTagsAPI";
+import type { AddDealTagIfNotExistsCommand, DealTagDto } from "./dealTagsAPI";
 
 // State interface
 interface DealTagsState {
@@ -35,14 +35,14 @@ export const fetchExistingTags = createAsyncThunk(
 
 export const addDealTag = createAsyncThunk(
   "dealTags/addDealTag",
-  async (data: AddOrDeleteDealTagCommand) => {
+  async (data: AddDealTagIfNotExistsCommand) => {
     return await dealTagsAPI.addDealTag(data);
   },
 );
 
 export const deleteDealTag = createAsyncThunk(
   "dealTags/deleteDealTag",
-  async (data: AddOrDeleteDealTagCommand) => {
+  async (data: AddDealTagIfNotExistsCommand) => {
     return await dealTagsAPI.deleteDealTag(data);
   },
 );

@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import {
   UpdateStringFieldCommand,
   UpdateNumericFieldCommand,
-  UpdateDateFieldCommand,
+  UpdateDateOnlyFieldCommand,
+  UpdateDateTimeOffsetFieldCommand,
 } from "../../../../features/fieldUpdate/fieldUpdateAPI";
 import fieldUpdateAPI from "../../../../features/fieldUpdate/fieldUpdateAPI";
 import { SizeType } from "../../StylingUtil";
@@ -23,6 +24,7 @@ export enum EditableFieldValueType {
   String,
   Number,
   Date,
+  DateTime,
 }
 
 export interface EditableFieldFrameProps {
@@ -84,7 +86,16 @@ export default function EditableFieldFrame({
             id,
             value: inputValue,
             notNull: validation === "NotNull",
-          } as UpdateDateFieldCommand);
+          } as UpdateDateOnlyFieldCommand);
+          break;
+        case EditableFieldValueType.DateTime:
+          await fieldUpdateAPI.updateDateTime({
+            entity,
+            field,
+            id,
+            value: inputValue,
+            notNull: validation === "NotNull",
+          } as UpdateDateTimeOffsetFieldCommand);
           break;
         default:
           await fieldUpdateAPI.updateString({
@@ -97,6 +108,7 @@ export default function EditableFieldFrame({
           break;
       }
       if (onUpdated) onUpdated();
+      setEditMode(false);
     } catch (err: any) {
       let failures = err.response?.data?.failures.Value;
       if (Array.isArray(failures) && failures.length > 0) {

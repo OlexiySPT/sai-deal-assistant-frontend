@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
   fetchDealWithDependents,
+  refreshDealListItem,
   selectCurrentDealWithDependents,
 } from "../../features/deals/dealsSlice";
 import EditableStringField from "../common/inputs/EditableStringField";
@@ -84,6 +85,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const handleDealUpdated = () => {
     if (dealId) {
       dispatch(fetchDealWithDependents(dealId));
+      dispatch(refreshDealListItem(dealId));
     }
   };
 
@@ -122,7 +124,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
     );
   }
 
-  if (loading) {
+  if (loading && !deal) {
     return (
       <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
         Loading...

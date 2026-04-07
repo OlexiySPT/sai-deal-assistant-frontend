@@ -2,7 +2,8 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import fieldUpdateAPI, {
   UpdateStringFieldCommand,
   UpdateNumericFieldCommand,
-  UpdateDateFieldCommand,
+  UpdateDateOnlyFieldCommand,
+  UpdateDateTimeOffsetFieldCommand,
 } from "./fieldUpdateAPI";
 
 interface FieldUpdateState {
@@ -41,9 +42,21 @@ export const updateNumericField = createAsyncThunk(
 
 export const updateDateField = createAsyncThunk(
   "fieldUpdate/updateDate",
-  async (data: UpdateDateFieldCommand, { rejectWithValue }) => {
+  async (data: UpdateDateOnlyFieldCommand, { rejectWithValue }) => {
     try {
       const response = await fieldUpdateAPI.updateDate(data);
+      return response.data;
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.detail || err.message);
+    }
+  },
+);
+
+export const updateDateTimeField = createAsyncThunk(
+  "fieldUpdate/updateDateTime",
+  async (data: UpdateDateTimeOffsetFieldCommand, { rejectWithValue }) => {
+    try {
+      const response = await fieldUpdateAPI.updateDateTime(data);
       return response.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data?.detail || err.message);
@@ -87,6 +100,17 @@ const fieldUpdateSlice = createSlice({
         state.loading = false;
       })
       .addCase(updateDateField.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      .addCase(updateDateTimeField.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateDateTimeField.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(updateDateTimeField.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });

@@ -26,15 +26,11 @@ export const Dialog: React.FC<DialogProps> = ({
           <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
             {title || ""}
           </h2>
-          <button
-            className={button({ colorClass: "grey", size: "sm" })}
-            onClick={onClose}
-            aria-label="Close"
-          >
+          <button onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>
-        <div className="p-6">{children}</div>
+        <div className="p-4">{children}</div>
       </div>
     </div>
   );

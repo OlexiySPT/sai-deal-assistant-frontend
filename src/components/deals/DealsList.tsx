@@ -65,7 +65,7 @@ const DealRow: React.FC<{
 const MemoDealRow = React.memo(
   DealRow,
   (prev, next) =>
-    prev.deal.id === next.deal.id &&
+    prev.deal === next.deal &&
     prev.stateId === next.stateId &&
     prev.states === next.states &&
     prev.isSelected === next.isSelected &&
@@ -111,7 +111,6 @@ export const DealsList: React.FC<DealsListProps> = ({
   const statusInputTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [statusDraft, setStatusDraft] = useState("");
   const hasInitialStateIdsFromUrlRef = useRef(false);
-  const defaultStatesInitializedRef = useRef(false);
 
   // Initialize filters from URL params on mount
   useEffect(() => {
@@ -125,19 +124,28 @@ export const DealsList: React.FC<DealsListProps> = ({
 
     hasInitialStateIdsFromUrlRef.current = !!stateIds;
 
+    const parsedStateIds = stateIds
+      ? stateIds.split(",").map((s) => Number(s))
+      : [];
+    const parsedTypeIds = typeIds
+      ? typeIds.split(",").map((s) => Number(s))
+      : [];
+
     setFilters((prev) => ({
       ...prev,
       Page: page ? Number(page) : prev.Page,
       FirmName: firmName ?? prev.FirmName,
       Industry: industry ?? prev.Industry,
       Status: status ?? prev.Status,
+      StateIds: parsedStateIds.length > 0 ? parsedStateIds : undefined,
+      TypeIds: parsedTypeIds.length > 0 ? parsedTypeIds : undefined,
     }));
 
     if (stateIds) {
-      setSelectedStates(stateIds.split(",").map((s) => Number(s)));
+      setSelectedStates(parsedStateIds);
     }
     if (typeIds) {
-      setSelectedTypes(typeIds.split(",").map((s) => Number(s)));
+      setSelectedTypes(parsedTypeIds);
     }
 
     if (firmName) setFirmNameDraft(firmName);
@@ -153,16 +161,21 @@ export const DealsList: React.FC<DealsListProps> = ({
       const sIds = p.get("stateIds");
       const tIds = p.get("typeIds");
 
+      const popStateIds = sIds ? sIds.split(",").map((s) => Number(s)) : [];
+      const popTypeIds = tIds ? tIds.split(",").map((s) => Number(s)) : [];
+
       setFilters((prev) => ({
         ...prev,
         Page: pg ? Number(pg) : prev.Page,
         FirmName: fn ?? prev.FirmName,
         Industry: ind ?? prev.Industry,
         Status: st ?? prev.Status,
+        StateIds: popStateIds.length > 0 ? popStateIds : undefined,
+        TypeIds: popTypeIds.length > 0 ? popTypeIds : undefined,
       }));
 
-      setSelectedStates(sIds ? sIds.split(",").map((s) => Number(s)) : []);
-      setSelectedTypes(tIds ? tIds.split(",").map((s) => Number(s)) : []);
+      setSelectedStates(popStateIds);
+      setSelectedTypes(popTypeIds);
 
       setFirmNameDraft(fn ?? "");
       setIndustryDraft(ind ?? "");
@@ -172,31 +185,6 @@ export const DealsList: React.FC<DealsListProps> = ({
     window.addEventListener("popstate", handlePop);
     return () => window.removeEventListener("popstate", handlePop);
   }, []);
-
-  // Initialize default state selection: all states except New/Won/Lost.
-  useEffect(() => {
-    if (defaultStatesInitializedRef.current) return;
-    if (hasInitialStateIdsFromUrlRef.current) return;
-    if (!dealStates || dealStates.length === 0) return;
-
-    const excluded = new Set([
-      "new",
-      "won",
-      "lost",
-      "closed won",
-      "closed lost",
-    ]);
-
-    const defaultStateIds = dealStates
-      .filter(
-        (state: any) => !excluded.has(String(state.State).trim().toLowerCase()),
-      )
-      .map((state: any) => Number(state.Id))
-      .filter((id: number) => Number.isFinite(id));
-
-    setSelectedStates(defaultStateIds);
-    defaultStatesInitializedRef.current = true;
-  }, [dealStates]);
 
   useEffect(() => {
     dispatch(loadAllEnums());
