@@ -40,3 +40,12 @@ export async function PATCH(
   const path = params.path.join("/");
   return proxyRequest(request, path);
 }
+
+// Ensure OPTIONS (CORS preflight) is routed to the proxy as well
+export async function OPTIONS(
+  request: NextRequest,
+  { params }: { params: { path: string[] } },
+) {
+  const path = params.path.join("/");
+  return proxyRequest(request, path);
+}
