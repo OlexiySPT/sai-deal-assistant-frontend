@@ -390,7 +390,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                   field="description"
                   id={deal.id}
                   validation="None"
-                  label="Description"
+                  label=""
                   onUpdated={handleDealUpdated}
                   rows={5}
                 />

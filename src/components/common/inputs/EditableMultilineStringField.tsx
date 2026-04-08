@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { UpdateStringFieldCommand } from "../../../features/fieldUpdate/fieldUpdateAPI";
 import fieldUpdateAPI from "../../../features/fieldUpdate/fieldUpdateAPI";
 import OkButton from "../buttons/OkButton";
@@ -110,6 +110,18 @@ export default function EditableMultilineStringField({
     setInputValue(e.target.value);
   }
 
+  const autoResize = useCallback(() => {
+    const el = textareaRef.current;
+    if (el && !editMode) {
+      el.style.height = "auto";
+      el.style.height = el.scrollHeight + "px";
+    }
+  }, [editMode]);
+
+  useEffect(() => {
+    autoResize();
+  }, [value, editMode, autoResize]);
+
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
       {!editMode ? (
@@ -117,30 +129,84 @@ export default function EditableMultilineStringField({
           {/* Header line */}
           <div className="flex items-center justify-between mb-1">
             <InputLabel label={label} />
-            <div className="flex gap-1">
+            <div className="flex gap-1 ml-auto">
+              <FullScreenButton
+                onClick={() => setIsFullScreen(!isFullScreen)}
+                size="sm"
+                aria-label="Full Screen"
+              />
               <EditButton onClick={handleEdit} size="sm" aria-label="Edit" />
             </div>
           </div>
           {/* Main content */}
-          <div className="flex flex-col flex-1 min-w-0">
-            <textarea
-              ref={textareaRef}
-              className="input input-sm border rounded px-2 py-1 w-full resize-none bg-transparent text-gray-900 dark:text-gray-100"
-              rows={rows}
-              value={value ?? ""}
-              disabled={true}
-              style={{
-                backgroundColor: "transparent",
-                borderColor: "transparent",
-                color: value ? undefined : "#9ca3af", // Tailwind gray-400
-                cursor: "pointer",
-              }}
-              title={value ?? ""}
-              onClick={handleEdit}
-              readOnly
-              autoFocus
-            />
-          </div>
+          {isFullScreen && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30"
+              style={{ pointerEvents: "auto" }}
+            >
+              <div className="shadow-2xl rounded-lg" style={fullScreenStyles}>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
+                    {label}:
+                  </span>
+                  <div className="flex gap-1">
+                    <FullScreenButton
+                      onClick={() => setIsFullScreen(false)}
+                      size="sm"
+                      aria-label="Exit Full Screen"
+                    />
+                  </div>
+                </div>
+                <textarea
+                  className="input input-sm border rounded px-2 py-1 w-full resize-none flex-1 text-base"
+                  value={value ?? ""}
+                  disabled={true}
+                  readOnly
+                  style={{
+                    minHeight: "calc(80vh - 60px)",
+                    maxHeight: "calc(80vh - 60px)",
+                    fontSize: "1rem",
+                    backgroundColor:
+                      typeof window !== "undefined" &&
+                      window.matchMedia &&
+                      window.matchMedia("(prefers-color-scheme: dark)").matches
+                        ? "#1e293b"
+                        : "#f0f4ff",
+                    color:
+                      typeof window !== "undefined" &&
+                      window.matchMedia &&
+                      window.matchMedia("(prefers-color-scheme: dark)").matches
+                        ? "#f1f5f9"
+                        : undefined,
+                    borderColor: "#3b82f6",
+                    cursor: "default",
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          {!isFullScreen && (
+            <div className="flex flex-col flex-1 min-w-0 min-h-0">
+              <textarea
+                ref={textareaRef}
+                className="input input-sm border rounded px-2 py-1 w-full resize-none bg-transparent text-gray-900 dark:text-gray-100"
+                value={value ?? ""}
+                disabled={true}
+                style={{
+                  backgroundColor: "transparent",
+                  borderColor: "transparent",
+                  color: value ? undefined : "#9ca3af", // Tailwind gray-400
+                  cursor: "pointer",
+                  overflow: "hidden",
+                  minHeight: `${Math.max(rows, 2) * 1.5}em`,
+                }}
+                title={value ?? ""}
+                onClick={handleEdit}
+                readOnly
+                autoFocus
+              />
+            </div>
+          )}
         </>
       ) : (
         <>
