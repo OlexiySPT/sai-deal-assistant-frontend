@@ -29,7 +29,7 @@ jobs:
 
       - name: Check and create PR to dev
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           BRANCH="${{ steps.branch.outputs.name }}"
 
@@ -42,14 +42,14 @@ jobs:
               --base dev \
               --head "$BRANCH" \
               --title "[$BRANCH] Merge to dev" \
-              --body "Auto-generated PR from $BRANCH to dev branch"
+              --body "Auto-generated PR from $BRANCH to dev branch" || echo "Warning: PR to dev creation failed"
           else
             echo "PR to dev already exists: #$EXISTING_PR"
           fi
 
       - name: Check and create PR to main
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           BRANCH="${{ steps.branch.outputs.name }}"
 
@@ -62,7 +62,7 @@ jobs:
               --base main \
               --head "$BRANCH" \
               --title "[$BRANCH] Merge to main" \
-              --body "Auto-generated PR from $BRANCH to main branch"
+              --body "Auto-generated PR from $BRANCH to main branch" || echo "Warning: PR to main creation failed"
           else
             echo "PR to main already exists: #$EXISTING_PR"
           fi
