@@ -6,10 +6,6 @@ on:
       - dev
       - main
 
-permissions:
-  contents: read
-  pull-requests: write
-
 jobs:
   create-pull-requests:
     runs-on: ubuntu-latest
@@ -29,7 +25,7 @@ jobs:
 
       - name: Check and create PR to dev
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
         run: |
           BRANCH="${{ steps.branch.outputs.name }}"
 
@@ -42,14 +38,14 @@ jobs:
               --base dev \
               --head "$BRANCH" \
               --title "[$BRANCH] Merge to dev" \
-              --body "Auto-generated PR from $BRANCH to dev branch" || echo "Warning: PR to dev creation failed"
+              --body "Auto-generated PR from $BRANCH to dev branch"
           else
             echo "PR to dev already exists: #$EXISTING_PR"
           fi
 
       - name: Check and create PR to main
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
         run: |
           BRANCH="${{ steps.branch.outputs.name }}"
 
@@ -62,7 +58,7 @@ jobs:
               --base main \
               --head "$BRANCH" \
               --title "[$BRANCH] Merge to main" \
-              --body "Auto-generated PR from $BRANCH to main branch" || echo "Warning: PR to main creation failed"
+              --body "Auto-generated PR from $BRANCH to main branch"
           else
             echo "PR to main already exists: #$EXISTING_PR"
           fi
