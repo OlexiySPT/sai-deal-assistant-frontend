@@ -32,6 +32,17 @@ export interface UpdateDateTimeOffsetFieldCommand {
   notNull: boolean;
 }
 
+export interface FieldUpdate {
+  field: string | null;
+  value: any;
+}
+
+export interface UpdateMultipleFieldsCommand {
+  entity?: string | null;
+  id: number;
+  fields: FieldUpdate[];
+}
+
 export const fieldUpdateAPI = {
   updateString: (data: UpdateStringFieldCommand) =>
     api.put<string>("/api/FieldUpdate/string", data),
@@ -44,6 +55,9 @@ export const fieldUpdateAPI = {
 
   updateDateTime: (data: UpdateDateTimeOffsetFieldCommand) =>
     api.put<string | null>("/api/FieldUpdate/date-time", data),
+
+  updateMultiple: (data: UpdateMultipleFieldsCommand) =>
+    api.put<Record<string, any>>("/api/FieldUpdate/multi", data),
 };
 
 export default fieldUpdateAPI;

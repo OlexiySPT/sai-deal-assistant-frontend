@@ -6,7 +6,6 @@ import {
   selectCurrentDealWithDependents,
 } from "../../features/deals/dealsSlice";
 import EditableStringField from "../common/inputs/EditableStringField";
-import EditableNumberField from "../common/inputs/EditableNumberField";
 import AutocompleteEditableStringField from "../common/inputs/AutocompleteEditableStringField";
 import AutocompleteDynamicDropDown, {
   DynamicDropdownActionArgs,
@@ -24,6 +23,7 @@ import {
 import { getEnumValues } from "../../features/enums/enumsAPI";
 import DropdownEditableField from "../common/inputs/DropdownEditableField";
 import EditableDateField from "../common/inputs/EditableDateField";
+import EditableMultiFieldGroup from "../common/inputs/EditableMultiFieldGroup";
 import { getFirmsDropdown } from "../../features/firms/firmsAPI";
 import {
   ContactPersonList,
@@ -204,67 +204,57 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           />
         </div>
         <div className="flex gap-4 justify-start flex-wrap">
-          <EditableNumberField
-            value={deal.proposalAmount}
+          <EditableMultiFieldGroup
             entity="Deal"
-            field="proposalAmount"
             id={deal.id}
-            validation="None"
-            label="Amount"
             onUpdated={handleDealUpdated}
-            decimalAccuracy={0}
-            thousandsSeparator={true}
-            width="16ch"
-          />
-          <EditableStringField
-            value={deal.currencyCode}
-            entity="Deal"
-            field="currencyCode"
-            id={deal.id}
-            validation="NotEmpty"
-            onUpdated={handleDealUpdated}
-            width="14ch"
-          />
-          <DropdownEditableField
-            value={deal.amountTypeId}
-            entity="Deal"
-            field="amountTypeId"
-            id={deal.id}
-            label=""
-            width="18ch"
-            onUpdated={handleDealUpdated}
-            options={
-              Array.isArray(amountTypeOptions)
-                ? amountTypeOptions.map((opt) => ({
-                    id: opt.Id,
-                    value: opt.Type,
-                  }))
-                : []
-            }
-          />
-          <EditableNumberField
-            value={deal.minClientAmount}
-            entity="Deal"
-            field="minClientAmount"
-            id={deal.id}
-            validation="None"
-            label="Client min"
-            onUpdated={handleDealUpdated}
-            decimalAccuracy={0}
-            thousandsSeparator={true}
-            width="16ch"
-          />
-          <EditableNumberField
-            value={deal.maxClientAmount}
-            entity="Deal"
-            field="maxClientAmount"
-            id={deal.id}
-            validation="None"
-            label="max"
-            onUpdated={handleDealUpdated}
-            decimalAccuracy={0}
-            thousandsSeparator={true}
-            width="16ch"
+            fields={[
+              {
+                field: "proposalAmount",
+                type: "number",
+                value: deal.proposalAmount,
+                label: "Amount",
+                width: "16ch",
+                decimalAccuracy: 0,
+                thousandsSeparator: true,
+              },
+              {
+                field: "currencyCode",
+                type: "string",
+                value: deal.currencyCode,
+                width: "14ch",
+              },
+              {
+                field: "amountTypeId",
+                type: "dropdown",
+                value: deal.amountTypeId,
+                width: "18ch",
+                options: Array.isArray(amountTypeOptions)
+                  ? amountTypeOptions.map((opt) => ({
+                      id: opt.Id,
+                      value: opt.Type,
+                    }))
+                  : [],
+              },
+              {
+                field: "minClientAmount",
+                type: "number",
+                value: deal.minClientAmount,
+                label: "Client min",
+                width: "16ch",
+                decimalAccuracy: 0,
+                thousandsSeparator: true,
+              },
+              {
+                field: "maxClientAmount",
+                type: "number",
+                value: deal.maxClientAmount,
+                label: "max",
+                width: "16ch",
+                decimalAccuracy: 0,
+                thousandsSeparator: true,
+              },
+            ]}
           />
         </div>
         <div className="flex gap-4 justify-start flex-wrap">
