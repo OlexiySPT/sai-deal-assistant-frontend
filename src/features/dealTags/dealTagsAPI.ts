@@ -22,15 +22,26 @@ export const getDealTags = async (dealId?: number): Promise<DealTagDto[]> => {
 // Simple in-memory cache for existing tags
 let existingTagsCache: { data: string[]; timestamp: number } | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+let existingTagsPending: Promise<string[]> | null = null;
 
 export const getExistingTags = async (): Promise<string[]> => {
   const now = Date.now();
   if (existingTagsCache && now - existingTagsCache.timestamp < CACHE_DURATION) {
     return existingTagsCache.data;
   }
-  const response = await api.get<string[]>("/api/DealTags/existing");
-  existingTagsCache = { data: response.data, timestamp: now };
-  return response.data;
+  if (existingTagsPending) return existingTagsPending;
+  existingTagsPending = api
+    .get<string[]>("/api/DealTags/existing")
+    .then((response) => {
+      existingTagsCache = { data: response.data, timestamp: Date.now() };
+      existingTagsPending = null;
+      return response.data;
+    })
+    .catch((err) => {
+      existingTagsPending = null;
+      throw err;
+    });
+  return existingTagsPending;
 };
 
 // Optional: function to clear the cache manually if needed

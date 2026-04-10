@@ -193,6 +193,7 @@ export async function deleteDeal(id: number): Promise<void> {
 // Simple in-memory cache for existing statuses
 let existingStatusesCache: { data: string[]; timestamp: number } | null = null;
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+let statusesPending: Promise<string[]> | null = null;
 
 export async function getCachedDealStatuses(): Promise<string[]> {
   const now = Date.now();
@@ -202,7 +203,17 @@ export async function getCachedDealStatuses(): Promise<string[]> {
   ) {
     return existingStatusesCache.data;
   }
-  const response = await api.get<string[]>("/api/Deals/statuses/cached");
-  existingStatusesCache = { data: response.data, timestamp: now };
-  return response.data;
+  if (statusesPending) return statusesPending;
+  statusesPending = api
+    .get<string[]>("/api/Deals/statuses/cached")
+    .then((response) => {
+      existingStatusesCache = { data: response.data, timestamp: Date.now() };
+      statusesPending = null;
+      return response.data;
+    })
+    .catch((err) => {
+      statusesPending = null;
+      throw err;
+    });
+  return statusesPending;
 }
