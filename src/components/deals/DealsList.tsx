@@ -13,7 +13,8 @@ import {
 import type { DealsQueryParams } from "../../features/deals/dealsAPI";
 import { MultiSelect } from "../common/inputs/MultiSelect";
 import AutocompleteInput from "../common/inputs/AutocompleteInput";
-import { getCachedDealStatuses } from "../../features/deals/dealsAPI";
+import { getCachedStringOptions } from "../../features/options/optionsAPI";
+import DatePicker from "../common/inputs/DatePicker";
 import { CreateDealDialog } from "./CreateDealDialog";
 import AddButton from "../common/buttons/AddButton";
 import { DealStateIcon } from "./DealStateIcon";
@@ -96,7 +97,11 @@ export const DealsList: React.FC<DealsListProps> = ({
     PageSize: 20,
     SortBy: "createdAt",
     SortDirection: "Desc",
+    "HasEventInThisPeriod.StartDate": undefined,
+    "HasEventInThisPeriod.EndDate": undefined,
   });
+  const [eventStartDate, setEventStartDate] = useState<string | null>(null);
+  const [eventEndDate, setEventEndDate] = useState<string | null>(null);
   const industryInputTimeout = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -110,6 +115,9 @@ export const DealsList: React.FC<DealsListProps> = ({
   const [statuses, setStatuses] = useState<string[]>([]);
   const statusInputTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [statusDraft, setStatusDraft] = useState("");
+
+  // Industry (autocomplete) filter
+  const [industryOptions, setIndustryOptions] = useState<string[]>([]);
   const hasInitialStateIdsFromUrlRef = useRef(false);
 
   // Initialize filters from URL params on mount
@@ -189,9 +197,13 @@ export const DealsList: React.FC<DealsListProps> = ({
   useEffect(() => {
     dispatch(loadAllEnums());
     // Load cached statuses for status autocomplete
-    getCachedDealStatuses()
+    getCachedStringOptions({ entityType: "Deal", fieldName: "Status" })
       .then(setStatuses)
       .catch(() => setStatuses([]));
+    // Load cached industries for industry autocomplete
+    getCachedStringOptions({ entityType: "Deal", fieldName: "Industry" })
+      .then(setIndustryOptions)
+      .catch(() => setIndustryOptions([]));
   }, [dispatch]);
 
   // Throttle industry filter
@@ -347,42 +359,109 @@ export const DealsList: React.FC<DealsListProps> = ({
           <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
             Deals
           </h2>
-          <AddButton onClick={() => setShowCreateDialog(true)} />
+          <div className="flex gap-2">
+            <AddButton onClick={() => setShowCreateDialog(true)} />
+            <button
+              type="button"
+              className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+              onClick={() => {
+                setFilters({
+                  Page: 1,
+                  PageSize: 20,
+                  SortBy: "createdAt",
+                  SortDirection: "Desc",
+                  "HasEventInThisPeriod.StartDate": undefined,
+                  "HasEventInThisPeriod.EndDate": undefined,
+                });
+                setFirmNameDraft("");
+                setIndustryDraft("");
+                setStatusDraft("");
+                setSelectedStates([]);
+                setSelectedTypes([]);
+                setEventStartDate(null);
+                setEventEndDate(null);
+              }}
+              aria-label="Clear all filters"
+            >
+              Clear All
+            </button>
+          </div>
         </div>
         <div className="space-y-1.5">
-          <input
-            type="text"
-            placeholder="Search by firm name..."
-            className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            value={firmNameDraft}
-            onChange={(e) => setFirmNameDraft(e.target.value)}
-          />
-          <MultiSelect
-            options={dealStates.map((state: any) => ({
-              id: state.Id,
-              label: state.State,
-            }))}
-            selectedValues={selectedStates}
-            onChange={(values) => setSelectedStates(values as number[])}
-            placeholder="All States"
-          />
-          <MultiSelect
-            options={dealTypes.map((type: any) => ({
-              id: type.Id,
-              label: type.Type,
-            }))}
-            selectedValues={selectedTypes}
-            onChange={(values) => setSelectedTypes(values as number[])}
-            placeholder="All Types"
-          />
-          <input
-            type="text"
-            placeholder="Industry..."
-            className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            value={industryDraft}
-            onChange={(e) => setIndustryDraft(e.target.value)}
-          />
-          <div>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by firm name..."
+              className="w-full pr-7 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              value={firmNameDraft}
+              onChange={(e) => setFirmNameDraft(e.target.value)}
+            />
+            {firmNameDraft && (
+              <button
+                type="button"
+                className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
+                style={{ padding: 0 }}
+                aria-label="Clear firm name"
+                onClick={() => setFirmNameDraft("")}
+              >
+                ×
+              </button>
+            )}
+          </div>
+          <div className="relative">
+            <MultiSelect
+              options={dealStates.map((state: any) => ({
+                id: state.Id,
+                label: state.State,
+              }))}
+              selectedValues={selectedStates}
+              onChange={(values) => setSelectedStates(values as number[])}
+              placeholder="All States"
+            />
+            {selectedStates.length > 0 && (
+              <button
+                type="button"
+                className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
+                style={{ padding: 0 }}
+                aria-label="Clear state filter"
+                onClick={() => setSelectedStates([])}
+              >
+                ×
+              </button>
+            )}
+          </div>
+          <div className="relative flex-1 min-w-0 flex gap-2 items-center">
+            <DatePicker
+              value={eventStartDate}
+              onChange={(date) => {
+                setEventStartDate(date);
+                setFilters((prev) => ({
+                  ...prev,
+                  "HasEventInThisPeriod.StartDate": date || undefined,
+                  Page: 1,
+                }));
+              }}
+              placeholder="Start date"
+              className="w-full max-w-[12rem] pr-2 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              style={{ minWidth: 0 }}
+            />
+            <span className="text-xs">–</span>
+            <DatePicker
+              value={eventEndDate}
+              onChange={(date) => {
+                setEventEndDate(date);
+                setFilters((prev) => ({
+                  ...prev,
+                  "HasEventInThisPeriod.EndDate": date || undefined,
+                  Page: 1,
+                }));
+              }}
+              placeholder="End date"
+              className="w-full max-w-[12rem] pr-2 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              style={{ minWidth: 0 }}
+            />
+          </div>
+          <div className="relative">
             <AutocompleteInput
               value={statusDraft}
               onChange={(v) => setStatusDraft(v)}
@@ -392,8 +471,65 @@ export const DealsList: React.FC<DealsListProps> = ({
                 setStatusDraft(s);
                 setFilters((prev) => ({ ...prev, Status: s, Page: 1 }));
               }}
-              className="w-full px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+              className="w-full pr-7 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
+            {statusDraft && (
+              <button
+                type="button"
+                className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
+                style={{ padding: 0 }}
+                aria-label="Clear status"
+                onClick={() => setStatusDraft("")}
+              >
+                ×
+              </button>
+            )}
+          </div>
+          <div className="relative">
+            <MultiSelect
+              options={dealTypes.map((type: any) => ({
+                id: type.Id,
+                label: type.Type,
+              }))}
+              selectedValues={selectedTypes}
+              onChange={(values) => setSelectedTypes(values as number[])}
+              placeholder="All Types"
+            />
+            {selectedTypes.length > 0 && (
+              <button
+                type="button"
+                className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
+                style={{ padding: 0 }}
+                aria-label="Clear type filter"
+                onClick={() => setSelectedTypes([])}
+              >
+                ×
+              </button>
+            )}
+          </div>
+          <div className="relative">
+            <AutocompleteInput
+              value={industryDraft}
+              onChange={setIndustryDraft}
+              suggestions={industryOptions}
+              placeholder="Industry..."
+              onSelect={(s) => {
+                setIndustryDraft(s);
+                setFilters((prev) => ({ ...prev, Industry: s, Page: 1 }));
+              }}
+              className="w-full pr-7 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            />
+            {industryDraft && (
+              <button
+                type="button"
+                className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
+                style={{ padding: 0 }}
+                aria-label="Clear industry"
+                onClick={() => setIndustryDraft("")}
+              >
+                ×
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -49,7 +49,9 @@ function AutocompleteInput({
       return;
     }
 
-    const safeSuggestions = Array.isArray(suggestions) ? suggestions : [];
+    const safeSuggestions = Array.isArray(suggestions)
+      ? suggestions.filter((s): s is string => typeof s === "string")
+      : [];
     const filtered = value
       ? safeSuggestions.filter((s) =>
           s.toLowerCase().includes(value.toLowerCase()),
