@@ -29,7 +29,7 @@ export interface CreateContactPersonCommand {
   phone: string | null;
   email: string | null;
   description: string | null;
-  dealId: number;
+  firmId: number;
 }
 
 export interface UpdateContactPersonCommand {
@@ -41,25 +41,47 @@ export interface UpdateContactPersonCommand {
   description: string | null;
 }
 
+export interface ContactPersonsQueryParams {
+  FirmId?: number;
+}
+
 // API Functions
-export const getContactPersons = async (dealId?: number): Promise<ContactPersonListItemDtoQueryResult> => {
-  const params = dealId ? { DealId: dealId } : {};
-  const response = await api.get<ContactPersonListItemDtoQueryResult>("/api/ContactPersons", { params });
+export const getContactPersons = async (
+  firmId?: number,
+): Promise<ContactPersonListItemDtoQueryResult> => {
+  const params: ContactPersonsQueryParams = firmId ? { FirmId: firmId } : {};
+  const response = await api.get<ContactPersonListItemDtoQueryResult>(
+    "/api/ContactPersons",
+    { params },
+  );
   return response.data;
 };
 
-export const getContactPersonById = async (id: number): Promise<ContactPersonDto> => {
+export const getContactPersonById = async (
+  id: number,
+): Promise<ContactPersonDto> => {
   const response = await api.get<ContactPersonDto>(`/api/ContactPersons/${id}`);
   return response.data;
 };
 
-export const createContactPerson = async (data: CreateContactPersonCommand): Promise<ContactPersonDto> => {
-  const response = await api.post<ContactPersonDto>("/api/ContactPersons", data);
+export const createContactPerson = async (
+  data: CreateContactPersonCommand,
+): Promise<ContactPersonDto> => {
+  const response = await api.post<ContactPersonDto>(
+    "/api/ContactPersons",
+    data,
+  );
   return response.data;
 };
 
-export const updateContactPerson = async (id: number, data: UpdateContactPersonCommand): Promise<ContactPersonDto> => {
-  const response = await api.put<ContactPersonDto>(`/api/ContactPersons/${id}`, data);
+export const updateContactPerson = async (
+  id: number,
+  data: UpdateContactPersonCommand,
+): Promise<ContactPersonDto> => {
+  const response = await api.put<ContactPersonDto>(
+    `/api/ContactPersons/${id}`,
+    data,
+  );
   return response.data;
 };
 

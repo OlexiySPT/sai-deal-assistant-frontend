@@ -2,21 +2,25 @@ import React from "react";
 import { useAppSelector } from "../../app/hooks";
 
 export const StatusBar: React.FC = () => {
-  const dealsLoading = useAppSelector((state) => state.deals.loading);
+  const dealsLoading = useAppSelector(
+    (state) => state.deals.listLoading || state.deals.detailLoading,
+  );
   const eventsLoading = useAppSelector((state) => state.events.loading);
   const contactPersonsLoading = useAppSelector(
-    (state) => state.contactPersons.loading
+    (state) => state.contactPersons.loading,
   );
   const dealTagsLoading = useAppSelector((state) => state.dealTags.loading);
   const enumsLoading = useAppSelector((state) => state.enums.loading);
   const eventNotesLoading = useAppSelector((state) => state.eventNotes.loading);
+  const firmsLoading = useAppSelector((state) => state.firms.loading);
 
   const dealsError = useAppSelector((state) => state.deals.error);
   const eventsError = useAppSelector((state) => state.events.error);
   const contactPersonsError = useAppSelector(
-    (state) => state.contactPersons.error
+    (state) => state.contactPersons.error,
   );
   const dealTagsError = useAppSelector((state) => state.dealTags.error);
+  const firmsError = useAppSelector((state) => state.firms.error);
 
   const getStatusMessage = () => {
     const statuses = [];
@@ -27,11 +31,13 @@ export const StatusBar: React.FC = () => {
     if (dealTagsLoading) statuses.push("Loading Tags...");
     if (enumsLoading) statuses.push("Loading Enums...");
     if (eventNotesLoading) statuses.push("Loading Notes...");
+    if (firmsLoading) statuses.push("Loading Firms...");
 
     if (dealsError) statuses.push(`Error: ${dealsError}`);
     if (eventsError) statuses.push(`Error: ${eventsError}`);
     if (contactPersonsError) statuses.push(`Error: ${contactPersonsError}`);
     if (dealTagsError) statuses.push(`Error: ${dealTagsError}`);
+    if (firmsError) statuses.push(`Error: ${firmsError}`);
 
     if (statuses.length > 0) {
       return statuses.join(" | ");
@@ -46,9 +52,14 @@ export const StatusBar: React.FC = () => {
     contactPersonsLoading ||
     dealTagsLoading ||
     enumsLoading ||
-    eventNotesLoading;
+    eventNotesLoading ||
+    firmsLoading;
   const hasError =
-    dealsError || eventsError || contactPersonsError || dealTagsError;
+    dealsError ||
+    eventsError ||
+    contactPersonsError ||
+    dealTagsError ||
+    firmsError;
 
   return (
     <div className="bg-blue-700 dark:bg-gray-900 text-white text-xs h-6 flex items-center justify-between px-3 transition-colors duration-200">

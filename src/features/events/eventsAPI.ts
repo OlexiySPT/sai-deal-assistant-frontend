@@ -1,9 +1,11 @@
 import api from "../../services/api";
+import type { EventNoteDto } from "../eventNotes/eventNotesAPI";
 
 // Types
 export interface EventDto {
   id: number;
   date: string;
+  topic: string | null;
   pos: number;
   agenda: string | null;
   result: string | null;
@@ -15,6 +17,7 @@ export interface EventDto {
 export interface EventListItemDto {
   id: number;
   date: string;
+  topic: string | null;
   type: string | null;
   contactPerson: string | null;
   state: string | null;
@@ -26,13 +29,14 @@ export interface EventListItemDto {
 export interface EventWithDependenciesListItemDto {
   id: number;
   date: string;
+  topic: string | null;
   type: string | null;
   contactPerson: string | null;
   state: string | null;
   agenda: string | null;
   result: string | null;
   pos: number;
-  notes: any[] | null;
+  notes: EventNoteDto[] | null;
 }
 
 export interface EventListItemDtoQueryResult {
@@ -43,6 +47,7 @@ export interface EventListItemDtoQueryResult {
 export interface CreateEventCommand {
   id: number;
   date: string;
+  topic: string | null;
   pos: number;
   agenda: string | null;
   result: string | null;
@@ -55,6 +60,7 @@ export interface CreateEventCommand {
 export interface UpdateEventCommand {
   id: number;
   date: string;
+  topic: string | null;
   pos: number;
   agenda: string | null;
   result: string | null;
@@ -65,7 +71,7 @@ export interface UpdateEventCommand {
 
 // API Functions
 export const getEvents = async (
-  dealId?: number
+  dealId?: number,
 ): Promise<EventListItemDtoQueryResult> => {
   const params = dealId ? { DealId: dealId } : {};
   const response = await api.get<EventListItemDtoQueryResult>("/api/Events", {
@@ -80,7 +86,7 @@ export const getEventById = async (id: number): Promise<EventDto> => {
 };
 
 export const createEvent = async (
-  data: CreateEventCommand
+  data: CreateEventCommand,
 ): Promise<EventDto> => {
   const response = await api.post<EventDto>("/api/Events", data);
   return response.data;
@@ -88,7 +94,7 @@ export const createEvent = async (
 
 export const updateEvent = async (
   id: number,
-  data: UpdateEventCommand
+  data: UpdateEventCommand,
 ): Promise<EventDto> => {
   const response = await api.put<EventDto>(`/api/Events/${id}`, data);
   return response.data;
