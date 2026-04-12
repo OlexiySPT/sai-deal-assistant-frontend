@@ -6,6 +6,7 @@ import eventsReducer from "../features/events/eventsSlice";
 import eventNotesReducer from "../features/eventNotes/eventNotesSlice";
 import enumsReducer from "../features/enums/enumsSlice";
 import firmsReducer from "../features/firms/firmsSlice";
+import optionsReducer from "../features/options/optionsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     eventNotes: eventNotesReducer,
     enums: enumsReducer,
     firms: firmsReducer,
+    options: optionsReducer,
   },
 });
 

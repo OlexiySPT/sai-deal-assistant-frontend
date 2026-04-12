@@ -13,7 +13,7 @@ import AutocompleteDynamicDropDown, {
 import EditableMultilineStringField from "../common/inputs/EditableMultilineStringField";
 import { CreateDealDialog } from "./CreateDealDialog";
 import { selectDealLoading } from "../../features/deals/dealsSlice";
-import { getCachedDealStatuses } from "../../features/deals/dealsAPI";
+import { getCachedStringOptions } from "../../features/options/optionsAPI";
 import AutocompleteStringListEditor from "../common/inputs/AutocompleteStringListEditor";
 import {
   addDealTag,
@@ -40,6 +40,7 @@ interface DealDetailsProps {
 export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const dispatch = useAppDispatch();
   const [statusOptions, setStatusOptions] = useState<string[]>([]);
+  const [industryOptions, setIndustryOptions] = useState<string[]>([]);
   const [typesOptions, setTypesOptions] = useState<any[]>([]);
   const [stateOptions, setStateOptions] = useState<any[]>([]);
   const [amountTypeOptions, setAmountTypeOptions] = useState<any[]>([]);
@@ -56,9 +57,16 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
 
   useEffect(() => {
     let mounted = true;
-    getCachedDealStatuses().then((opts) => {
-      if (mounted) setStatusOptions(opts || []);
-    });
+    getCachedStringOptions({ entityType: "Deal", fieldName: "Status" }).then(
+      (opts: string[]) => {
+        if (mounted) setStatusOptions(opts || []);
+      },
+    );
+    getCachedStringOptions({ entityType: "Deal", fieldName: "Industry" }).then(
+      (opts: string[]) => {
+        if (mounted) setIndustryOptions(opts || []);
+      },
+    );
     getEnumValues("dealType").then((opts) => {
       if (mounted) setTypesOptions(opts || []);
     });
@@ -271,7 +279,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           />
         </div>
         <div className="flex gap-4 justify-start flex-wrap">
-          <EditableStringField
+          <AutocompleteEditableStringField
             value={deal.industry}
             entity="Deal"
             field="industry"
@@ -279,6 +287,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             validation="None"
             label="Industry"
             onUpdated={handleDealUpdated}
+            options={Array.isArray(industryOptions) ? industryOptions : []}
             width="24ch"
           />
         </div>

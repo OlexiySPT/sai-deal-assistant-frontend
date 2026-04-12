@@ -47,13 +47,6 @@ export const fetchDealById = createAsyncThunk(
   },
 );
 
-export const fetchCachedDealStatuses = createAsyncThunk(
-  "deals/statuses/cached",
-  async () => {
-    return await dealsAPI.getCachedDealStatuses();
-  },
-);
-
 export const fetchDealWithDependents = createAsyncThunk(
   "deals/fetchDealWithDependents",
   async (id: number) => {

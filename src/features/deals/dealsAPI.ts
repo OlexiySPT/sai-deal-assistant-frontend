@@ -123,6 +123,8 @@ export interface DealsQueryParams {
   FirmId?: number;
   StateIds?: number | number[];
   TypeIds?: number | number[];
+  "HasEventInThisPeriod.StartDate"?: string;
+  "HasEventInThisPeriod.EndDate"?: string;
   SortBy?: string;
   SortDirection?: "Asc" | "Desc";
   Page?: number;
@@ -190,30 +192,4 @@ export async function deleteDeal(id: number): Promise<void> {
   await api.delete(`/api/Deals/${id}`);
 }
 
-// Simple in-memory cache for existing statuses
-let existingStatusesCache: { data: string[]; timestamp: number } | null = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-let statusesPending: Promise<string[]> | null = null;
-
-export async function getCachedDealStatuses(): Promise<string[]> {
-  const now = Date.now();
-  if (
-    existingStatusesCache &&
-    now - existingStatusesCache.timestamp < CACHE_DURATION
-  ) {
-    return existingStatusesCache.data;
-  }
-  if (statusesPending) return statusesPending;
-  statusesPending = api
-    .get<string[]>("/api/Deals/statuses/cached")
-    .then((response) => {
-      existingStatusesCache = { data: response.data, timestamp: Date.now() };
-      statusesPending = null;
-      return response.data;
-    })
-    .catch((err) => {
-      statusesPending = null;
-      throw err;
-    });
-  return statusesPending;
-}
+// (Status options caching moved to optionsAPI)

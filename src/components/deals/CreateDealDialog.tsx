@@ -9,8 +9,8 @@ import {
   createDeal,
   updateDeal,
   getDealById,
-  getCachedDealStatuses,
 } from "../../features/deals/dealsAPI";
+import { getCachedStringOptions } from "../../features/options/optionsAPI";
 import { getFirmById, getFirmsDropdown } from "../../features/firms/firmsAPI";
 import { Dialog } from "../common/Dialog";
 import AutocompleteInput from "../common/inputs/AutocompleteInput";
@@ -73,6 +73,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
   const [isEdit, setIsEdit] = useState(false);
 
   const [statuses, setStatuses] = useState<string[]>([]);
+  const [industryOptions, setIndustryOptions] = useState<string[]>([]);
   const [firmName, setFirmName] = useState("");
   const [firmDialogOpen, setFirmDialogOpen] = useState(false);
   const [activeFirmId, setActiveFirmId] = useState<number | null>(null);
@@ -80,9 +81,16 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
 
   useEffect(() => {
     let mounted = true;
-    getCachedDealStatuses().then((data) => {
-      if (mounted) setStatuses(data || []);
-    });
+    getCachedStringOptions({ entityType: "Deal", fieldName: "Status" }).then(
+      (data: string[]) => {
+        if (mounted) setStatuses(data || []);
+      },
+    );
+    getCachedStringOptions({ entityType: "Deal", fieldName: "Industry" }).then(
+      (data: string[]) => {
+        if (mounted) setIndustryOptions(data || []);
+      },
+    );
     return () => {
       mounted = false;
     };
@@ -294,12 +302,21 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <label className="w-32 text-sm font-medium">Industry</label>
-              <input
-                name="industry"
-                value={form.industry}
-                onChange={handleChange}
-                className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-              />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <AutocompleteInput
+                  value={form.industry || ""}
+                  onChange={(v) =>
+                    setForm((prev) => ({ ...prev, industry: v }))
+                  }
+                  suggestions={industryOptions}
+                  placeholder="Type or select industry..."
+                  onSelect={(s) =>
+                    setForm((prev) => ({ ...prev, industry: s }))
+                  }
+                  onEnter={(v) => setForm((prev) => ({ ...prev, industry: v }))}
+                  className="w-full border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+                />
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <label className="w-32 text-sm font-medium">Type</label>
