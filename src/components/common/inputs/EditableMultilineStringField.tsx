@@ -5,6 +5,7 @@ import OkButton from "../buttons/OkButton";
 import CancelButton from "../buttons/CancelButton";
 import EditButton from "../buttons/EditButton";
 import FullScreenButton from "../buttons/FullScreenButton";
+import CopyToClipboardButton from "../buttons/CopyToClipboardButton";
 import InputLabel from "./InputLabel";
 
 interface EditableMultilineStringFieldProps {
@@ -129,7 +130,14 @@ export default function EditableMultilineStringField({
           {/* Header line */}
           <div className="flex items-center justify-between mb-1">
             <InputLabel label={label} />
-            <div className="flex gap-1 ml-auto">
+            <div className="flex ml-auto gap-1 items-center">
+              <CopyToClipboardButton
+                text={value ?? ""}
+                size="sm"
+                copyTooltip="Copy"
+                copiedTooltip="Copied!"
+                className="align-middle"
+              />
               <FullScreenButton
                 onClick={() => setIsFullScreen(!isFullScreen)}
                 size="sm"
@@ -149,7 +157,14 @@ export default function EditableMultilineStringField({
                   <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
                     {label}:
                   </span>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 items-center">
+                    <CopyToClipboardButton
+                      text={value ?? ""}
+                      size="sm"
+                      copyTooltip="Copy"
+                      copiedTooltip="Copied!"
+                      className="align-middle"
+                    />
                     <FullScreenButton
                       onClick={() => setIsFullScreen(false)}
                       size="sm"

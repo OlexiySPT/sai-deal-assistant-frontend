@@ -350,9 +350,10 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
         <div className="shrink-0 px-3 flex items-center border-b border-gray-300 dark:border-gray-600">
           {[
             "Description",
-            "AI Information",
+            "Initial Letter",
             "Events",
             "Firm Contact Persons",
+            "AI Information",
           ].map((tab) => (
             <button
               key={tab}
@@ -390,6 +391,21 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                   id={deal.id}
                   validation="None"
                   label=""
+                  onUpdated={handleDealUpdated}
+                  rows={5}
+                />
+              </div>
+            </div>
+          )}
+          {activeTab === "Initial Letter" && (
+            <div>
+              <div className="mb-6">
+                <EditableMultilineStringField
+                  value={deal.initialLetter}
+                  entity="Deal"
+                  field="initialLetter"
+                  id={deal.id}
+                  validation="None"
                   onUpdated={handleDealUpdated}
                   rows={5}
                 />
