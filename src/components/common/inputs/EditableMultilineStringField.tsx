@@ -131,13 +131,7 @@ export default function EditableMultilineStringField({
           <div className="flex items-center justify-between mb-1">
             <InputLabel label={label} />
             <div className="flex ml-auto gap-1 items-center">
-              <CopyToClipboardButton
-                text={value ?? ""}
-                size="sm"
-                copyTooltip="Copy"
-                copiedTooltip="Copied!"
-                className="align-middle"
-              />
+              <CopyToClipboardButton size="sm" className="align-middle" />
               <FullScreenButton
                 onClick={() => setIsFullScreen(!isFullScreen)}
                 size="sm"
@@ -158,13 +152,7 @@ export default function EditableMultilineStringField({
                     {label}:
                   </span>
                   <div className="flex gap-1 items-center">
-                    <CopyToClipboardButton
-                      text={value ?? ""}
-                      size="sm"
-                      copyTooltip="Copy"
-                      copiedTooltip="Copied!"
-                      className="align-middle"
-                    />
+                    <CopyToClipboardButton size="sm" className="align-middle" />
                     <FullScreenButton
                       onClick={() => setIsFullScreen(false)}
                       size="sm"

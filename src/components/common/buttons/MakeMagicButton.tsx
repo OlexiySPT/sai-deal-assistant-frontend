@@ -31,7 +31,7 @@ export interface MakeMagicButtonProps extends Omit<
 
 export const MakeMagicButton: React.FC<MakeMagicButtonProps> = ({
   size = "sm",
-  colorClass = "primary",
+  colorClass = "primary" as IconActionButtonProps["colorClass"],
   ariaLabel = "Make Magic",
   ...props
 }) => (
