@@ -443,7 +443,6 @@ export const DealsList: React.FC<DealsListProps> = ({
               }}
               placeholder="Start date"
               className="w-full max-w-[12rem] pr-2 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              style={{ minWidth: 0 }}
             />
             <span className="text-xs">–</span>
             <DatePicker
@@ -458,7 +457,6 @@ export const DealsList: React.FC<DealsListProps> = ({
               }}
               placeholder="End date"
               className="w-full max-w-[12rem] pr-2 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              style={{ minWidth: 0 }}
             />
           </div>
           <div className="relative">
