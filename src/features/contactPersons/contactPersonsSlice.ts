@@ -28,30 +28,30 @@ const initialState: ContactPersonsState = {
 // Async thunks
 export const fetchContactPersons = createAsyncThunk(
   "contactPersons/fetchContactPersons",
-  async (dealId?: number) => {
-    return await contactPersonsAPI.getContactPersons(dealId);
-  }
+  async (firmId?: number) => {
+    return await contactPersonsAPI.getContactPersons(firmId);
+  },
 );
 
 export const fetchContactPersonById = createAsyncThunk(
   "contactPersons/fetchContactPersonById",
   async (id: number) => {
     return await contactPersonsAPI.getContactPersonById(id);
-  }
+  },
 );
 
 export const createContactPerson = createAsyncThunk(
   "contactPersons/createContactPerson",
   async (data: CreateContactPersonCommand) => {
     return await contactPersonsAPI.createContactPerson(data);
-  }
+  },
 );
 
 export const updateContactPerson = createAsyncThunk(
   "contactPersons/updateContactPerson",
   async ({ id, data }: { id: number; data: UpdateContactPersonCommand }) => {
     return await contactPersonsAPI.updateContactPerson(id, data);
-  }
+  },
 );
 
 export const deleteContactPerson = createAsyncThunk(
@@ -59,7 +59,7 @@ export const deleteContactPerson = createAsyncThunk(
   async (id: number) => {
     await contactPersonsAPI.deleteContactPerson(id);
     return id;
-  }
+  },
 );
 
 // Slice
@@ -137,7 +137,7 @@ const contactPersonsSlice = createSlice({
       .addCase(deleteContactPerson.fulfilled, (state, action) => {
         state.loading = false;
         state.contactPersons = state.contactPersons.filter(
-          (cp) => cp.id !== action.payload
+          (cp) => cp.id !== action.payload,
         );
       })
       .addCase(deleteContactPerson.rejected, (state, action) => {
@@ -148,13 +148,19 @@ const contactPersonsSlice = createSlice({
 });
 
 // Actions
-export const { clearCurrentContactPerson, clearError } = contactPersonsSlice.actions;
+export const { clearCurrentContactPerson, clearError } =
+  contactPersonsSlice.actions;
 
 // Selectors
-export const selectContactPersons = (state: RootState) => state.contactPersons.contactPersons;
-export const selectCurrentContactPerson = (state: RootState) => state.contactPersons.currentContactPerson;
-export const selectContactPersonsLoading = (state: RootState) => state.contactPersons.loading;
-export const selectContactPersonsError = (state: RootState) => state.contactPersons.error;
-export const selectContactPersonsTotalItems = (state: RootState) => state.contactPersons.totalItems;
+export const selectContactPersons = (state: RootState) =>
+  state.contactPersons.contactPersons;
+export const selectCurrentContactPerson = (state: RootState) =>
+  state.contactPersons.currentContactPerson;
+export const selectContactPersonsLoading = (state: RootState) =>
+  state.contactPersons.loading;
+export const selectContactPersonsError = (state: RootState) =>
+  state.contactPersons.error;
+export const selectContactPersonsTotalItems = (state: RootState) =>
+  state.contactPersons.totalItems;
 
 export default contactPersonsSlice.reducer;

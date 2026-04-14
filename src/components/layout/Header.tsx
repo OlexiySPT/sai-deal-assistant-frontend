@@ -7,7 +7,7 @@ export const Header: React.FC = () => {
 
   return (
     <header className="bg-blue-700 dark:bg-gray-900 text-white shadow-lg transition-colors duration-200">
-      <nav className="container mx-auto px-4 py-2">
+      <nav className="mx-auto px-4 py-2">
         <div className="flex items-center justify-between">
           <Link
             to="/"
