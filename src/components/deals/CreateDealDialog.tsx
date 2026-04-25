@@ -21,6 +21,8 @@ import {
 } from "../common/inputs/AutocompleteDynamicDropDown";
 import { CreateOrEditFirmDialog } from "../firms/CreateOrEditFirmDialog";
 import { todayLocalYmd } from "../../utils/date";
+import { MakeMagicButton } from "../common/buttons/MakeMagicButton";
+import { readPage } from "../../features/dealAutomation/dealAutomationAPI";
 
 interface CreateDealDialogProps {
   open: boolean;
@@ -32,6 +34,7 @@ interface CreateDealDialogProps {
 interface DealFormState {
   name: string;
   firmId: number;
+  firmName?: string;
   description: string;
   url: string;
   aiSearchInfo: string;
@@ -41,6 +44,7 @@ interface DealFormState {
   typeId: number;
   stateId: number;
   startDate: string | null;
+  AiFullStructuredInfo: string | null;
 }
 
 export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
@@ -69,6 +73,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
     typeId: 0,
     stateId: 0,
     startDate: null,
+    AiFullStructuredInfo: null,
   });
   const [isEdit, setIsEdit] = useState(false);
 
@@ -115,6 +120,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             status: deal.status || "",
             typeId: deal.typeId || 0,
             stateId: deal.stateId || 0,
+            AiFullStructuredInfo: null,
           });
 
           if (deal.firmId) {
@@ -145,6 +151,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
         status: "New",
         typeId: 3,
         stateId: 1,
+        AiFullStructuredInfo: null,
       });
       setFirmName("");
     }
@@ -215,12 +222,33 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
     }));
   };
 
+  const parseReadPageResult = (result: string) => {
+    try {
+      return JSON.parse(result);
+    } catch {
+      const parsedResult: Record<string, string> = {};
+      let currentKey: string | null = null;
+
+      result.split(/\r?\n/).forEach((line) => {
+        const match = line.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
+        if (match) {
+          currentKey = match[1];
+          parsedResult[currentKey] = match[2] || "";
+        } else if (currentKey) {
+          parsedResult[currentKey] += `\n${line}`;
+        }
+      });
+
+      return parsedResult;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    if (!form.firmId) {
+    if (!form.firmId && firmName.trim() !== "") {
       setError("Please select a firm.");
       setLoading(false);
       return;
@@ -298,6 +326,33 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
                 value={form.url}
                 onChange={handleChange}
                 className="flex-1 border rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600"
+              />
+              <MakeMagicButton
+                onClick={async () => {
+                  try {
+                    const result = await readPage({
+                      dealId: null,
+                      url: form.url,
+                    });
+
+                    const parsedResult = parseReadPageResult(result);
+
+                    setForm((prev) => ({
+                      ...prev,
+                      firmName: parsedResult.company || prev.firmName,
+                      name: parsedResult.title || prev.name,
+                      description:
+                        parsedResult.text ||
+                        parsedResult.description ||
+                        prev.description,
+                      AiFullStructuredInfo: result || prev.aiSearchInfo,
+                    }));
+                    console.debug(parsedResult);
+                  } catch (err) {
+                    console.error("Failed to read page", err);
+                  }
+                }}
+                colorClass={"blue"}
               />
             </div>
             <div className="flex items-center gap-2">

@@ -66,6 +66,8 @@ export interface DealWithDependentsDto {
   amountTypeId: number | null;
   amountType: string | null;
   denormDenormLastActionDate?: string | null;
+  AiFullStructuredInfo?: string | null;
+  aiFullStructuredInfo?: string | null;
 }
 
 export interface CreateDealCommand {

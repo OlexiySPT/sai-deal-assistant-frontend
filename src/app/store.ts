@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import contactPersonsReducer from "../features/contactPersons/contactPersonsSlice";
 import dealsReducer from "../features/deals/dealsSlice";
+import dealAutomationReducer from "../features/dealAutomation/dealAutomationSlice";
 import dealTagsReducer from "../features/dealTags/dealTagsSlice";
 import eventsReducer from "../features/events/eventsSlice";
 import eventNotesReducer from "../features/eventNotes/eventNotesSlice";
@@ -12,6 +13,7 @@ export const store = configureStore({
   reducer: {
     contactPersons: contactPersonsReducer,
     deals: dealsReducer,
+    dealAutomation: dealAutomationReducer,
     dealTags: dealTagsReducer,
     events: eventsReducer,
     eventNotes: eventNotesReducer,

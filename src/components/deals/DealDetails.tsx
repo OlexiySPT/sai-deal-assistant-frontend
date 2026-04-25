@@ -32,6 +32,8 @@ import {
 import { EventList, EventListHandle } from "../events/EventList";
 import AddButton from "../common/buttons/AddButton";
 import { CreateOrEditFirmDialog } from "../firms/CreateOrEditFirmDialog";
+import { MakeMagicButton } from "../common/buttons/MakeMagicButton";
+import { readPage } from "../../features/dealAutomation/dealAutomationAPI";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -414,7 +416,10 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           )}
           {activeTab === "AI Information" && (
             <div>
-              {deal.aiSearchInfo || deal.aiBriefDescription ? (
+              {deal.aiSearchInfo ||
+              deal.aiBriefDescription ||
+              deal.AiFullStructuredInfo ||
+              (deal as any).aiFullStructuredInfo ? (
                 <div>
                   {deal.aiBriefDescription && (
                     <div className="mb-3">
@@ -433,6 +438,18 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                       </h3>
                       <p className="text-gray-700 dark:text-gray-300">
                         {deal.aiSearchInfo}
+                      </p>
+                    </div>
+                  )}
+                  {(deal.AiFullStructuredInfo ||
+                    (deal as any).aiFullStructuredInfo) && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
+                        Full Structured Info
+                      </h3>
+                      <p className="text-gray-700 dark:text-gray-300">
+                        {deal.AiFullStructuredInfo ||
+                          (deal as any).aiFullStructuredInfo}
                       </p>
                     </div>
                   )}
