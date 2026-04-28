@@ -155,10 +155,10 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   return (
     <div
       id="details-container"
-      className="h-full flex flex-col bg-white dark:bg-gray-800"
+      className="h-full flex flex-col bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-tr-lg rounded-br-lg shadow-sm"
     >
       {/* Header */}
-      <div className="shrink-0 px-3 py-1">
+      <div className="shrink-0 px-3 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-[18%_80%] gap-4">
           <div>
             <AutocompleteDynamicDropDown
@@ -416,49 +416,47 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           )}
           {activeTab === "AI Information" && (
             <div>
-              {deal.aiSearchInfo ||
-              deal.aiBriefDescription ||
-              deal.AiFullStructuredInfo ||
-              (deal as any).aiFullStructuredInfo ? (
+              <div className="space-y-4">
                 <div>
-                  {deal.aiBriefDescription && (
-                    <div className="mb-3">
-                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                        Brief Description
-                      </h3>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        {deal.aiBriefDescription}
-                      </p>
-                    </div>
-                  )}
-                  {deal.aiSearchInfo && (
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                        Search Info
-                      </h3>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        {deal.aiSearchInfo}
-                      </p>
-                    </div>
-                  )}
-                  {(deal.AiFullStructuredInfo ||
-                    (deal as any).aiFullStructuredInfo) && (
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                        Full Structured Info
-                      </h3>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        {deal.AiFullStructuredInfo ||
-                          (deal as any).aiFullStructuredInfo}
-                      </p>
-                    </div>
-                  )}
+                  <EditableMultilineStringField
+                    value={deal.aiBriefDescription}
+                    entity="Deal"
+                    field="aiBriefDescription"
+                    id={deal.id}
+                    validation="None"
+                    label="Brief Description"
+                    onUpdated={handleDealUpdated}
+                    rows={4}
+                  />
                 </div>
-              ) : (
-                <div className="text-gray-500 dark:text-gray-400">
-                  No AI information available.
+                <div>
+                  <EditableMultilineStringField
+                    value={deal.aiSearchInfo}
+                    entity="Deal"
+                    field="aiSearchInfo"
+                    id={deal.id}
+                    validation="None"
+                    label="Search Info"
+                    onUpdated={handleDealUpdated}
+                    rows={4}
+                  />
                 </div>
-              )}
+                <div>
+                  <EditableMultilineStringField
+                    value={
+                      deal.aiFullStructuredInfo ||
+                      (deal as any).AiFullStructuredInfo
+                    }
+                    entity="Deal"
+                    field="aiFullStructuredInfo"
+                    id={deal.id}
+                    validation="None"
+                    label="Full Structured Info"
+                    onUpdated={handleDealUpdated}
+                    rows={4}
+                  />
+                </div>
+              </div>
             </div>
           )}
           {activeTab === "Events" && (

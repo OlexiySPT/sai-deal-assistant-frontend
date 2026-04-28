@@ -3,6 +3,7 @@ import { useAppDispatch } from "../app/hooks";
 import { ActivityBar } from "../components/layout/ActivityBar";
 import { DealsList } from "../components/deals/DealsList";
 import { DealDetails } from "../components/deals/DealDetails";
+import { AiPromptsDialog } from "../components/aiPrompts/AiPromptsDialog";
 import { fetchDealWithDependents } from "../features/deals/dealsSlice";
 
 export const Home = () => {
@@ -74,6 +75,8 @@ export const Home = () => {
     window.history.replaceState({}, "", newUrl);
   }, [selectedDealId]);
 
+  const [aiPromptsDialogOpen, setAiPromptsDialogOpen] = useState(false);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
     const startX = e.clientX;
@@ -100,7 +103,11 @@ export const Home = () => {
     <div className="flex md:flex-row flex-col h-full overflow-hidden">
       {/* Activity Bar */}
       <div className="hidden md:block">
-        <ActivityBar activeView={activeView} onViewChange={setActiveView} />
+        <ActivityBar
+          activeView={activeView}
+          onViewChange={setActiveView}
+          onAiPromptOpen={() => setAiPromptsDialogOpen(true)}
+        />
       </div>
 
       {/* Left Panel - Deals List (conditionally shown) */}
@@ -147,6 +154,10 @@ export const Home = () => {
         <div className="flex-1 overflow-hidden">
           <DealDetails dealId={selectedDealId} />
         </div>
+        <AiPromptsDialog
+          open={aiPromptsDialogOpen}
+          onClose={() => setAiPromptsDialogOpen(false)}
+        />
       </div>
     </div>
   );

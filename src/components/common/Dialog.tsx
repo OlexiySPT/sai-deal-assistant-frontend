@@ -30,7 +30,9 @@ export const Dialog: React.FC<DialogProps> = ({
             ✕
           </button>
         </div>
-        <div className="p-4">{children}</div>
+        <div className="p-4 flex flex-col h-full overflow-hidden">
+          {children}
+        </div>
       </div>
     </div>
   );

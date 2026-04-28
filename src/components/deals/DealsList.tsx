@@ -11,67 +11,12 @@ import {
   loadAllEnums,
 } from "../../features/enums/enumsSlice";
 import type { DealsQueryParams } from "../../features/deals/dealsAPI";
-import { MultiSelect } from "../common/inputs/MultiSelect";
-import AutocompleteInput from "../common/inputs/AutocompleteInput";
 import { getCachedStringOptions } from "../../features/options/optionsAPI";
-import DatePicker from "../common/inputs/DatePicker";
 import { CreateDealDialog } from "./CreateDealDialog";
 import AddButton from "../common/buttons/AddButton";
-import { DealStateIcon } from "./DealStateIcon";
-
-// New memoized row to avoid full list redraw on selection
-const DealRow: React.FC<{
-  deal: any;
-  stateId: number | null;
-  states: any[];
-  isSelected: boolean;
-  onClick: (id: number, opts?: { immediate?: boolean }) => void;
-}> = ({ deal, stateId, states, isSelected, onClick }) => {
-  const meta = [
-    deal.firmName,
-    deal.lastActionDate
-      ? new Date(deal.lastActionDate).toLocaleDateString()
-      : null,
-    deal.status,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
-  return (
-    <div
-      data-deal-id={deal.id}
-      onClick={() => onClick(deal.id, { immediate: true })}
-      role="button"
-      className={`px-3 py-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition ${
-        isSelected
-          ? "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500"
-          : ""
-      }`}
-    >
-      <div className="flex items-center gap-2">
-        <DealStateIcon id={stateId} states={states} />
-        <div className="flex-1 min-w-0">
-          <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
-            {deal.name || "Untitled Deal"}
-          </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-            {meta || deal.state || "-"}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const MemoDealRow = React.memo(
-  DealRow,
-  (prev, next) =>
-    prev.deal === next.deal &&
-    prev.stateId === next.stateId &&
-    prev.states === next.states &&
-    prev.isSelected === next.isSelected &&
-    prev.onClick === next.onClick,
-);
+import { DealRow } from "./DealRow";
+import { DealListFilters } from "./DealListFilters";
+import { ListDetailsFrame } from "../common/layout/ListDetailsFrame";
 
 interface DealsListProps {
   selectedDealId: number | null;
@@ -351,258 +296,149 @@ export const DealsList: React.FC<DealsListProps> = ({
     dispatch(fetchDeals(filters));
   };
 
-  return (
-    <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900">
-      {/* Filters Panel */}
-      <div className="p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between mb-1.5">
-          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-            Deals
-          </h2>
-          <div className="flex gap-2">
-            <AddButton onClick={() => setShowCreateDialog(true)} />
-            <button
-              type="button"
-              className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
-              onClick={() => {
-                setFilters({
-                  Page: 1,
-                  PageSize: 20,
-                  SortBy: "createdAt",
-                  SortDirection: "Desc",
-                  "HasEventInThisPeriod.StartDate": undefined,
-                  "HasEventInThisPeriod.EndDate": undefined,
-                });
-                setFirmNameDraft("");
-                setIndustryDraft("");
-                setStatusDraft("");
-                setSelectedStates([]);
-                setSelectedTypes([]);
-                setEventStartDate(null);
-                setEventEndDate(null);
-              }}
-              aria-label="Clear all filters"
-            >
-              Clear All
-            </button>
-          </div>
+  const listPanel = (
+    <div
+      ref={listRef}
+      tabIndex={0}
+      onKeyDown={handleListKeyDown}
+      className={`h-full overflow-y-auto ${
+        showDealsOnMobile ? "block" : "hidden"
+      } md:block focus:outline-none focus:ring-0`}
+    >
+      {loading ? (
+        <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+          Loading...
         </div>
-        <div className="space-y-1.5">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search by firm name..."
-              className="w-full pr-7 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-              value={firmNameDraft}
-              onChange={(e) => setFirmNameDraft(e.target.value)}
-            />
-            {firmNameDraft && (
-              <button
-                type="button"
-                className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
-                style={{ padding: 0 }}
-                aria-label="Clear firm name"
-                onClick={() => setFirmNameDraft("")}
-              >
-                ×
-              </button>
-            )}
-          </div>
-          <div className="relative">
-            <MultiSelect
-              options={dealStates.map((state: any) => ({
-                id: state.Id,
-                label: state.State,
-              }))}
-              selectedValues={selectedStates}
-              onChange={(values) => setSelectedStates(values as number[])}
-              placeholder="All States"
-            />
-            {selectedStates.length > 0 && (
-              <button
-                type="button"
-                className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
-                style={{ padding: 0 }}
-                aria-label="Clear state filter"
-                onClick={() => setSelectedStates([])}
-              >
-                ×
-              </button>
-            )}
-          </div>
-          <div className="relative flex-1 min-w-0 flex gap-2 items-center">
-            <DatePicker
-              value={eventStartDate}
-              onChange={(date) => {
-                setEventStartDate(date);
-                setFilters((prev) => ({
-                  ...prev,
-                  "HasEventInThisPeriod.StartDate": date || undefined,
-                  Page: 1,
-                }));
-              }}
-              placeholder="Start date"
-              className="w-full max-w-[12rem] pr-2 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            />
-            <span className="text-xs">–</span>
-            <DatePicker
-              value={eventEndDate}
-              onChange={(date) => {
-                setEventEndDate(date);
-                setFilters((prev) => ({
-                  ...prev,
-                  "HasEventInThisPeriod.EndDate": date || undefined,
-                  Page: 1,
-                }));
-              }}
-              placeholder="End date"
-              className="w-full max-w-[12rem] pr-2 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            />
-          </div>
-          <div className="relative">
-            <AutocompleteInput
-              value={statusDraft}
-              onChange={(v) => setStatusDraft(v)}
-              suggestions={statuses}
-              placeholder="Status..."
-              onSelect={(s) => {
-                setStatusDraft(s);
-                setFilters((prev) => ({ ...prev, Status: s, Page: 1 }));
-              }}
-              className="w-full pr-7 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            />
-            {statusDraft && (
-              <button
-                type="button"
-                className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
-                style={{ padding: 0 }}
-                aria-label="Clear status"
-                onClick={() => setStatusDraft("")}
-              >
-                ×
-              </button>
-            )}
-          </div>
-          <div className="relative">
-            <MultiSelect
-              options={dealTypes.map((type: any) => ({
-                id: type.Id,
-                label: type.Type,
-              }))}
-              selectedValues={selectedTypes}
-              onChange={(values) => setSelectedTypes(values as number[])}
-              placeholder="All Types"
-            />
-            {selectedTypes.length > 0 && (
-              <button
-                type="button"
-                className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
-                style={{ padding: 0 }}
-                aria-label="Clear type filter"
-                onClick={() => setSelectedTypes([])}
-              >
-                ×
-              </button>
-            )}
-          </div>
-          <div className="relative">
-            <AutocompleteInput
-              value={industryDraft}
-              onChange={setIndustryDraft}
-              suggestions={industryOptions}
-              placeholder="Industry..."
-              onSelect={(s) => {
-                setIndustryDraft(s);
-                setFilters((prev) => ({ ...prev, Industry: s, Page: 1 }));
-              }}
-              className="w-full pr-7 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            />
-            {industryDraft && (
-              <button
-                type="button"
-                className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
-                style={{ padding: 0 }}
-                aria-label="Clear industry"
-                onClick={() => setIndustryDraft("")}
-              >
-                ×
-              </button>
-            )}
-          </div>
+      ) : deals.length === 0 ? (
+        <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+          No deals found
         </div>
-      </div>
+      ) : (
+        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          {deals.map((deal) => (
+            <DealRow
+              key={deal.id}
+              deal={deal}
+              stateId={deal.state ? (stateIdByName[deal.state] ?? null) : null}
+              states={dealStates}
+              isSelected={selectedDealId === deal.id}
+              onClick={onSelectDeal}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
-      {/* Deals List */}
-      <div
-        ref={listRef}
-        tabIndex={0}
-        onKeyDown={handleListKeyDown}
-        className={`flex-1 overflow-y-auto ${
-          showDealsOnMobile ? "block" : "hidden"
-        } md:block focus:outline-none focus:ring-0`}
-      >
-        {loading ? (
-          <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-            Loading...
-          </div>
-        ) : deals.length === 0 ? (
-          <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-            No deals found
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {deals.map((deal) => (
-              <MemoDealRow
-                key={deal.id}
-                deal={deal}
-                stateId={
-                  deal.state ? (stateIdByName[deal.state] ?? null) : null
-                }
-                states={dealStates}
-                isSelected={selectedDealId === deal.id}
-                onClick={onSelectDeal}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Pagination */}
-      <div
-        className={`px-3 py-1 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 ${
-          showDealsOnMobile ? "block" : "hidden"
-        } md:block`}
-      >
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-600 dark:text-gray-400">
-            {totalItems} total
+  const listFooter = (
+    <div
+      className={`px-3 py-1 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 ${
+        showDealsOnMobile ? "block" : "hidden"
+      } md:block`}
+    >
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-gray-600 dark:text-gray-400">
+          {totalItems} total
+        </span>
+        <div className="flex gap-3 items-center">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage <= 1}
+            className="text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+          >
+            Prev
+          </button>
+          <span className="text-gray-700 dark:text-gray-300">
+            {currentPage} / {totalPages || 1}
           </span>
-          <div className="flex gap-3 items-center">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage <= 1}
-              className="text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
-            >
-              Prev
-            </button>
-            <span className="text-gray-700 dark:text-gray-300">
-              {currentPage} / {totalPages || 1}
-            </span>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage >= totalPages}
-              className="text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
-            >
-              Next
-            </button>
-          </div>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage >= totalPages}
+            className="text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+          >
+            Next
+          </button>
         </div>
       </div>
+    </div>
+  );
+
+  return (
+    <>
+      <ListDetailsFrame
+        filters={
+          <DealListFilters
+            dealStates={dealStates}
+            dealTypes={dealTypes}
+            firmNameDraft={firmNameDraft}
+            industryDraft={industryDraft}
+            statusDraft={statusDraft}
+            selectedStates={selectedStates}
+            selectedTypes={selectedTypes}
+            eventStartDate={eventStartDate}
+            eventEndDate={eventEndDate}
+            industryOptions={industryOptions}
+            statuses={statuses}
+            onFirmNameChange={setFirmNameDraft}
+            onIndustryChange={(value) => setIndustryDraft(value)}
+            onIndustrySelect={(value) => {
+              setIndustryDraft(value);
+              setFilters((prev) => ({ ...prev, Industry: value, Page: 1 }));
+            }}
+            onStatusChange={(value) => setStatusDraft(value)}
+            onStatusSelect={(value) => {
+              setStatusDraft(value);
+              setFilters((prev) => ({ ...prev, Status: value, Page: 1 }));
+            }}
+            onSelectedStatesChange={(values) => setSelectedStates(values)}
+            onSelectedTypesChange={(values) => setSelectedTypes(values)}
+            onEventStartDateChange={(date) => {
+              setEventStartDate(date);
+              setFilters((prev) => ({
+                ...prev,
+                "HasEventInThisPeriod.StartDate": date || undefined,
+                Page: 1,
+              }));
+            }}
+            onEventEndDateChange={(date) => {
+              setEventEndDate(date);
+              setFilters((prev) => ({
+                ...prev,
+                "HasEventInThisPeriod.EndDate": date || undefined,
+                Page: 1,
+              }));
+            }}
+            onAdd={() => setShowCreateDialog(true)}
+            onClearAll={() => {
+              setFilters({
+                Page: 1,
+                PageSize: 20,
+                SortBy: "createdAt",
+                SortDirection: "Desc",
+                "HasEventInThisPeriod.StartDate": undefined,
+                "HasEventInThisPeriod.EndDate": undefined,
+              });
+              setFirmNameDraft("");
+              setIndustryDraft("");
+              setStatusDraft("");
+              setSelectedStates([]);
+              setSelectedTypes([]);
+              setEventStartDate(null);
+              setEventEndDate(null);
+            }}
+          />
+        }
+        list={listPanel}
+        listFooter={listFooter}
+        showListOnMobile={showDealsOnMobile}
+        listClassName="bg-gray-50 dark:bg-gray-900"
+      />
+
       <CreateDealDialog
         open={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
         onCreated={handleDealCreated}
       />
-    </div>
+    </>
   );
 };
