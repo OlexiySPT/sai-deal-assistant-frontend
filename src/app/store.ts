@@ -1,23 +1,29 @@
 import { configureStore } from "@reduxjs/toolkit";
 import contactPersonsReducer from "../features/contactPersons/contactPersonsSlice";
 import dealsReducer from "../features/deals/dealsSlice";
+import dealAutomationReducer from "../features/dealAutomation/dealAutomationSlice";
 import dealTagsReducer from "../features/dealTags/dealTagsSlice";
 import eventsReducer from "../features/events/eventsSlice";
 import eventNotesReducer from "../features/eventNotes/eventNotesSlice";
 import enumsReducer from "../features/enums/enumsSlice";
 import firmsReducer from "../features/firms/firmsSlice";
 import optionsReducer from "../features/options/optionsSlice";
+import aiPromptsReducer from "../features/aiPrompts/aiPromptsSlice";
+import aiMetadataReducer from "../features/aiMetadata/aiMetadataSlice";
 
 export const store = configureStore({
   reducer: {
     contactPersons: contactPersonsReducer,
     deals: dealsReducer,
+    dealAutomation: dealAutomationReducer,
     dealTags: dealTagsReducer,
     events: eventsReducer,
     eventNotes: eventNotesReducer,
     enums: enumsReducer,
     firms: firmsReducer,
     options: optionsReducer,
+    aiPrompts: aiPromptsReducer,
+    aiMetadata: aiMetadataReducer,
   },
 });
 
