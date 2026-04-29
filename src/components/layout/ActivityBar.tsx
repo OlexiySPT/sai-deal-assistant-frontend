@@ -4,12 +4,14 @@ interface ActivityBarProps {
   activeView: string | null;
   onViewChange: (view: string | null) => void;
   onAiPromptOpen: () => void;
+  onAiMetadataOpen: () => void;
 }
 
 export const ActivityBar: React.FC<ActivityBarProps> = ({
   activeView,
   onViewChange,
   onAiPromptOpen,
+  onAiMetadataOpen,
 }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -106,7 +108,17 @@ export const ActivityBar: React.FC<ActivityBarProps> = ({
               onClick={openAiPromptMenu}
               className="w-full px-3 py-2 text-left text-sm text-gray-100 hover:bg-gray-800"
             >
-              AI Prompt
+              AI Prompts
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSettingsOpen(false);
+                onAiMetadataOpen();
+              }}
+              className="w-full px-3 py-2 text-left text-sm text-gray-100 hover:bg-gray-800"
+            >
+              AI Metadata
             </button>
           </div>
         )}

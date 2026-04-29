@@ -4,6 +4,7 @@ import { ActivityBar } from "../components/layout/ActivityBar";
 import { DealsList } from "../components/deals/DealsList";
 import { DealDetails } from "../components/deals/DealDetails";
 import { AiPromptsDialog } from "../components/aiPrompts/AiPromptsDialog";
+import { AiMetadataDialog } from "../components/aiMetadata/AiMetadataDialog";
 import { fetchDealWithDependents } from "../features/deals/dealsSlice";
 
 export const Home = () => {
@@ -76,6 +77,7 @@ export const Home = () => {
   }, [selectedDealId]);
 
   const [aiPromptsDialogOpen, setAiPromptsDialogOpen] = useState(false);
+  const [aiMetadataDialogOpen, setAiMetadataDialogOpen] = useState(false);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -107,6 +109,7 @@ export const Home = () => {
           activeView={activeView}
           onViewChange={setActiveView}
           onAiPromptOpen={() => setAiPromptsDialogOpen(true)}
+          onAiMetadataOpen={() => setAiMetadataDialogOpen(true)}
         />
       </div>
 
@@ -157,6 +160,10 @@ export const Home = () => {
         <AiPromptsDialog
           open={aiPromptsDialogOpen}
           onClose={() => setAiPromptsDialogOpen(false)}
+        />
+        <AiMetadataDialog
+          open={aiMetadataDialogOpen}
+          onClose={() => setAiMetadataDialogOpen(false)}
         />
       </div>
     </div>

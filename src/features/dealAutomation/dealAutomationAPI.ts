@@ -5,7 +5,24 @@ export interface ProcessPageCommand {
   dealId?: number | null;
 }
 
-export async function readPage(data: ProcessPageCommand): Promise<string> {
-  const response = await api.post("/api/DealAutomation/ReadPage", data);
+export type ReadPageResult = string;
+export type GenerateCoverLetterResult = string;
+
+export async function readPage(
+  data: ProcessPageCommand,
+): Promise<ReadPageResult> {
+  const response = await api.post<ReadPageResult>(
+    "/api/DealAutomation/ReadPage",
+    data,
+  );
+  return response.data;
+}
+
+export async function generateCoverLetter(
+  id: number,
+): Promise<GenerateCoverLetterResult> {
+  const response = await api.post<GenerateCoverLetterResult>(
+    `/api/DealAutomation/${id}/generate-cover-letter`,
+  );
   return response.data;
 }

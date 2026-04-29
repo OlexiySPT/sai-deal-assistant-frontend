@@ -44,7 +44,7 @@ interface DealFormState {
   typeId: number;
   stateId: number;
   startDate: string | null;
-  AiFullStructuredInfo: string | null;
+  aiFullStructuredInfo: string | null;
 }
 
 export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
@@ -73,7 +73,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
     typeId: 0,
     stateId: 0,
     startDate: null,
-    AiFullStructuredInfo: null,
+    aiFullStructuredInfo: null,
   });
   const [isEdit, setIsEdit] = useState(false);
 
@@ -120,7 +120,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             status: deal.status || "",
             typeId: deal.typeId || 0,
             stateId: deal.stateId || 0,
-            AiFullStructuredInfo: null,
+            aiFullStructuredInfo: null,
           });
 
           if (deal.firmId) {
@@ -151,7 +151,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
         status: "New",
         typeId: 3,
         stateId: 1,
-        AiFullStructuredInfo: null,
+        aiFullStructuredInfo: null,
       });
       setFirmName("");
     }
@@ -336,6 +336,10 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
                     });
 
                     const parsedResult = parseReadPageResult(result);
+                    const parsedResultAsString =
+                      typeof parsedResult === "string"
+                        ? parsedResult
+                        : JSON.stringify(parsedResult, null, 2);
 
                     setForm((prev) => ({
                       ...prev,
@@ -345,7 +349,8 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
                         parsedResult.text ||
                         parsedResult.description ||
                         prev.description,
-                      AiFullStructuredInfo: result || prev.aiSearchInfo,
+                      aiFullStructuredInfo:
+                        parsedResultAsString || prev.aiFullStructuredInfo,
                     }));
                     console.debug(parsedResult);
                   } catch (err) {

@@ -9,6 +9,7 @@ import enumsReducer from "../features/enums/enumsSlice";
 import firmsReducer from "../features/firms/firmsSlice";
 import optionsReducer from "../features/options/optionsSlice";
 import aiPromptsReducer from "../features/aiPrompts/aiPromptsSlice";
+import aiMetadataReducer from "../features/aiMetadata/aiMetadataSlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     firms: firmsReducer,
     options: optionsReducer,
     aiPrompts: aiPromptsReducer,
+    aiMetadata: aiMetadataReducer,
   },
 });
 

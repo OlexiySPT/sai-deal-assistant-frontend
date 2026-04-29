@@ -24,6 +24,13 @@ export const processDealAutomationPage = createAsyncThunk(
   },
 );
 
+export const generateDealAutomationCoverLetter = createAsyncThunk(
+  "dealAutomation/generateCoverLetter",
+  async (id: number) => {
+    return await dealAutomationAPI.generateCoverLetter(id);
+  },
+);
+
 const dealAutomationSlice = createSlice({
   name: "dealAutomation",
   initialState,
@@ -50,6 +57,19 @@ const dealAutomationSlice = createSlice({
         state.loading = false;
         state.error =
           action.error.message || "Failed to process DealAutomation page";
+      })
+      .addCase(generateDealAutomationCoverLetter.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(generateDealAutomationCoverLetter.fulfilled, (state, action) => {
+        state.loading = false;
+        state.result = action.payload;
+      })
+      .addCase(generateDealAutomationCoverLetter.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.error.message || "Failed to generate cover letter";
       });
   },
 });

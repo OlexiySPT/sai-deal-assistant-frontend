@@ -33,7 +33,7 @@ import { EventList, EventListHandle } from "../events/EventList";
 import AddButton from "../common/buttons/AddButton";
 import { CreateOrEditFirmDialog } from "../firms/CreateOrEditFirmDialog";
 import { MakeMagicButton } from "../common/buttons/MakeMagicButton";
-import { readPage } from "../../features/dealAutomation/dealAutomationAPI";
+import { generateCoverLetter } from "../../features/dealAutomation/dealAutomationAPI";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -54,6 +54,9 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const [activeFirmId, setActiveFirmId] = useState<number | null>(null);
   const [initialFirmName, setInitialFirmName] = useState("");
   const [activeTab, setActiveTab] = useState<string>("Description");
+  const [coverLetter, setCoverLetter] = useState<string | null>(null);
+  const [magicLoading, setMagicLoading] = useState(false);
+  const [magicError, setMagicError] = useState<string | null>(null);
   const eventListRef = useRef<EventListHandle>(null);
   const contactListRef = useRef<ContactPersonListHandle>(null);
 
@@ -124,6 +127,25 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const handleFirmSaved = (_savedFirmId: number) => {
     handleFirmDialogClose();
     handleDealUpdated();
+  };
+
+  const handleGenerateCoverLetter = async () => {
+    const currentDealId = deal?.id;
+    if (!currentDealId) return;
+    setMagicLoading(true);
+    setMagicError(null);
+    try {
+      const result = await generateCoverLetter(currentDealId);
+      setCoverLetter(result);
+    } catch (error) {
+      setMagicError(
+        error instanceof Error
+          ? error.message
+          : "Failed to generate cover letter",
+      );
+    } finally {
+      setMagicLoading(false);
+    }
   };
 
   if (!dealId) {
@@ -402,6 +424,24 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           {activeTab === "Initial Letter" && (
             <div>
               <div className="mb-6">
+                <div className="mt-4 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <MakeMagicButton
+                      colorClass="blue"
+                      onClick={handleGenerateCoverLetter}
+                      disabled={magicLoading}
+                    />
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                      Generate cover letter from this deal
+                    </span>
+                  </div>
+                  {magicLoading && (
+                    <div className="text-sm text-gray-500">Generating...</div>
+                  )}
+                  {magicError && (
+                    <div className="text-sm text-red-500">{magicError}</div>
+                  )}
+                </div>
                 <EditableMultilineStringField
                   value={deal.initialLetter}
                   entity="Deal"
@@ -418,6 +458,18 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
             <div>
               <div className="space-y-4">
                 <div>
+                  <div>
+                    <EditableMultilineStringField
+                      value={deal.aiFullStructuredInfo}
+                      entity="Deal"
+                      field="aiFullStructuredInfo"
+                      id={deal.id}
+                      validation="None"
+                      label="Full Structured Info"
+                      onUpdated={handleDealUpdated}
+                      rows={4}
+                    />
+                  </div>
                   <EditableMultilineStringField
                     value={deal.aiBriefDescription}
                     entity="Deal"
@@ -437,21 +489,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                     id={deal.id}
                     validation="None"
                     label="Search Info"
-                    onUpdated={handleDealUpdated}
-                    rows={4}
-                  />
-                </div>
-                <div>
-                  <EditableMultilineStringField
-                    value={
-                      deal.aiFullStructuredInfo ||
-                      (deal as any).AiFullStructuredInfo
-                    }
-                    entity="Deal"
-                    field="aiFullStructuredInfo"
-                    id={deal.id}
-                    validation="None"
-                    label="Full Structured Info"
                     onUpdated={handleDealUpdated}
                     rows={4}
                   />
