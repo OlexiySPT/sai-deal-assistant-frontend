@@ -55,6 +55,10 @@ export const DealsList: React.FC<DealsListProps> = ({
     null,
   );
   const [firmNameDraft, setFirmNameDraft] = useState("");
+  const contactPersonNameInputTimeout = useRef<ReturnType<
+    typeof setTimeout
+  > | null>(null);
+  const [contactPersonNameDraft, setContactPersonNameDraft] = useState("");
 
   // Status (autocomplete) filter
   const [statuses, setStatuses] = useState<string[]>([]);
@@ -70,6 +74,7 @@ export const DealsList: React.FC<DealsListProps> = ({
     const params = new URLSearchParams(window.location.search);
     const page = params.get("page");
     const firmName = params.get("firmName");
+    const contactPersonName = params.get("contactPersonName");
     const industry = params.get("industry");
     const status = params.get("status");
     const stateIds = params.get("stateIds");
@@ -88,6 +93,7 @@ export const DealsList: React.FC<DealsListProps> = ({
       ...prev,
       Page: page ? Number(page) : prev.Page,
       FirmName: firmName ?? prev.FirmName,
+      ContactPersonName: contactPersonName ?? prev.ContactPersonName,
       Industry: industry ?? prev.Industry,
       Status: status ?? prev.Status,
       StateIds: parsedStateIds.length > 0 ? parsedStateIds : undefined,
@@ -102,6 +108,7 @@ export const DealsList: React.FC<DealsListProps> = ({
     }
 
     if (firmName) setFirmNameDraft(firmName);
+    if (contactPersonName) setContactPersonNameDraft(contactPersonName);
     if (industry) setIndustryDraft(industry);
     if (status) setStatusDraft(status);
 
@@ -109,6 +116,7 @@ export const DealsList: React.FC<DealsListProps> = ({
       const p = new URLSearchParams(window.location.search);
       const pg = p.get("page");
       const fn = p.get("firmName");
+      const contactPerson = p.get("contactPersonName");
       const ind = p.get("industry");
       const st = p.get("status");
       const sIds = p.get("stateIds");
@@ -121,6 +129,7 @@ export const DealsList: React.FC<DealsListProps> = ({
         ...prev,
         Page: pg ? Number(pg) : prev.Page,
         FirmName: fn ?? prev.FirmName,
+        ContactPersonName: contactPerson ?? prev.ContactPersonName,
         Industry: ind ?? prev.Industry,
         Status: st ?? prev.Status,
         StateIds: popStateIds.length > 0 ? popStateIds : undefined,
@@ -131,6 +140,7 @@ export const DealsList: React.FC<DealsListProps> = ({
       setSelectedTypes(popTypeIds);
 
       setFirmNameDraft(fn ?? "");
+      setContactPersonNameDraft(contactPerson ?? "");
       setIndustryDraft(ind ?? "");
       setStatusDraft(st ?? "");
     };
@@ -191,6 +201,24 @@ export const DealsList: React.FC<DealsListProps> = ({
     };
   }, [firmNameDraft]);
 
+  // Throttle contact person filter
+  useEffect(() => {
+    if (contactPersonNameDraft === (filters.ContactPersonName || "")) return;
+    if (contactPersonNameInputTimeout.current)
+      clearTimeout(contactPersonNameInputTimeout.current);
+    contactPersonNameInputTimeout.current = setTimeout(() => {
+      setFilters((prev) => ({
+        ...prev,
+        ContactPersonName: contactPersonNameDraft,
+        Page: 1,
+      }));
+    }, 300);
+    return () => {
+      if (contactPersonNameInputTimeout.current)
+        clearTimeout(contactPersonNameInputTimeout.current);
+    };
+  }, [contactPersonNameDraft]);
+
   useEffect(() => {
     dispatch(fetchDeals(filters));
   }, [dispatch, filters]);
@@ -209,6 +237,9 @@ export const DealsList: React.FC<DealsListProps> = ({
     else params.delete("page");
     if (filters.FirmName) params.set("firmName", String(filters.FirmName));
     else params.delete("firmName");
+    if (filters.ContactPersonName)
+      params.set("contactPersonName", String(filters.ContactPersonName));
+    else params.delete("contactPersonName");
     if (filters.Industry) params.set("industry", String(filters.Industry));
     else params.delete("industry");
     if (filters.Status) params.set("status", String(filters.Status));
@@ -408,6 +439,8 @@ export const DealsList: React.FC<DealsListProps> = ({
                 Page: 1,
               }));
             }}
+            contactPersonNameDraft={contactPersonNameDraft}
+            onContactPersonNameChange={setContactPersonNameDraft}
             onAdd={() => setShowCreateDialog(true)}
             onClearAll={() => {
               setFilters({
@@ -419,6 +452,7 @@ export const DealsList: React.FC<DealsListProps> = ({
                 "HasEventInThisPeriod.EndDate": undefined,
               });
               setFirmNameDraft("");
+              setContactPersonNameDraft("");
               setIndustryDraft("");
               setStatusDraft("");
               setSelectedStates([]);

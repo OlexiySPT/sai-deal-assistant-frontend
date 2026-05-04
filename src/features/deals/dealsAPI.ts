@@ -130,6 +130,7 @@ export interface DealsQueryParams {
   TypeIds?: number | number[];
   "HasEventInThisPeriod.StartDate"?: string;
   "HasEventInThisPeriod.EndDate"?: string;
+  ContactPersonName?: string;
   SortBy?: string;
   SortDirection?: "Asc" | "Desc";
   Page?: number;
