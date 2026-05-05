@@ -13,6 +13,7 @@ import {
 import type { DealsQueryParams } from "../../features/deals/dealsAPI";
 import { getCachedStringOptions } from "../../features/options/optionsAPI";
 import { CreateDealDialog } from "./CreateDealDialog";
+import { GetUrlDialog } from "./GetUrlDialog";
 import AddButton from "../common/buttons/AddButton";
 import { DealRow } from "./DealRow";
 import { DealListFilters } from "./DealListFilters";
@@ -35,6 +36,7 @@ export const DealsList: React.FC<DealsListProps> = ({
   const dealTypes = useAppSelector(selectEnumValues("dealtype"));
   const [showDealsOnMobile, setShowDealsOnMobile] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showGetUrlDialog, setShowGetUrlDialog] = useState(false);
   const [selectedStates, setSelectedStates] = useState<number[]>([]);
   const [selectedTypes, setSelectedTypes] = useState<number[]>([]);
   const [filters, setFilters] = useState<DealsQueryParams>({
@@ -442,6 +444,7 @@ export const DealsList: React.FC<DealsListProps> = ({
             contactPersonNameDraft={contactPersonNameDraft}
             onContactPersonNameChange={setContactPersonNameDraft}
             onAdd={() => setShowCreateDialog(true)}
+            onAddMagic={() => setShowGetUrlDialog(true)}
             onClearAll={() => {
               setFilters({
                 Page: 1,
@@ -468,6 +471,13 @@ export const DealsList: React.FC<DealsListProps> = ({
         listClassName="bg-gray-50 dark:bg-gray-900"
       />
 
+      <GetUrlDialog
+        open={showGetUrlDialog}
+        onClose={() => setShowGetUrlDialog(false)}
+        onMagic={(url) => {
+          console.log("Make magic URL:", url);
+        }}
+      />
       <CreateDealDialog
         open={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { button } from "../cva/button-cva";
+import Button from "../common/buttons/Button";
 import { useAppSelector, useAppDispatch } from "../../app/hooks";
 import {
   selectEnumValues,
@@ -29,6 +29,7 @@ interface CreateDealDialogProps {
   onClose: () => void;
   onCreated?: (deal: any) => void;
   dealId?: number | null; // If provided, dialog is in edit mode
+  initialValues?: Partial<DealFormState>;
 }
 
 interface DealFormState {
@@ -52,6 +53,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
   onClose,
   onCreated,
   dealId,
+  initialValues,
 }) => {
   const dispatch = useAppDispatch();
   const dealTypes = useAppSelector(selectEnumValues("dealtype"));
@@ -140,23 +142,23 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
     } else if (!dealId && open) {
       setIsEdit(false);
       setForm({
-        name: "",
-        firmId: 0,
-        startDate: todayLocalYmd(),
-        description: "",
-        url: "",
-        aiSearchInfo: "",
-        aiBriefDescription: "",
-        industry: "DotNet",
-        status: "New",
-        typeId: 3,
-        stateId: 1,
-        aiFullStructuredInfo: null,
+        name: initialValues?.name ?? "",
+        firmId: initialValues?.firmId ?? 0,
+        startDate: initialValues?.startDate ?? todayLocalYmd(),
+        description: initialValues?.description ?? "",
+        url: initialValues?.url ?? "",
+        aiSearchInfo: initialValues?.aiSearchInfo ?? "",
+        aiBriefDescription: initialValues?.aiBriefDescription ?? "",
+        industry: initialValues?.industry ?? "DotNet",
+        status: initialValues?.status ?? "New",
+        typeId: initialValues?.typeId ?? 3,
+        stateId: initialValues?.stateId ?? 1,
+        aiFullStructuredInfo: initialValues?.aiFullStructuredInfo ?? null,
       });
-      setFirmName("");
+      setFirmName(initialValues?.firmName ?? "");
     }
     // eslint-disable-next-line
-  }, [dealId, open]);
+  }, [dealId, open, initialValues]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -444,11 +446,11 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
             </div>
           </div>
           {/* Submit and error message below both columns */}
-          <div className="md:col-span-2 flex flex-col items-start gap-2 mt-2">
+          <div className="md:col-span-2 flex flex-col items-end gap-2 mt-2">
             {error && <div className="text-red-600 text-sm">{error}</div>}
-            <button
+            <Button
               type="submit"
-              className={`${button({ colorClass: "blue", size: "md" })} !aspect-auto w-auto h-auto px-4 py-2 !rounded`}
+              className="!aspect-auto w-auto h-auto px-4 py-2 !rounded"
               disabled={loading}
             >
               {loading
@@ -458,7 +460,7 @@ export const CreateDealDialog: React.FC<CreateDealDialogProps> = ({
                 : isEdit
                   ? "Update Deal"
                   : "Create Deal"}
-            </button>
+            </Button>
           </div>
         </form>
       </Dialog>

@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import * as dealAutomationAPI from "./dealAutomationAPI";
 
 interface DealAutomationState {
-  result: dealAutomationAPI.ReadPageResult | null;
+  result: dealAutomationAPI.DealAutomationResult | null;
   loading: boolean;
   error: string | null;
 }
@@ -21,6 +21,13 @@ export const processDealAutomationPage = createAsyncThunk(
   "dealAutomation/processPage",
   async (data: dealAutomationAPI.ProcessPageCommand) => {
     return await dealAutomationAPI.readPage(data);
+  },
+);
+
+export const extractDealAutomationText = createAsyncThunk(
+  "dealAutomation/extractText",
+  async (data: dealAutomationAPI.ExtractTextCommand) => {
+    return await dealAutomationAPI.extractText(data);
   },
 );
 
@@ -70,6 +77,19 @@ const dealAutomationSlice = createSlice({
         state.loading = false;
         state.error =
           action.error.message || "Failed to generate cover letter";
+      })
+      .addCase(extractDealAutomationText.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(extractDealAutomationText.fulfilled, (state, action) => {
+        state.loading = false;
+        state.result = action.payload;
+      })
+      .addCase(extractDealAutomationText.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          action.error.message || "Failed to extract text";
       });
   },
 });

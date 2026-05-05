@@ -3,6 +3,8 @@ import { MultiSelect } from "../common/inputs/MultiSelect";
 import AutocompleteInput from "../common/inputs/AutocompleteInput";
 import DatePicker from "../common/inputs/DatePicker";
 import AddButton from "../common/buttons/AddButton";
+import Button from "../common/buttons/Button";
+import { MakeMagicButton } from "../common/buttons/MakeMagicButton";
 
 interface DealListFiltersProps {
   dealStates: any[];
@@ -28,6 +30,7 @@ interface DealListFiltersProps {
   onEventStartDateChange: (value: string | null) => void;
   onEventEndDateChange: (value: string | null) => void;
   onAdd: () => void;
+  onAddMagic: () => void;
   onClearAll: () => void;
 }
 
@@ -55,6 +58,7 @@ export const DealListFilters: React.FC<DealListFiltersProps> = ({
   onEventStartDateChange,
   onEventEndDateChange,
   onAdd,
+  onAddMagic,
   onClearAll,
 }) => {
   const [showExtendedFilters, setShowExtendedFilters] = useState(false);
@@ -67,14 +71,15 @@ export const DealListFilters: React.FC<DealListFiltersProps> = ({
         </h2>
         <div className="flex gap-2">
           <AddButton onClick={onAdd} />
-          <button
+          <MakeMagicButton onClick={onAddMagic} />
+          <Button
             type="button"
             className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
             onClick={onClearAll}
             aria-label="Clear all filters"
           >
             Clear All
-          </button>
+          </Button>
         </div>
       </div>
 

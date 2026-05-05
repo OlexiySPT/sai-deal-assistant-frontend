@@ -428,7 +428,10 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                   <div className="flex items-center gap-2">
                     <MakeMagicButton
                       colorClass="blue"
-                      onClick={handleGenerateCoverLetter}
+                      onClick={() => {
+                        handleGenerateCoverLetter();
+                        handleDealUpdated();
+                      }}
                       disabled={magicLoading}
                     />
                     <span className="text-sm text-gray-600 dark:text-gray-300">
