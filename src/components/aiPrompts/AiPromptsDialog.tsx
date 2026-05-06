@@ -175,21 +175,45 @@ const AddAiPromptForm: React.FC<AddAiPromptFormProps> = ({
   const [key, setKey] = useState("");
   const [version, setVersion] = useState("");
   const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSave = async () => {
-    await onSave({ key, version, text });
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!key.trim()) {
+      setError("Name is required");
+      return;
+    }
+
+    if (!text.trim()) {
+      setError("Text is required");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await onSave({ key, version, text });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save prompt");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <>
+    <form onSubmit={handleSave} className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
           Name
         </label>
         <input
+          type="text"
           value={key}
           onChange={(e) => setKey(e.target.value)}
-          className="mt-1 w-full rounded border border-gray-300 bg-white text-sm text-gray-900 shadow-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+          disabled={loading}
+          className="mt-1 w-full rounded border border-gray-300 bg-white text-sm text-gray-900 shadow-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-50"
         />
       </div>
 
@@ -198,9 +222,11 @@ const AddAiPromptForm: React.FC<AddAiPromptFormProps> = ({
           Version
         </label>
         <input
+          type="text"
           value={version}
           onChange={(e) => setVersion(e.target.value)}
-          className="mt-1 w-full rounded border border-gray-300 bg-white text-sm text-gray-900 shadow-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+          disabled={loading}
+          className="mt-1 w-full rounded border border-gray-300 bg-white text-sm text-gray-900 shadow-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-50"
         />
       </div>
 
@@ -211,27 +237,36 @@ const AddAiPromptForm: React.FC<AddAiPromptFormProps> = ({
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
+          disabled={loading}
           rows={8}
-          className="mt-1 w-full rounded border border-gray-300 bg-white text-sm text-gray-900 shadow-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+          className="mt-1 w-full rounded border border-gray-300 bg-white text-sm text-gray-900 shadow-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-50"
         />
       </div>
+
+      {error && (
+        <div className="rounded bg-red-50 p-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+          {error}
+        </div>
+      )}
 
       <div className="flex justify-end gap-2 pt-2">
         <Button
           type="button"
           variant="secondary"
           onClick={onCancel}
-          className="rounded px-4 py-2 text-sm"
+          disabled={loading}
+          className="rounded px-4 py-2 text-sm disabled:opacity-50"
         >
           Cancel
         </Button>
         <Button
           type="submit"
-          className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+          disabled={loading}
+          className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          Save
+          {loading ? "Saving..." : "Save"}
         </Button>
       </div>
-    </>
+    </form>
   );
 };
