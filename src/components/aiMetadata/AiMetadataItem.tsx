@@ -5,6 +5,7 @@ export interface AiMetadataItemProps {
     id: number;
     key?: string | null;
     type?: string | null;
+    version?: string | null;
   };
   isSelected: boolean;
   onClick: () => void;
@@ -28,7 +29,7 @@ const AiMetadataItemComponent: React.FC<AiMetadataItemProps> = ({
       {item.key || "Untitled"}
     </div>
     <div className="text-xs text-gray-500 dark:text-gray-400">
-      Type: {item.type || "n/a"}
+      Type: {item.type || "n/a"} | v{item.version || "n/a"}
     </div>
   </button>
 );

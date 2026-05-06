@@ -12,12 +12,14 @@ interface GetUrlDialogProps {
   open: boolean;
   onClose: () => void;
   onMagic?: (url: string) => void;
+  onDealCreated?: () => void;
 }
 
 export const GetUrlDialog: React.FC<GetUrlDialogProps> = ({
   open,
   onClose,
   onMagic,
+  onDealCreated,
 }) => {
   const [url, setUrl] = useState("");
   const [pageResult, setPageResult] = useState("");
@@ -135,6 +137,11 @@ export const GetUrlDialog: React.FC<GetUrlDialogProps> = ({
       <CreateDealDialog
         open={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
+        onCreated={() => {
+          setShowCreateDialog(false);
+          onClose();
+          onDealCreated?.();
+        }}
         initialValues={createInitialValues}
       />
     </>

@@ -20,7 +20,7 @@ export const Dialog: React.FC<DialogProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div
-        className={`bg-white dark:bg-gray-800 rounded shadow-lg w-full relative overflow-hidden border border-gray-300 dark:border-gray-600 ${dialogClassName || ""}`}
+        className={`bg-white dark:bg-gray-800 rounded shadow-lg w-full relative flex flex-col overflow-hidden border border-gray-300 dark:border-gray-600 ${dialogClassName || ""}`}
       >
         <div className="flex items-center justify-between px-4 py-2 bg-gray-100 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 select-none">
           <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
@@ -35,7 +35,7 @@ export const Dialog: React.FC<DialogProps> = ({
             ✕
           </Button>
         </div>
-        <div className="px-4 pt-1 pb-4 flex flex-col h-full overflow-hidden">
+        <div className="px-4 pt-1 pb-4 flex flex-col flex-1 min-h-0 overflow-hidden">
           {children}
         </div>
       </div>

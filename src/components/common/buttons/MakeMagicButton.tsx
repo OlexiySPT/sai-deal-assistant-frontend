@@ -39,7 +39,7 @@ const MagicStickIcon: React.FC<{ className?: string }> = ({
 
 export interface MakeMagicButtonProps extends Omit<
   IconActionButtonProps,
-  "icon" | "ariaLabel"
+  "icon" | "ariaLabel" | "colorClass"
 > {
   ariaLabel?: string;
   colorClass?: IconActionButtonProps["colorClass"];

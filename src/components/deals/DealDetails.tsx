@@ -31,8 +31,11 @@ import {
 } from "../contacts/ContactPersonList";
 import { EventList, EventListHandle } from "../events/EventList";
 import AddButton from "../common/buttons/AddButton";
+import Button from "../common/buttons/Button";
 import { CreateOrEditFirmDialog } from "../firms/CreateOrEditFirmDialog";
+import { Dialog } from "../common/Dialog";
 import { MakeMagicButton } from "../common/buttons/MakeMagicButton";
+import fieldUpdateAPI from "../../features/fieldUpdate/fieldUpdateAPI";
 import { generateCoverLetter } from "../../features/dealAutomation/dealAutomationAPI";
 
 interface DealDetailsProps {
@@ -55,6 +58,8 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const [initialFirmName, setInitialFirmName] = useState("");
   const [activeTab, setActiveTab] = useState<string>("Description");
   const [coverLetter, setCoverLetter] = useState<string | null>(null);
+  const [coverLetterDialogOpen, setCoverLetterDialogOpen] = useState(false);
+  const [coverLetterSaving, setCoverLetterSaving] = useState(false);
   const [magicLoading, setMagicLoading] = useState(false);
   const [magicError, setMagicError] = useState<string | null>(null);
   const eventListRef = useRef<EventListHandle>(null);
@@ -129,6 +134,25 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
     handleDealUpdated();
   };
 
+  const handleSaveCoverLetter = async () => {
+    if (!deal?.id || coverLetter === null) return;
+    setCoverLetterSaving(true);
+    try {
+      await fieldUpdateAPI.updateString({
+        entity: "Deal",
+        field: "initialLetter",
+        id: deal.id,
+        value: coverLetter,
+        validation: "None",
+      });
+      await dispatch(fetchDealWithDependents(deal.id));
+      dispatch(refreshDealListItem(deal.id));
+      setCoverLetterDialogOpen(false);
+    } finally {
+      setCoverLetterSaving(false);
+    }
+  };
+
   const handleGenerateCoverLetter = async () => {
     const currentDealId = deal?.id;
     if (!currentDealId) return;
@@ -137,6 +161,7 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
     try {
       const result = await generateCoverLetter(currentDealId);
       setCoverLetter(result);
+      setCoverLetterDialogOpen(true);
     } catch (error) {
       setMagicError(
         error instanceof Error
@@ -430,7 +455,6 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
                       colorClass="blue"
                       onClick={() => {
                         handleGenerateCoverLetter();
-                        handleDealUpdated();
                       }}
                       disabled={magicLoading}
                     />
@@ -531,6 +555,55 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
         initialName={initialFirmName}
         onSaved={handleFirmSaved}
       />
+      <Dialog
+        open={coverLetterDialogOpen}
+        onClose={() => setCoverLetterDialogOpen(false)}
+        title="Generated Cover Letter"
+        dialogClassName="max-w-[90vw] h-[90vh] flex flex-col"
+      >
+        <div className="flex flex-col flex-1 min-h-0 gap-3 pt-2">
+          <div className="flex flex-1 min-h-0 gap-3">
+            <div className="flex flex-col flex-1 min-h-0 gap-1">
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                Generated
+              </span>
+              <textarea
+                value={coverLetter || ""}
+                onChange={(e) => setCoverLetter(e.target.value)}
+                className="flex-1 min-h-0 w-full rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 p-3 font-mono resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex flex-col flex-1 min-h-0 gap-1">
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                Current
+              </span>
+              <textarea
+                readOnly
+                value={deal?.initialLetter || ""}
+                className="flex-1 min-h-0 w-full rounded border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 p-3 font-mono resize-none focus:outline-none"
+              />
+            </div>
+          </div>
+          <div className="shrink-0 flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setCoverLetterDialogOpen(false)}
+              className="rounded px-4 py-2 text-sm"
+            >
+              Close
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSaveCoverLetter}
+              disabled={coverLetterSaving}
+              className="rounded px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {coverLetterSaving ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </div>
   );
 };
