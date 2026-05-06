@@ -477,6 +477,10 @@ export const DealsList: React.FC<DealsListProps> = ({
         onMagic={(url) => {
           console.log("Make magic URL:", url);
         }}
+        onDealCreated={() => {
+          setShowGetUrlDialog(false);
+          handleDealCreated();
+        }}
       />
       <CreateDealDialog
         open={showCreateDialog}
