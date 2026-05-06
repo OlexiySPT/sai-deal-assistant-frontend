@@ -2,6 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Dialog } from "../common/Dialog";
 import AddButton from "../common/buttons/AddButton";
+import Button from "../common/buttons/Button";
+import { AiPromptsFiltersPanel } from "./AiPromptsFiltersPanel";
+import { AiPromptsListPanel } from "./AiPromptsListPanel";
+import { AiPromptDetailsPanel } from "./AiPromptDetailsPanel";
+import { AiPromptsListFooter } from "./AiPromptsListFooter";
 import MultilineStringEditor from "../common/inputs/MultilineStringEditor";
 import EditableMultilineStringField from "../common/inputs/EditableMultilineStringField";
 import EditableStringField from "../common/inputs/EditableStringField";
@@ -34,11 +39,6 @@ export const AiPromptsDialog: React.FC<AiPromptsDialogProps> = ({
   const [keyFilter, setKeyFilter] = useState("");
   const [versionFilter, setVersionFilter] = useState("");
 
-  const selectedPrompt = useMemo(
-    () => aiPrompts.find((prompt) => prompt.id === selectedPromptId) ?? null,
-    [aiPrompts, selectedPromptId],
-  );
-
   const filteredPrompts = useMemo(
     () =>
       aiPrompts.filter((prompt) => {
@@ -57,6 +57,13 @@ export const AiPromptsDialog: React.FC<AiPromptsDialogProps> = ({
     [aiPrompts, keyFilter, versionFilter],
   );
 
+  const selectedPrompt = useMemo(() => {
+    if (selectedPromptId !== null) {
+      return aiPrompts.find((prompt) => prompt.id === selectedPromptId) ?? null;
+    }
+    return filteredPrompts[0] ?? null;
+  }, [aiPrompts, filteredPrompts, selectedPromptId]);
+
   useEffect(() => {
     if (open) {
       dispatch(fetchAiPrompts());
@@ -64,10 +71,15 @@ export const AiPromptsDialog: React.FC<AiPromptsDialogProps> = ({
   }, [open, dispatch]);
 
   useEffect(() => {
-    if (open && aiPrompts.length > 0 && selectedPromptId === null) {
-      setSelectedPromptId(aiPrompts[0].id);
+    if (
+      open &&
+      filteredPrompts.length > 0 &&
+      (selectedPromptId === null ||
+        !filteredPrompts.some((prompt) => prompt.id === selectedPromptId))
+    ) {
+      setSelectedPromptId(filteredPrompts[0].id);
     }
-  }, [open, aiPrompts, selectedPromptId]);
+  }, [open, filteredPrompts, selectedPromptId]);
 
   const handleAddPrompt = async (command: CreateAiPromptCommand) => {
     const resultAction = await dispatch(createAiPrompt(command));
@@ -85,192 +97,6 @@ export const AiPromptsDialog: React.FC<AiPromptsDialogProps> = ({
     }
   };
 
-  const filtersPanel = (
-    <div className="p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex items-center justify-between mb-1.5">
-        <div>
-          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-            AI Prompts
-          </h2>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            Filters, list and details
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <AddButton onClick={() => setShowAddDialog(true)} />
-          <button
-            type="button"
-            className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
-            onClick={() => {
-              setKeyFilter("");
-              setVersionFilter("");
-            }}
-          >
-            Clear All
-          </button>
-        </div>
-      </div>
-      <div className="space-y-1.5">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search by key..."
-            value={keyFilter}
-            onChange={(e) => setKeyFilter(e.target.value)}
-            className="w-full pr-7 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          />
-          {keyFilter && (
-            <button
-              type="button"
-              className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
-              style={{ padding: 0 }}
-              aria-label="Clear key filter"
-              onClick={() => setKeyFilter("")}
-            >
-              ×
-            </button>
-          )}
-        </div>
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search by version..."
-            value={versionFilter}
-            onChange={(e) => setVersionFilter(e.target.value)}
-            className="w-full pr-7 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          />
-          {versionFilter && (
-            <button
-              type="button"
-              className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
-              style={{ padding: 0 }}
-              aria-label="Clear version filter"
-              onClick={() => setVersionFilter("")}
-            >
-              ×
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  const listPanel = (
-    <div className="flex flex-col h-full min-h-0 overflow-hidden rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        {filteredPrompts.length === 0 ? (
-          <div className="p-4 text-sm text-gray-500">
-            No AI prompts match filters.
-          </div>
-        ) : (
-          filteredPrompts.map((prompt) => (
-            <button
-              key={prompt.id}
-              type="button"
-              onClick={() => setSelectedPromptId(prompt.id)}
-              className={`w-full text-left px-3 py-1 cursor-pointer border-b border-gray-100 dark:border-gray-800 transition ${
-                prompt.id === selectedPromptId
-                  ? "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
-            >
-              <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                {prompt.key || "Untitled"}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                Version: {prompt.version || "n/a"}
-              </div>
-            </button>
-          ))
-        )}
-      </div>
-    </div>
-  );
-
-  const detailsPanel = (
-    <div className="flex flex-col h-full min-h-0 overflow-hidden rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-      <div className="flex-1 min-h-0 p-3 overflow-y-auto">
-        {selectedPrompt ? (
-          <div className="flex flex-col h-full gap-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="text-xs text-gray-500 uppercase">Key</div>
-                <AutocompleteEditableStringField
-                  value={selectedPrompt.key}
-                  entity="AiPrompt"
-                  field="key"
-                  id={selectedPrompt.id}
-                  label=""
-                  options={Array.from(
-                    new Set(
-                      aiPrompts
-                        .map((prompt) => prompt.key || "")
-                        .filter(Boolean) as string[],
-                    ),
-                  )}
-                  onUpdated={refreshPrompts}
-                />
-              </div>
-              <div>
-                <div className="text-xs text-gray-500 uppercase">Version</div>
-                <EditableStringField
-                  value={selectedPrompt.version}
-                  entity="AiPrompt"
-                  field="version"
-                  id={selectedPrompt.id}
-                  label=""
-                  onUpdated={refreshPrompts}
-                />
-              </div>
-            </div>
-            <div className="flex-1 min-h-0">
-              <EditableMultilineStringField
-                value={selectedPrompt.text}
-                entity="AiPrompt"
-                field="text"
-                id={selectedPrompt.id}
-                label="Prompt text"
-                rows={12}
-                onUpdated={refreshPrompts}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="h-full flex items-center justify-center text-sm text-gray-500">
-            Select an AI prompt from the list.
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const listFooter = (
-    <div className="px-3 py-1 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-gray-600 dark:text-gray-400">
-          {filteredPrompts.length} total
-        </span>
-        <div className="flex gap-3 items-center">
-          <button
-            type="button"
-            disabled
-            className="text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
-          >
-            Prev
-          </button>
-          <span className="text-gray-700 dark:text-gray-300">1 / 1</span>
-          <button
-            type="button"
-            disabled
-            className="text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
-          >
-            Next
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <>
       <Dialog
@@ -283,17 +109,39 @@ export const AiPromptsDialog: React.FC<AiPromptsDialogProps> = ({
           <div className="flex-1 min-h-0 flex flex-col overflow-hidden rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
             <div className="flex-1 min-h-0 flex overflow-hidden">
               <div className="flex flex-col min-h-0 w-[30%] max-w-[40%] overflow-hidden border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-                <div className="shrink-0">{filtersPanel}</div>
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  {listPanel}
+                <div className="shrink-0">
+                  <AiPromptsFiltersPanel
+                    keyFilter={keyFilter}
+                    versionFilter={versionFilter}
+                    onKeyFilterChange={setKeyFilter}
+                    onVersionFilterChange={setVersionFilter}
+                    onClearAll={() => {
+                      setKeyFilter("");
+                      setVersionFilter("");
+                    }}
+                    onAddPrompt={() => setShowAddDialog(true)}
+                  />
                 </div>
-                <div>{listFooter}</div>
+                <div className="flex-1 min-h-0 overflow-hidden">
+                  <AiPromptsListPanel
+                    items={filteredPrompts}
+                    selectedPromptId={selectedPromptId}
+                    onSelectPrompt={setSelectedPromptId}
+                  />
+                </div>
+                <div>
+                  <AiPromptsListFooter total={filteredPrompts.length} />
+                </div>
               </div>
 
               <div className="w-1 bg-gray-200 dark:bg-gray-700 cursor-col-resize" />
 
               <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white dark:bg-gray-900">
-                {detailsPanel}
+                <AiPromptDetailsPanel
+                  selectedPrompt={selectedPrompt}
+                  allPrompts={aiPrompts}
+                  onRefresh={refreshPrompts}
+                />
               </div>
             </div>
           </div>
@@ -333,13 +181,7 @@ const AddAiPromptForm: React.FC<AddAiPromptFormProps> = ({
   };
 
   return (
-    <form
-      className="space-y-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSave();
-      }}
-    >
+    <>
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
           Name
@@ -375,20 +217,21 @@ const AddAiPromptForm: React.FC<AddAiPromptFormProps> = ({
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
-        <button
+        <Button
           type="button"
+          variant="secondary"
           onClick={onCancel}
-          className="rounded border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+          className="rounded px-4 py-2 text-sm"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
         >
           Save
-        </button>
+        </Button>
       </div>
-    </form>
+    </>
   );
 };

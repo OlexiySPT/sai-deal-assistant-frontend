@@ -2,6 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Dialog } from "../common/Dialog";
 import AddButton from "../common/buttons/AddButton";
+import Button from "../common/buttons/Button";
+import { AiMetadataFiltersPanel } from "./AiMetadataFiltersPanel";
+import { AiMetadataListPanel } from "./AiMetadataListPanel";
+import { AiMetadataDetailsPanel } from "./AiMetadataDetailsPanel";
+import { AiMetadataListFooter } from "./AiMetadataListFooter";
 import EditableMultilineStringField from "../common/inputs/EditableMultilineStringField";
 import EditableStringField from "../common/inputs/EditableStringField";
 import AutocompleteEditableStringField from "../common/inputs/AutocompleteEditableStringField";
@@ -86,207 +91,6 @@ export const AiMetadataDialog: React.FC<AiMetadataDialogProps> = ({
     }
   };
 
-  const filtersPanel = (
-    <div className="p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-      <div className="flex items-center justify-between mb-1.5">
-        <div>
-          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-            AI Metadata
-          </h2>
-        </div>
-        <div className="flex gap-2">
-          <AddButton onClick={() => setShowAddDialog(true)} />
-          <button
-            type="button"
-            className="px-2 py-1 text-xs rounded border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 transition"
-            onClick={() => {
-              setTypeFilter("");
-              setKeyFilter("");
-            }}
-          >
-            Clear All
-          </button>
-        </div>
-      </div>
-      <div className="space-y-1.5">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search by type..."
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="w-full pr-7 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          />
-          {typeFilter && (
-            <button
-              type="button"
-              className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
-              style={{ padding: 0 }}
-              aria-label="Clear type filter"
-              onClick={() => setTypeFilter("")}
-            >
-              ×
-            </button>
-          )}
-        </div>
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search by Key..."
-            value={keyFilter}
-            onChange={(e) => setKeyFilter(e.target.value)}
-            className="w-full pr-7 px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          />
-          {keyFilter && (
-            <button
-              type="button"
-              className="absolute right-1 top-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
-              style={{ padding: 0 }}
-              aria-label="Clear key filter"
-              onClick={() => setKeyFilter("")}
-            >
-              ×
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  const listPanel = (
-    <div className="flex flex-col h-full min-h-0 overflow-hidden rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        {filteredMetadata.length === 0 ? (
-          <div className="p-4 text-sm text-gray-500">
-            No AI metadata items match filters.
-          </div>
-        ) : (
-          filteredMetadata.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setSelectedMetadataId(item.id)}
-              className={`w-full text-left px-3 py-1 cursor-pointer border-b border-gray-100 dark:border-gray-800 transition ${
-                item.id === selectedMetadataId
-                  ? "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500"
-                  : "hover:bg-gray-100 dark:hover:bg-gray-700"
-              }`}
-            >
-              <div className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                {item.key || "Untitled"}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-                Type: {item.type || "n/a"}
-              </div>
-            </button>
-          ))
-        )}
-      </div>
-    </div>
-  );
-
-  const detailsPanel = (
-    <div className="flex flex-col h-full min-h-0 overflow-hidden rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
-      <div className="flex-1 min-h-0 p-3 overflow-y-auto">
-        {selectedMetadata ? (
-          <div className="flex flex-col h-full gap-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <div className="text-xs text-gray-500 uppercase">Type</div>
-                <AutocompleteEditableStringField
-                  value={selectedMetadata.type}
-                  entity="AiMetadata"
-                  field="type"
-                  id={selectedMetadata.id}
-                  label=""
-                  options={Array.from(
-                    new Set(
-                      aiMetadata
-                        .map((item) => item.type || "")
-                        .filter(Boolean) as string[],
-                    ),
-                  )}
-                  onUpdated={refreshMetadata}
-                />
-              </div>
-              <div>
-                <div className="text-xs text-gray-500 uppercase">Key</div>
-                <AutocompleteEditableStringField
-                  value={selectedMetadata.key}
-                  entity="AiMetadata"
-                  field="key"
-                  id={selectedMetadata.id}
-                  label=""
-                  options={Array.from(
-                    new Set(
-                      aiMetadata
-                        .map((item) => item.key || "")
-                        .filter(Boolean) as string[],
-                    ),
-                  )}
-                  onUpdated={refreshMetadata}
-                />
-              </div>
-              <div>
-                <div className="text-xs text-gray-500 uppercase">Version</div>
-                <EditableStringField
-                  value={selectedMetadata.version}
-                  entity="AiMetadata"
-                  field="version"
-                  id={selectedMetadata.id}
-                  label=""
-                  onUpdated={refreshMetadata}
-                />
-              </div>
-            </div>
-            <div className="flex-1 min-h-0">
-              <EditableMultilineStringField
-                value={selectedMetadata.text}
-                entity="AiMetadata"
-                field="text"
-                id={selectedMetadata.id}
-                label="Metadata text"
-                rows={12}
-                onUpdated={refreshMetadata}
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="h-full flex items-center justify-center text-sm text-gray-500">
-            Select an AI metadata item from the list.
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const listFooter = (
-    <div className="px-3 py-1 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-      <div className="flex items-center justify-between text-xs">
-        <span className="text-gray-600 dark:text-gray-400">
-          {filteredMetadata.length} total
-        </span>
-        <div className="flex gap-3 items-center">
-          <button
-            type="button"
-            disabled
-            className="text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
-          >
-            Prev
-          </button>
-          <span className="text-gray-700 dark:text-gray-300">1 / 1</span>
-          <button
-            type="button"
-            disabled
-            className="text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
-          >
-            Next
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <>
       <Dialog
@@ -299,17 +103,37 @@ export const AiMetadataDialog: React.FC<AiMetadataDialogProps> = ({
           <div className="flex-1 min-h-0 flex flex-col overflow-hidden rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
             <div className="flex-1 min-h-0 flex overflow-hidden">
               <div className="flex flex-col min-h-0 w-[30%] max-w-[40%] overflow-hidden border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-                <div className="shrink-0">{filtersPanel}</div>
+                <AiMetadataFiltersPanel
+                  typeFilter={typeFilter}
+                  keyFilter={keyFilter}
+                  onTypeFilterChange={setTypeFilter}
+                  onKeyFilterChange={setKeyFilter}
+                  onClearAll={() => {
+                    setTypeFilter("");
+                    setKeyFilter("");
+                  }}
+                  onAddMetadata={() => setShowAddDialog(true)}
+                />
                 <div className="flex-1 min-h-0 overflow-hidden">
-                  {listPanel}
+                  <AiMetadataListPanel
+                    items={filteredMetadata}
+                    selectedMetadataId={selectedMetadataId}
+                    onSelectMetadata={setSelectedMetadataId}
+                  />
                 </div>
-                <div>{listFooter}</div>
+                <div>
+                  <AiMetadataListFooter total={filteredMetadata.length} />
+                </div>
               </div>
 
               <div className="w-1 bg-gray-200 dark:bg-gray-700 cursor-col-resize" />
 
               <div className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white dark:bg-gray-900">
-                {detailsPanel}
+                <AiMetadataDetailsPanel
+                  selectedMetadata={selectedMetadata}
+                  allMetadata={aiMetadata}
+                  onRefresh={refreshMetadata}
+                />
               </div>
             </div>
           </div>
@@ -403,19 +227,20 @@ const AddAiMetadataForm: React.FC<AddAiMetadataFormProps> = ({
       </div>
 
       <div className="flex justify-end gap-2 pt-2">
-        <button
+        <Button
           type="button"
+          variant="secondary"
           onClick={onCancel}
-          className="rounded border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+          className="rounded px-4 py-2 text-sm"
         >
           Cancel
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
         >
           Save
-        </button>
+        </Button>
       </div>
     </form>
   );

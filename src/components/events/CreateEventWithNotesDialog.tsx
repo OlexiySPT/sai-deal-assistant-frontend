@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../styles/datepicker-dark.css";
-import { button } from "../cva/button-cva";
+import Button from "../common/buttons/Button";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { Dialog } from "../common/Dialog";
 import {
@@ -328,15 +328,15 @@ export const CreateEventWithNotesDialog: React.FC<
           </div>
         </div>
 
-        <div className="md:col-span-2 flex flex-col items-start gap-2 mt-2">
+        <div className="md:col-span-2 flex flex-col items-end gap-2 mt-2">
           {error && <div className="text-red-600 text-sm">{error}</div>}
-          <button
+          <Button
             type="submit"
-            className={`${button({ colorClass: "blue", size: "md" })} !aspect-auto w-auto h-auto px-4 py-2 !rounded`}
+            className="!aspect-auto w-auto h-auto px-4 py-2 !rounded"
             disabled={loading}
           >
             {loading ? "Saving..." : eventId ? "Update Event" : "Create Event"}
-          </button>
+          </Button>
         </div>
       </form>
 

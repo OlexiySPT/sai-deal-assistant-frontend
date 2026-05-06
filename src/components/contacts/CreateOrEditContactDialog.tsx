@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Dialog } from "../common/Dialog";
-import { button } from "../cva/button-cva";
+import Button from "../common/buttons/Button";
 import {
   createContactPerson,
   getContactPersonById,
@@ -166,17 +166,19 @@ export const CreateOrEditContactDialog: React.FC<
           />
         </div>
         {error && <div className="text-red-600 text-sm">{error}</div>}
-        <button
-          type="submit"
-          className={`${button({ colorClass: "blue", size: "md" })} !aspect-auto w-auto h-auto px-4 py-2 !rounded`}
-          disabled={loading}
-        >
-          {loading
-            ? "Saving..."
-            : contactId
-              ? "Update Contact"
-              : "Create Contact"}
-        </button>
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            className="!aspect-auto w-auto h-auto px-4 py-2 !rounded"
+            disabled={loading}
+          >
+            {loading
+              ? "Saving..."
+              : contactId
+                ? "Update Contact"
+                : "Create Contact"}
+          </Button>
+        </div>
       </form>
     </Dialog>
   );

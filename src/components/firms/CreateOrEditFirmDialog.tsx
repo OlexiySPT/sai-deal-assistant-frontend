@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Dialog } from "../common/Dialog";
-import { button } from "../cva/button-cva";
+import Button from "../common/buttons/Button";
 import {
   createFirm,
   getFirmById,
@@ -139,13 +139,15 @@ export const CreateOrEditFirmDialog: React.FC<CreateOrEditFirmDialogProps> = ({
 
         {error && <div className="text-red-600 text-sm">{error}</div>}
 
-        <button
-          type="submit"
-          className={`${button({ colorClass: "blue", size: "md" })} !aspect-auto w-auto h-auto px-4 py-2 !rounded`}
-          disabled={loading}
-        >
-          {loading ? "Saving..." : firmId ? "Update Firm" : "Create Firm"}
-        </button>
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            className="!aspect-auto w-auto h-auto px-4 py-2 !rounded"
+            disabled={loading}
+          >
+            {loading ? "Saving..." : firmId ? "Update Firm" : "Create Firm"}
+          </Button>
+        </div>
       </form>
     </Dialog>
   );

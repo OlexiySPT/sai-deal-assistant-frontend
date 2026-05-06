@@ -1,5 +1,5 @@
 import React from "react";
-import { button } from "../cva/button-cva";
+import Button from "./buttons/Button";
 
 interface DialogProps {
   open: boolean;
@@ -26,11 +26,16 @@ export const Dialog: React.FC<DialogProps> = ({
           <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
             {title || ""}
           </h2>
-          <button onClick={onClose} aria-label="Close">
+          <Button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="!px-2 !py-2 !rounded-full !border-none !bg-transparent text-gray-600 hover:text-gray-900 dark:text-gray-100 dark:hover:text-white"
+          >
             ✕
-          </button>
+          </Button>
         </div>
-        <div className="p-4 flex flex-col h-full overflow-hidden">
+        <div className="px-4 pt-1 pb-4 flex flex-col h-full overflow-hidden">
           {children}
         </div>
       </div>
