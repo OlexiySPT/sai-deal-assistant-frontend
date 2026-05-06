@@ -25,6 +25,7 @@ export interface DealDto {
   exchangeRate?: number | null;
   amountTypeId?: number | null;
   amountType?: string | null;
+  aiFullStructuredInfo?: string | null;
 }
 
 export interface DealListItemDto {
@@ -66,6 +67,7 @@ export interface DealWithDependentsDto {
   amountTypeId: number | null;
   amountType: string | null;
   denormDenormLastActionDate?: string | null;
+  aiFullStructuredInfo?: string | null;
 }
 
 export interface CreateDealCommand {
@@ -89,6 +91,8 @@ export interface CreateDealCommand {
   exchangeRate?: number | null;
   amountTypeId?: number | null;
   amountType?: string | null;
+  aiFullStructuredInfo?: string | null;
+  firmName?: string | null;
 }
 
 export interface UpdateDealCommand {
@@ -112,6 +116,7 @@ export interface UpdateDealCommand {
   exchangeRate?: number | null;
   amountTypeId?: number | null;
   amountType?: string | null;
+  aiFullStructuredInfo?: string | null;
 }
 
 export interface DealsQueryParams {
@@ -125,6 +130,7 @@ export interface DealsQueryParams {
   TypeIds?: number | number[];
   "HasEventInThisPeriod.StartDate"?: string;
   "HasEventInThisPeriod.EndDate"?: string;
+  ContactPersonName?: string;
   SortBy?: string;
   SortDirection?: "Asc" | "Desc";
   Page?: number;

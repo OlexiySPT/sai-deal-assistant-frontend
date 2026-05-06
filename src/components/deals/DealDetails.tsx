@@ -32,6 +32,8 @@ import {
 import { EventList, EventListHandle } from "../events/EventList";
 import AddButton from "../common/buttons/AddButton";
 import { CreateOrEditFirmDialog } from "../firms/CreateOrEditFirmDialog";
+import { MakeMagicButton } from "../common/buttons/MakeMagicButton";
+import { generateCoverLetter } from "../../features/dealAutomation/dealAutomationAPI";
 
 interface DealDetailsProps {
   dealId: number | null;
@@ -52,6 +54,9 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   const [activeFirmId, setActiveFirmId] = useState<number | null>(null);
   const [initialFirmName, setInitialFirmName] = useState("");
   const [activeTab, setActiveTab] = useState<string>("Description");
+  const [coverLetter, setCoverLetter] = useState<string | null>(null);
+  const [magicLoading, setMagicLoading] = useState(false);
+  const [magicError, setMagicError] = useState<string | null>(null);
   const eventListRef = useRef<EventListHandle>(null);
   const contactListRef = useRef<ContactPersonListHandle>(null);
 
@@ -124,6 +129,25 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
     handleDealUpdated();
   };
 
+  const handleGenerateCoverLetter = async () => {
+    const currentDealId = deal?.id;
+    if (!currentDealId) return;
+    setMagicLoading(true);
+    setMagicError(null);
+    try {
+      const result = await generateCoverLetter(currentDealId);
+      setCoverLetter(result);
+    } catch (error) {
+      setMagicError(
+        error instanceof Error
+          ? error.message
+          : "Failed to generate cover letter",
+      );
+    } finally {
+      setMagicLoading(false);
+    }
+  };
+
   if (!dealId) {
     return (
       <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
@@ -153,10 +177,10 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
   return (
     <div
       id="details-container"
-      className="h-full flex flex-col bg-white dark:bg-gray-800"
+      className="h-full flex flex-col bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-tr-lg rounded-br-lg shadow-sm"
     >
       {/* Header */}
-      <div className="shrink-0 px-3 py-1">
+      <div className="shrink-0 px-3 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-[18%_80%] gap-4">
           <div>
             <AutocompleteDynamicDropDown
@@ -400,6 +424,27 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           {activeTab === "Initial Letter" && (
             <div>
               <div className="mb-6">
+                <div className="mt-4 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <MakeMagicButton
+                      colorClass="blue"
+                      onClick={() => {
+                        handleGenerateCoverLetter();
+                        handleDealUpdated();
+                      }}
+                      disabled={magicLoading}
+                    />
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                      Generate cover letter from this deal
+                    </span>
+                  </div>
+                  {magicLoading && (
+                    <div className="text-sm text-gray-500">Generating...</div>
+                  )}
+                  {magicError && (
+                    <div className="text-sm text-red-500">{magicError}</div>
+                  )}
+                </div>
                 <EditableMultilineStringField
                   value={deal.initialLetter}
                   entity="Deal"
@@ -414,34 +459,44 @@ export const DealDetails: React.FC<DealDetailsProps> = ({ dealId }) => {
           )}
           {activeTab === "AI Information" && (
             <div>
-              {deal.aiSearchInfo || deal.aiBriefDescription ? (
+              <div className="space-y-4">
                 <div>
-                  {deal.aiBriefDescription && (
-                    <div className="mb-3">
-                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                        Brief Description
-                      </h3>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        {deal.aiBriefDescription}
-                      </p>
-                    </div>
-                  )}
-                  {deal.aiSearchInfo && (
-                    <div>
-                      <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                        Search Info
-                      </h3>
-                      <p className="text-gray-700 dark:text-gray-300">
-                        {deal.aiSearchInfo}
-                      </p>
-                    </div>
-                  )}
+                  <div>
+                    <EditableMultilineStringField
+                      value={deal.aiFullStructuredInfo}
+                      entity="Deal"
+                      field="aiFullStructuredInfo"
+                      id={deal.id}
+                      validation="None"
+                      label="Full Structured Info"
+                      onUpdated={handleDealUpdated}
+                      rows={4}
+                    />
+                  </div>
+                  <EditableMultilineStringField
+                    value={deal.aiBriefDescription}
+                    entity="Deal"
+                    field="aiBriefDescription"
+                    id={deal.id}
+                    validation="None"
+                    label="Brief Description"
+                    onUpdated={handleDealUpdated}
+                    rows={4}
+                  />
                 </div>
-              ) : (
-                <div className="text-gray-500 dark:text-gray-400">
-                  No AI information available.
+                <div>
+                  <EditableMultilineStringField
+                    value={deal.aiSearchInfo}
+                    entity="Deal"
+                    field="aiSearchInfo"
+                    id={deal.id}
+                    validation="None"
+                    label="Search Info"
+                    onUpdated={handleDealUpdated}
+                    rows={4}
+                  />
                 </div>
-              )}
+              </div>
             </div>
           )}
           {activeTab === "Events" && (
